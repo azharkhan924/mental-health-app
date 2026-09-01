@@ -1,6 +1,5 @@
-package com.mental_health_app.mental_health.therapist.entity;
+package com.mental_health_app.mental_health.entity;
 
-import com.mental_health_app.mental_health.auth.entity.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -45,7 +44,7 @@ public class Therapist {
     // e.g. "Clinical Psychology", "Cognitive Behavioural Therapy"
     private String specialization;
 
-    // e.g. "LMHC-2024-XYZ" – license number issued by medical board
+    // e.g. "LMHC-2024-XYZ" - license number issued by medical board
     private String licenseNumber;
 
     // Short professional bio shown to patients

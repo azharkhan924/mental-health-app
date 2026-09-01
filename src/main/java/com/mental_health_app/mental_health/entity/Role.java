@@ -1,4 +1,4 @@
-package com.mental_health_app.mental_health.auth.entity;
+package com.mental_health_app.mental_health.entity;
 
 /**
  * Defines the role of a user in the system.

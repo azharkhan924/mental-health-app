@@ -1,6 +1,5 @@
-package com.mental_health_app.mental_health.patient.entity;
+package com.mental_health_app.mental_health.entity;
 
-import com.mental_health_app.mental_health.auth.entity.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
