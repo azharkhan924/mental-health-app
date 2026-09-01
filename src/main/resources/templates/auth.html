@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login or Create an Account — Breathe Heal Grow</title>
+  <meta name="description" content="Sign in or create your Breathe Heal Grow account to access therapists, AI chat and mental health assessments." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/}">Home</a>
+        <a href="#">Mental Health Matters</a>
+        <a href="#">Find Help</a>
+        <a href="#">About Us</a>
+        <a href="#">Initiatives</a>
+      </nav>
+      <div class="header-actions">
+        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span style="font-size:0.7rem;font-weight:600;letter-spacing:0.12em;color:var(--muted-foreground);">EN</span>
+        <a th:href="@{/auth}" class="btn btn-coral">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div th:if="${success}" class="toast toast--success show" th:text="${success}"></div>
+  <div th:if="${error}" class="toast toast--error show" th:text="${error}"></div>
+
+  <!-- ===== AUTH LAYOUT ===== -->
+  <div class="auth-layout">
+
+    <!-- Info Sidebar -->
+    <aside class="auth-sidebar">
+      <h2 class="auth-sidebar__title">Your<br/>Mental Health<br/>Matters</h2>
+
+      <div class="faq-bar">
+        <span>Why create an account?</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+
+      <h3 class="faq-heading">For Patients</h3>
+      <ul class="faq-list">
+        <li>Chat with an AI-powered mental health assistant anytime, anywhere.</li>
+        <li>Book appointments with licensed therapists and track your progress.</li>
+        <li>Fill mental health assessments to understand your wellbeing better.</li>
+      </ul>
+
+      <h3 class="faq-heading">For Therapists</h3>
+      <ul class="faq-list">
+        <li>Manage your schedule and view assigned patients from one dashboard.</li>
+        <li>Access patient assessment results to provide better, data-driven care.</li>
+      </ul>
+    </aside>
+
+    <!-- Form Panel -->
+    <main class="auth-form-panel">
+      <div class="auth-form-panel__inner fade-up">
+
+        <!-- Title -->
+        <h1 class="auth-form-panel__title"
+            th:text="${mode == 'login'} ? 'Login to your account' : 'Create an account'"></h1>
+
+        <!-- Toggle link -->
+        <p class="auth-form-panel__subtitle">
+          <span th:if="${mode != 'login'}">If you already have an account </span>
+          <span th:if="${mode == 'login'}">New here? </span>
+          <a th:if="${mode != 'login'}" th:href="@{/auth(mode='login', role=${role})}">Login</a>
+          <a th:if="${mode == 'login'}" th:href="@{/auth(mode='register', role=${role})}">Create an account</a>
+        </p>
+
+        <!-- Role Tabs -->
+        <div class="role-tabs">
+          <a th:href="@{/auth(mode=${mode}, role='patient')}"
+             class="role-tab"
+             th:classappend="${role != 'therapist'} ? 'active' : ''">Patient</a>
+          <a th:href="@{/auth(mode=${mode}, role='therapist')}"
+             class="role-tab"
+             th:classappend="${role == 'therapist'} ? 'active' : ''">Therapist</a>
+        </div>
+
+        <!-- =========================================
+             REGISTER FORMS
+             ========================================= -->
+        <div th:if="${mode != 'login'}">
+
+          <!-- Patient Register -->
+          <form th:if="${role != 'therapist'}" th:action="@{/auth/patient/register}" th:object="${patientRegister}" method="post">
+            <div class="form-grid form-grid--2col">
+              <label class="field">
+                <span class="field-label">Full Name *</span>
+                <input type="text" th:field="*{name}" class="field-input" required />
+              </label>
+              <label class="field">
+                <span class="field-label">Phone Number</span>
+                <input type="tel" th:field="*{phoneNumber}" class="field-input" placeholder="+91" />
+              </label>
+            </div>
+            <div class="form-grid form-grid--2col" style="margin-top:1rem;">
+              <label class="field">
+                <span class="field-label">Email *</span>
+                <input type="email" th:field="*{email}" class="field-input" required />
+              </label>
+              <label class="field">
+                <span class="field-label">Password *</span>
+                <input type="password" th:field="*{password}" class="field-input" required />
+              </label>
+            </div>
+            <button type="submit" class="btn btn-outline-coral form-submit">Sign up</button>
+          </form>
+
+          <!-- Therapist Register -->
+          <form th:if="${role == 'therapist'}" th:action="@{/auth/therapist/register}" th:object="${therapistRegister}" method="post">
+            <div class="form-grid form-grid--2col">
+              <label class="field">
+                <span class="field-label">Full Name *</span>
+                <input type="text" th:field="*{name}" class="field-input" required />
+              </label>
+              <label class="field">
+                <span class="field-label">Phone Number</span>
+                <input type="tel" th:field="*{phoneNumber}" class="field-input" placeholder="+91" />
+              </label>
+            </div>
+            <div class="form-grid form-grid--2col" style="margin-top:1rem;">
+              <label class="field">
+                <span class="field-label">Specialization</span>
+                <input type="text" th:field="*{specialization}" class="field-input" placeholder="e.g. Clinical Psychology" />
+              </label>
+              <label class="field">
+                <span class="field-label">License Number</span>
+                <input type="text" th:field="*{licenseNumber}" class="field-input" placeholder="e.g. LMHC-2024-XYZ" />
+              </label>
+            </div>
+            <div class="form-grid form-grid--2col" style="margin-top:1rem;">
+              <label class="field">
+                <span class="field-label">Email *</span>
+                <input type="email" th:field="*{email}" class="field-input" required />
+              </label>
+              <label class="field">
+                <span class="field-label">Password *</span>
+                <input type="password" th:field="*{password}" class="field-input" required />
+              </label>
+            </div>
+            <button type="submit" class="btn btn-outline-coral form-submit">Sign up</button>
+          </form>
+        </div>
+
+        <!-- =========================================
+             LOGIN FORM
+             ========================================= -->
+        <form th:if="${mode == 'login'}" th:action="@{/auth/login(role=${role})}" th:object="${loginRequest}" method="post">
+          <div class="form-grid form-grid--2col">
+            <label class="field">
+              <span class="field-label">Email *</span>
+              <input type="email" th:field="*{email}" class="field-input" required />
+            </label>
+            <label class="field">
+              <span class="field-label">Password *</span>
+              <input type="password" th:field="*{password}" class="field-input" required />
+            </label>
+          </div>
+          <button type="submit" class="btn btn-outline-coral form-submit">Login</button>
+        </form>
+
+        <p class="form-legal">
+          By clicking <span th:text="${mode == 'login'} ? 'Login' : 'Sign up'"></span> you agree to our
+          <a href="#">Terms and Conditions</a>.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-links">
+      <div class="footer-links__inner">
+        <a href="#">Terms and Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
+  </footer>
+
+  <!-- Auto-hide toast -->
+  <script th:if="${success} or ${error}">
+    setTimeout(function() {
+      var t = document.querySelector('.toast');
+      if (t) t.classList.remove('show');
+    }, 3500);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breathe Heal Grow — Making Mental Health a Priority for All</title>
+  <meta name="description" content="Awareness, accessible help and affordable care. Find a therapist, access helplines and take mental health assessments." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+
+      <nav class="site-nav">
+        <a href="#">Mental Health Matters</a>
+        <a href="#">Find Help</a>
+        <a href="#">About Us</a>
+        <a href="#">Initiatives</a>
+        <a href="#">Impact</a>
+      </nav>
+
+      <div class="header-actions">
+        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <a th:href="@{/auth}" aria-label="Login or register">
+          <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </a>
+        <a th:href="@{/auth}" class="btn btn-coral">Get Started</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== TOAST (flash messages) ===== -->
+  <div th:if="${success}" class="toast toast--success show" th:text="${success}"></div>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <img th:src="@{/images/hero-calm.jpg}" alt="A woman sitting on a hilltop watching the sunrise over misty mountains" class="hero__img" />
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <div class="container">
+        <div class="hero__text fade-up">
+          <h1 class="hero__title">Making Mental Health<br/>a Priority for All</h1>
+          <p class="hero__desc">We create awareness, provide accessible help and ensure support is available for everyone, everywhere.</p>
+          <a th:href="@{/auth}" class="btn btn-coral hero__cta">Get Started</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PILLARS ===== -->
+  <section class="pillars">
+    <div class="container">
+      <div class="pillars__grid">
+        <div class="pillar fade-up fade-up-d1">
+          <span class="pillar__icon bg-mint text-teal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-teal pillar__title">Awareness</h3>
+            <p class="pillar__body">Spreading knowledge to break the silence around mental health.</p>
+          </div>
+        </div>
+
+        <div class="pillar fade-up fade-up-d2">
+          <span class="pillar__icon bg-blush text-coral">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 0 3 3l1.5-1.5"/><path d="m18 8 4-4"/><path d="m17.5 2.5 1 1"/><path d="M2 12h2"/><path d="m7 5 2 2"/><path d="M5 21a7 7 0 0 1 5-7"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-coral pillar__title">Accessibility</h3>
+            <p class="pillar__body">Making professional help easy to reach for everyone who needs it.</p>
+          </div>
+        </div>
+
+        <div class="pillar fade-up fade-up-d3">
+          <span class="pillar__icon bg-sand text-gold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="M2 14h2"/><path d="M2 18h2"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-gold pillar__title">Affordability</h3>
+            <p class="pillar__body">Ensuring mental healthcare is affordable and available to all.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROGRAMS ===== -->
+  <section class="programs">
+    <div class="container">
+      <div class="programs__grid">
+        <article class="program-card" style="background-color: rgba(197,232,224,0.5);">
+          <div class="program-card__body rule-teal">
+            <h2 class="program-card__title text-teal">Rural Program</h2>
+            <p class="program-card__desc">Taking mental health support to rural communities and creating a healthier tomorrow.</p>
+            <button type="button" class="btn btn-teal program-card__cta">Explore</button>
+          </div>
+          <img th:src="@{/images/rural-program.jpg}" alt="Community mental health circle gathered under a tree in a village" class="program-card__img" loading="lazy" />
+        </article>
+
+        <article class="program-card" style="background-color: rgba(245,213,200,0.6);">
+          <div class="program-card__body rule-coral">
+            <h2 class="program-card__title text-coral">Corporate Program</h2>
+            <p class="program-card__desc">Partnering with organizations to build mentally healthy workplaces and communities.</p>
+            <button type="button" class="btn btn-coral program-card__cta">Explore</button>
+          </div>
+          <img th:src="@{/images/corporate-program.jpg}" alt="Facilitator leading a workplace wellbeing session for employees" class="program-card__img" loading="lazy" />
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GET HELP BAND ===== -->
+  <section class="help-band">
+    <div class="container">
+      <div class="help-band__grid">
+        <div class="action-card">
+          <span class="action-card__icon bg-mint text-teal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-teal action-card__title">Speak to an expert</h3>
+            <p class="action-card__body">Connect with a qualified therapist or counsellor.</p>
+            <button type="button" class="btn btn-teal action-card__cta">Find a therapist</button>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <span class="action-card__icon bg-blush text-coral">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.65 2.36a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.76.29 1.55.52 2.36.65A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-coral action-card__title">Helplines</h3>
+            <p class="action-card__body">Talk to someone who understands. We're here for you.</p>
+            <button type="button" class="btn btn-coral action-card__cta">Call a helpline</button>
+          </div>
+        </div>
+
+        <div class="action-card">
+          <span class="action-card__icon bg-sand text-gold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+          </span>
+          <div>
+            <h3 class="eyebrow text-gold action-card__title">Join the community</h3>
+            <p class="action-card__body">Be a part of a supportive community focused on healing.</p>
+            <a th:href="@{/auth}" class="btn btn-gold action-card__cta">Sign up now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOUNDATION ===== -->
+  <section class="foundation">
+    <div class="container">
+      <h2 class="foundation__title rule-coral">Mental Health<br/>Foundation</h2>
+      <div class="foundation__grid">
+        <div class="foundation__card" style="background-color: rgba(240,228,200,0.7);">
+          <p>We are a mental health organization with a life-affirming approach. Through research, content, community and a holistic approach for all caregivers.</p>
+          <button type="button" class="btn btn-coral" style="margin-top:1.5rem;">Know more</button>
+        </div>
+        <img th:src="@{/images/paper-community.jpg}" alt="Layered paper-cut illustration of people helping each other" class="foundation__img" loading="lazy" />
+        <div class="foundation__card" style="background-color: rgba(245,213,200,0.6);">
+          <h3>Corporate Program</h3>
+          <p style="margin-top:0.75rem;">Our workplace wellbeing program helps organizations prioritize mental health, using data-driven insights and a customized roadmap.</p>
+          <button type="button" class="btn btn-outline-coral" style="margin-top:1.5rem;">Explore</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUOTE MOSAIC ===== -->
+  <section>
+    <div class="container">
+      <h2 class="mosaic__heading">Breathe · Heal · Grow</h2>
+    </div>
+    <div class="mosaic__grid">
+      <div class="mosaic__cell mosaic__cell--quote bg-teal">
+        <p>"More than ever, we need to remind ourselves to be vulnerable, human and sensitive."</p>
+        <p class="mosaic__author">A caregiver</p>
+      </div>
+      <div class="mosaic__cell bg-blush" style="align-items:flex-end;">
+        <span class="mosaic__word">Breathe</span>
+      </div>
+      <div class="mosaic__cell bg-sky" style="align-items:center;justify-content:center;">
+        <span class="mosaic__word">Heal</span>
+      </div>
+      <div class="mosaic__cell mosaic__cell--poem bg-sand">
+        <span class="mosaic__word" style="color:var(--coral);align-self:center;">You<br/>are<br/>not<br/>alone</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HELPLINE STRIP ===== -->
+  <section class="helpline-strip">
+    <div class="helpline-strip__left">
+      <h3>Call a helpline</h3>
+      <p>Talk to someone who understands. We're here for you, any hour of the day.</p>
+      <button type="button" class="btn">View helplines</button>
+    </div>
+    <div class="helpline-strip__right">
+      <h3 style="color:var(--coral);">Start your journey</h3>
+      <p>Create an account to access therapists, AI chat, and mental health assessments.</p>
+      <a th:href="@{/auth}" class="btn btn-coral" style="margin-top:1.5rem;">Create an account</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-links">
+      <div class="footer-links__inner">
+        <a href="#">Terms and Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
+  </footer>
+
+  <!-- Auto-hide toast -->
+  <script th:if="${success}">
+    setTimeout(function() {
+      document.querySelector('.toast').classList.remove('show');
+    }, 3500);
+  </script>
+
+</body>
+</html>
