@@ -94,7 +94,7 @@
         <div th:if="${mode != 'login'}">
 
           <!-- Patient Register -->
-          <form th:if="${role != 'therapist'}" th:action="@{/auth/patient/register}" th:object="${patientRegister}" method="post">
+          <form th:if="${role != 'therapist'}" th:action="@{/auth/patient/register}" th:object="${patient}" method="post">
             <div class="form-grid form-grid--2col">
               <label class="field">
                 <span class="field-label">Full Name *</span>
@@ -119,7 +119,7 @@
           </form>
 
           <!-- Therapist Register -->
-          <form th:if="${role == 'therapist'}" th:action="@{/auth/therapist/register}" th:object="${therapistRegister}" method="post">
+          <form th:if="${role == 'therapist'}" th:action="@{/auth/therapist/register}" th:object="${therapist}" method="post">
             <div class="form-grid form-grid--2col">
               <label class="field">
                 <span class="field-label">Full Name *</span>
@@ -157,15 +157,15 @@
         <!-- =========================================
              LOGIN FORM
              ========================================= -->
-        <form th:if="${mode == 'login'}" th:action="@{/auth/login(role=${role})}" th:object="${loginRequest}" method="post">
+        <form th:if="${mode == 'login'}" th:action="@{/auth/login(role=${role})}" method="post">
           <div class="form-grid form-grid--2col">
             <label class="field">
               <span class="field-label">Email *</span>
-              <input type="email" th:field="*{email}" class="field-input" required />
+              <input type="email" name="email" class="field-input" required />
             </label>
             <label class="field">
               <span class="field-label">Password *</span>
-              <input type="password" th:field="*{password}" class="field-input" required />
+              <input type="password" name="password" class="field-input" required />
             </label>
           </div>
           <button type="submit" class="btn btn-outline-coral form-submit">Login</button>
