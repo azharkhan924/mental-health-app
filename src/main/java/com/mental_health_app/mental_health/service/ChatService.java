@@ -98,6 +98,11 @@ public class ChatService {
         String url = "https://api.groq.com/openai/v1/chat/completions";
         int totalKeys = keys.size();
 
+        // Take last 12 messages to keep strong short-term memory without context drift
+        List<ChatMessage> recentHistory = (history != null && history.size() > 12)
+                ? history.subList(history.size() - 12, history.size())
+                : (history != null ? history : Collections.emptyList());
+
         for (int i = 0; i < totalKeys; i++) {
             int keyIndex = (currentGroqKeyIndex + i) % totalKeys;
             String apiKey = keys.get(keyIndex);
@@ -109,13 +114,13 @@ public class ChatService {
 
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("model", groqModel);
-                payload.put("temperature", 0.7);
-                payload.put("max_tokens", 512);
+                payload.put("temperature", 0.5); // Grounded, low-hallucination conversational temperature
+                payload.put("max_tokens", 350);
 
                 List<Map<String, String>> messages = new ArrayList<>();
                 messages.add(Map.of("role", "system", "content", systemPrompt));
 
-                for (ChatMessage msg : history) {
+                for (ChatMessage msg : recentHistory) {
                     String role = "user".equalsIgnoreCase(msg.getRole()) ? "user" : "assistant";
                     messages.add(Map.of("role", role, "content", msg.getContent()));
                 }
@@ -150,6 +155,11 @@ public class ChatService {
     private String tryGeminiWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt) {
         int totalKeys = keys.size();
 
+        // Take last 12 messages for grounded context
+        List<ChatMessage> recentHistory = (history != null && history.size() > 12)
+                ? history.subList(history.size() - 12, history.size())
+                : (history != null ? history : Collections.emptyList());
+
         for (int i = 0; i < totalKeys; i++) {
             int keyIndex = (currentGeminiKeyIndex + i) % totalKeys;
             String apiKey = keys.get(keyIndex);
@@ -164,8 +174,11 @@ public class ChatService {
                 Map<String, Object> sysInst = Map.of("parts", List.of(Map.of("text", systemPrompt)));
                 payload.put("system_instruction", sysInst);
 
+                Map<String, Object> genConfig = Map.of("temperature", 0.5, "maxOutputTokens", 350);
+                payload.put("generationConfig", genConfig);
+
                 List<Map<String, Object>> contents = new ArrayList<>();
-                for (ChatMessage msg : history) {
+                for (ChatMessage msg : recentHistory) {
                     String role = "assistant".equalsIgnoreCase(msg.getRole()) ? "model" : "user";
                     contents.add(Map.of("role", role, "parts", List.of(Map.of("text", msg.getContent()))));
                 }
