@@ -3,8 +3,10 @@ package com.mental_health_app.mental_health.controller;
 import com.mental_health_app.mental_health.entity.Assessment;
 import com.mental_health_app.mental_health.entity.AssessmentType;
 import com.mental_health_app.mental_health.entity.Patient;
+import com.mental_health_app.mental_health.entity.PatientReport;
 import com.mental_health_app.mental_health.service.AssessmentService;
 import com.mental_health_app.mental_health.service.PatientService;
+import com.mental_health_app.mental_health.service.ReportService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -20,7 +22,7 @@ import java.util.Optional;
  * ASSESSMENT CONTROLLER
  * ─────────────────────
  * Handles assessment selection, dynamic questionnaire rendering for 5 test types,
- * scoring calculations, and detailed result presentations.
+ * scoring calculations, and AI clinical report generation.
  */
 @Controller
 @RequestMapping("/assessments")
@@ -28,10 +30,14 @@ public class AssessmentController {
 
     private final AssessmentService assessmentService;
     private final PatientService patientService;
+    private final ReportService reportService;
 
-    public AssessmentController(AssessmentService assessmentService, PatientService patientService) {
+    public AssessmentController(AssessmentService assessmentService,
+                                PatientService patientService,
+                                ReportService reportService) {
         this.assessmentService = assessmentService;
         this.patientService = patientService;
+        this.reportService = reportService;
     }
 
     /**
@@ -45,6 +51,7 @@ public class AssessmentController {
             Patient patient = patientOpt.get();
             model.addAttribute("userName", patient.getName());
             model.addAttribute("assessments", assessmentService.getPatientAssessments(patient));
+            model.addAttribute("reports", reportService.getReportsForPatient(patient));
         }
 
         return "assessments";
@@ -77,7 +84,7 @@ public class AssessmentController {
     }
 
     /**
-     * Submit assessment answers, compute score, and redirect to the result page.
+     * Submit assessment answers, compute score, generate AI clinical report, and redirect to the result page.
      */
     @PostMapping("/submit")
     public String submitAssessment(@RequestParam AssessmentType type,
@@ -100,11 +107,18 @@ public class AssessmentController {
 
         Assessment saved = assessmentService.evaluateAndSave(patientOpt.get(), type, answers);
 
+        // Generate and persist AI Clinical Report for this assessment
+        try {
+            reportService.generateAssessmentReport(saved);
+        } catch (Exception e) {
+            // Log and continue gracefully
+        }
+
         return "redirect:/assessments/result/" + saved.getId();
     }
 
     /**
-     * View detailed assessment score evaluation and suggestions.
+     * View detailed assessment score evaluation, AI clinical analysis, and suggestions.
      */
     @GetMapping("/result/{id}")
     public String viewResult(@PathVariable Long id,
@@ -123,9 +137,14 @@ public class AssessmentController {
             int percentage = (int) Math.round(((double) assessment.getTotalScore() / maxScore) * 100);
             model.addAttribute("scorePercentage", percentage);
 
+            // Fetch AI Clinical Report
+            Optional<PatientReport> reportOpt = reportService.getReportForAssessment(assessment);
+            reportOpt.ifPresent(r -> model.addAttribute("aiReport", r));
+
             return "assessment-result";
         }
 
         return "redirect:/assessments";
     }
 }
+

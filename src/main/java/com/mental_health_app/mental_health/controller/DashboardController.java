@@ -31,15 +31,18 @@ public class DashboardController {
     private final TherapistService therapistService;
     private final AppointmentService appointmentService;
     private final AssessmentService assessmentService;
+    private final com.mental_health_app.mental_health.service.ReportService reportService;
 
     public DashboardController(PatientService patientService,
                                TherapistService therapistService,
                                AppointmentService appointmentService,
-                               AssessmentService assessmentService) {
+                               AssessmentService assessmentService,
+                               com.mental_health_app.mental_health.service.ReportService reportService) {
         this.patientService = patientService;
         this.therapistService = therapistService;
         this.appointmentService = appointmentService;
         this.assessmentService = assessmentService;
+        this.reportService = reportService;
     }
 
     /**
@@ -65,6 +68,9 @@ public class DashboardController {
             // Fetch patient's past assessments
             List<Assessment> assessments = assessmentService.getPatientAssessments(patient);
             model.addAttribute("assessments", assessments);
+
+            // Fetch patient's AI assessment reports
+            model.addAttribute("reports", reportService.getReportsForPatient(patient));
 
             // Statistics
             model.addAttribute("pendingCount", appointmentService.countByPatientAndStatus(patient, AppointmentStatus.PENDING));

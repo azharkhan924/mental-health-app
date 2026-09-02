@@ -215,7 +215,9 @@
                   <span th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, hh:mm a')}">02 Sep 2026</span>
                 </td>
                 <td>
-                  <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">View Result</a>
+                  <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">
+                    📊 View AI Report & Result
+                  </a>
                 </td>
               </tr>
             </tbody>

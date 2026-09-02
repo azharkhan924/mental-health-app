@@ -140,6 +140,13 @@
                       <button type="submit" class="btn btn-cancel btn-sm">Decline</button>
                     </form>
 
+                    <!-- View Patient Reports & Live Behavioral Insights -->
+                    <a th:href="@{/therapist/patient/{id}/reports(id=${apt.patient.id})}"
+                       class="btn btn-outline-coral btn-sm"
+                       title="View test analysis and confidential AI chat behavioral insights">
+                      📋 Reports
+                    </a>
+
                     <!-- Cancel Button (If CONFIRMED) -->
                     <form th:if="${apt.status.name() == 'CONFIRMED'}"
                           th:action="@{/appointments/{id}/status(id=${apt.id})}"

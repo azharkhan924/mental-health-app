@@ -69,6 +69,29 @@ public class ChatService {
     }
 
     /**
+     * Generic completion generator for clinical reports and behavioral analysis.
+     */
+    public String generateCompletion(String systemPrompt, String userPrompt) {
+        List<ChatMessage> emptyHistory = Collections.emptyList();
+        List<String> groqKeys = getKeysList(groqKeysConfig);
+        if (!groqKeys.isEmpty()) {
+            String groqReply = tryGroqWithKeyRotation(userPrompt, emptyHistory, groqKeys, systemPrompt);
+            if (groqReply != null && !groqReply.isBlank()) {
+                return groqReply;
+            }
+        }
+
+        List<String> geminiKeys = getKeysList(geminiKeysConfig);
+        if (!geminiKeys.isEmpty()) {
+            String geminiReply = tryGeminiWithKeyRotation(userPrompt, emptyHistory, geminiKeys, systemPrompt);
+            if (geminiReply != null && !geminiReply.isBlank()) {
+                return geminiReply;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Call Groq API with round-robin key rotation on rate-limits / failures.
      */
     private String tryGroqWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt) {

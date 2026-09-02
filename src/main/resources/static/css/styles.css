@@ -2828,6 +2828,278 @@ ul { list-style: none; }
   }
 }
 
+/* ========================================
+   PATIENT CLINICAL REPORTS & INSIGHTS
+   ======================================== */
+
+.patient-profile-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-soft);
+  margin-bottom: 2rem;
+}
+
+.patient-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.patient-profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--coral));
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.patient-profile-details {
+  flex: 1;
+  min-width: 200px;
+}
+
+.patient-profile-name {
+  font-size: 1.6rem;
+  color: var(--teal);
+  margin-bottom: 0.35rem;
+}
+
+.patient-profile-meta {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.patient-profile-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .patient-profile-actions {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+.access-window-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: var(--mint);
+  border: 1px solid rgba(26, 92, 92, 0.2);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  color: var(--teal);
+}
+
+.access-window-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.25);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* --- TABS --- */
+.report-tab-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--muted-foreground);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.report-tab-btn:hover {
+  color: var(--teal);
+  background-color: var(--muted);
+}
+
+.report-tab-btn.active {
+  color: var(--teal);
+  background-color: var(--sand);
+  font-weight: 700;
+}
+
+/* --- REPORT CARDS --- */
+.reports-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.report-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.report-card--behavioral {
+  border-left: 5px solid var(--coral);
+  background: linear-gradient(to right, rgba(245, 213, 200, 0.1), #ffffff);
+}
+
+.report-card--assessment {
+  border-left: 5px solid var(--teal);
+  background: linear-gradient(to right, rgba(197, 232, 224, 0.1), #ffffff);
+}
+
+.report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.report-type-badge {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.report-type-badge--behavioral {
+  background-color: var(--blush);
+  color: var(--coral);
+}
+
+.report-type-badge--assessment {
+  background-color: var(--mint);
+  color: var(--teal);
+}
+
+.report-date {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+.report-severity-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+}
+
+.severity-badge--low {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.severity-badge--mild {
+  background-color: var(--sand);
+  color: #92400e;
+}
+
+.severity-badge--moderate {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.severity-badge--high {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.severity-badge--confidential {
+  background-color: #fee2e2;
+  color: var(--coral);
+  border: 1px solid rgba(212, 100, 74, 0.3);
+}
+
+.badge-confidential {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background-color: #fee2e2;
+  color: var(--coral);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.badge-shared {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background-color: var(--mint);
+  color: var(--teal);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.report-card-title {
+  font-size: 1.2rem;
+  color: var(--teal);
+  margin-bottom: 0.35rem;
+}
+
+.report-card-summary {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin-bottom: 1.25rem;
+}
+
+.report-card-body {
+  background: rgba(250, 245, 238, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.report-card-body h3 {
+  font-size: 0.98rem;
+  color: var(--teal);
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.report-card-body h3:first-child {
+  margin-top: 0;
+}
+
+
 
 
 

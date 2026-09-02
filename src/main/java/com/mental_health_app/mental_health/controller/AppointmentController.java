@@ -27,33 +27,31 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final TherapistService therapistService;
     private final PatientService patientService;
+    private final com.mental_health_app.mental_health.service.ReportService reportService;
 
-    public AppointmentController(AppointmentService appointmentService,
-                                 TherapistService therapistService,
-                                 PatientService patientService) {
+    public AppointmentController(AppointmentService appointmentService, 
+                                 TherapistService therapistService, 
+                                 PatientService patientService,
+                                 com.mental_health_app.mental_health.service.ReportService reportService) {
         this.appointmentService = appointmentService;
         this.therapistService = therapistService;
         this.patientService = patientService;
+        this.reportService = reportService;
     }
 
     /**
-     * Show appointment booking page with the list of available therapists.
+     * Show the appointment booking form.
      */
     @GetMapping("/book")
-    public String showBookingPage(@RequestParam(required = false) Long therapistId,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  Model model) {
-        // Add all therapists to the model so patient can select one
+    public String showBookingForm(@RequestParam(required = false) Long therapistId,
+                                  Model model, 
+                                  @AuthenticationPrincipal UserDetails userDetails) {
+        Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+        patientOpt.ifPresent(p -> model.addAttribute("userName", p.getName()));
+
         model.addAttribute("therapists", therapistService.getAllTherapists());
         model.addAttribute("selectedTherapistId", therapistId);
-
-        // Fetch patient name for greeting in header
-        Optional<Patient> patient = patientService.findByEmail(userDetails.getUsername());
-        patient.ifPresent(p -> model.addAttribute("userName", p.getName()));
-
-        // Set minimum date for booking as today
         model.addAttribute("minDate", LocalDate.now());
-
         return "book-appointment";
     }
 
@@ -62,11 +60,11 @@ public class AppointmentController {
      */
     @PostMapping("/book")
     public String bookAppointment(@RequestParam Long therapistId,
-                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate appointmentDate,
-                                  @RequestParam String appointmentTime,
-                                  @RequestParam(required = false) String notes,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  Model model) {
+                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate appointmentDate,
+                                   @RequestParam String appointmentTime,
+                                   @RequestParam(required = false) String notes,
+                                   @AuthenticationPrincipal UserDetails userDetails,
+                                   Model model) {
         try {
             Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
 
@@ -74,8 +72,16 @@ public class AppointmentController {
                 return "redirect:/auth?mode=login";
             }
 
+            Patient patient = patientOpt.get();
+
             // Save the appointment
-            appointmentService.bookAppointment(patientOpt.get(), therapistId, appointmentDate, appointmentTime, notes);
+            appointmentService.bookAppointment(patient, therapistId, appointmentDate, appointmentTime, notes);
+
+            // Generate an initial or refreshed behavioral report for the therapist
+            try {
+                reportService.generateChatBehavioralReport(patient);
+            } catch (Exception ignored) {
+            }
 
             // Redirect back to patient dashboard with a success message
             return "redirect:/dashboard?booked=true";

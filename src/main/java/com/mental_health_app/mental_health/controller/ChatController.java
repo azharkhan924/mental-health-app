@@ -2,23 +2,29 @@ package com.mental_health_app.mental_health.controller;
 
 import com.mental_health_app.mental_health.dto.ChatMessage;
 import com.mental_health_app.mental_health.dto.ChatPersona;
+import com.mental_health_app.mental_health.entity.ChatMessageEntity;
 import com.mental_health_app.mental_health.entity.Patient;
+import com.mental_health_app.mental_health.repository.ChatMessageRepository;
 import com.mental_health_app.mental_health.service.ChatService;
 import com.mental_health_app.mental_health.service.PatientService;
+import com.mental_health_app.mental_health.service.ReportService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
  * CHAT CONTROLLER
  * ───────────────
- * Serves a WhatsApp Web style 1-on-1 messaging interface with real human-like profiles:
+ * Serves a WhatsApp Web style 1-on-1 messaging interface with persistent memory:
  * Kabir (Bro), Aanya (Bestie), Dr. Priya (Psychologist), Rohan Sir (Mentor), and Meera (Zen Guide).
+ * Automatically updates confidential behavioral reports for consulting therapists.
  */
 @Controller
 @RequestMapping("/chat")
@@ -26,14 +32,21 @@ public class ChatController {
 
     private final ChatService chatService;
     private final PatientService patientService;
+    private final ChatMessageRepository chatMessageRepository;
+    private final ReportService reportService;
 
-    public ChatController(ChatService chatService, PatientService patientService) {
+    public ChatController(ChatService chatService,
+                          PatientService patientService,
+                          ChatMessageRepository chatMessageRepository,
+                          ReportService reportService) {
         this.chatService = chatService;
         this.patientService = patientService;
+        this.chatMessageRepository = chatMessageRepository;
+        this.reportService = reportService;
     }
 
     /**
-     * Show WhatsApp Web style chat interface.
+     * Show WhatsApp Web style chat interface with persistent message history.
      */
     @GetMapping
     public String showChatPage(@RequestParam(defaultValue = "KABIR") ChatPersona persona,
@@ -41,8 +54,8 @@ public class ChatController {
                                HttpSession session,
                                Model model) {
 
-        Optional<Patient> patient = patientService.findByEmail(userDetails.getUsername());
-        patient.ifPresent(p -> model.addAttribute("userName", p.getName()));
+        Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+        patientOpt.ifPresent(p -> model.addAttribute("userName", p.getName()));
 
         // Active persona
         model.addAttribute("currentPersona", persona);
@@ -51,10 +64,10 @@ public class ChatController {
         // Maps containing last message snippet and dynamic timestamp for sidebar
         Map<String, String> lastMessageMap = new HashMap<>();
         Map<String, String> sidebarTimeMap = new HashMap<>();
-        java.time.format.DateTimeFormatter timeFmt = java.time.format.DateTimeFormatter.ofPattern("hh:mm a");
+        DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("hh:mm a");
 
         for (ChatPersona p : ChatPersona.values()) {
-            List<ChatMessage> hist = getChatHistory(session, p);
+            List<ChatMessage> hist = loadChatHistory(patientOpt.orElse(null), session, p);
             if (!hist.isEmpty()) {
                 ChatMessage last = hist.get(hist.size() - 1);
                 String prefix = "user".equalsIgnoreCase(last.getRole()) ? "You: " : "";
@@ -63,7 +76,7 @@ public class ChatController {
                     preview = preview.substring(0, 35) + "...";
                 }
                 lastMessageMap.put(p.name(), preview);
-                sidebarTimeMap.put(p.name(), last.getTimestamp().format(timeFmt));
+                sidebarTimeMap.put(p.name(), last.getTimestamp() != null ? last.getTimestamp().format(timeFmt) : "today");
             } else {
                 lastMessageMap.put(p.name(), p.getSubtitle());
                 sidebarTimeMap.put(p.name(), "recently");
@@ -73,7 +86,7 @@ public class ChatController {
         model.addAttribute("sidebarTimeMap", sidebarTimeMap);
 
         // Active conversation messages
-        List<ChatMessage> chatHistory = getChatHistory(session, persona);
+        List<ChatMessage> chatHistory = loadChatHistory(patientOpt.orElse(null), session, persona);
         model.addAttribute("messages", chatHistory);
 
         // Crisis detection
@@ -90,27 +103,48 @@ public class ChatController {
     }
 
     /**
-     * Send a message to the active companion.
+     * Send a message to the active companion with persistent contextual memory.
      */
     @PostMapping("/send")
     public String sendMessage(@RequestParam String message,
                               @RequestParam(defaultValue = "KABIR") ChatPersona persona,
+                              @AuthenticationPrincipal UserDetails userDetails,
                               HttpSession session) {
 
         if (message == null || message.trim().isEmpty()) {
             return "redirect:/chat?persona=" + persona.name();
         }
 
-        List<ChatMessage> chatHistory = getChatHistory(session, persona);
+        Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+        Patient patient = patientOpt.orElse(null);
 
-        // Get AI response using persona-specific system prompt
+        List<ChatMessage> chatHistory = loadChatHistory(patient, session, persona);
+
+        // Get AI response using persona-specific system prompt and past conversation context
         String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona);
 
-        // Append user and reply
-        chatHistory.add(new ChatMessage("user", message.trim()));
-        chatHistory.add(new ChatMessage("assistant", aiResponse));
+        ChatMessage userMsg = new ChatMessage("user", message.trim());
+        ChatMessage assistantMsg = new ChatMessage("assistant", aiResponse);
 
+        chatHistory.add(userMsg);
+        chatHistory.add(assistantMsg);
         session.setAttribute("chatHistory_" + persona.name(), chatHistory);
+
+        // Persist to Database for continuity and therapist behavioral analysis
+        if (patient != null) {
+            try {
+                chatMessageRepository.save(new ChatMessageEntity(patient, persona.name(), "user", message.trim()));
+                chatMessageRepository.save(new ChatMessageEntity(patient, persona.name(), "assistant", aiResponse));
+
+                // Trigger behavioral report update if sufficient conversation data is recorded
+                long count = chatMessageRepository.countByPatientAndRole(patient, "user");
+                if (count >= 3 && count % 4 == 0) {
+                    reportService.generateChatBehavioralReport(patient);
+                }
+            } catch (Exception e) {
+                // Log and continue gracefully
+            }
+        }
 
         return "redirect:/chat?persona=" + persona.name();
     }
@@ -119,18 +153,39 @@ public class ChatController {
      * Clear chat conversation with the active companion.
      */
     @PostMapping("/clear")
+    @Transactional
     public String clearChat(@RequestParam(defaultValue = "KABIR") ChatPersona persona,
+                            @AuthenticationPrincipal UserDetails userDetails,
                             HttpSession session) {
         session.removeAttribute("chatHistory_" + persona.name());
+
+        Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+        patientOpt.ifPresent(patient -> chatMessageRepository.deleteByPatientAndPersona(patient, persona.name()));
+
         return "redirect:/chat?persona=" + persona.name();
     }
 
     /**
-     * Helper: Get session chat history for a specific persona.
+     * Helper: Load chat history prioritizing persistent DB, fallback to session.
      */
     @SuppressWarnings("unchecked")
-    private List<ChatMessage> getChatHistory(HttpSession session, ChatPersona persona) {
+    private List<ChatMessage> loadChatHistory(Patient patient, HttpSession session, ChatPersona persona) {
         String sessionKey = "chatHistory_" + persona.name();
+
+        if (patient != null) {
+            List<ChatMessageEntity> dbMsgs = chatMessageRepository.findByPatientAndPersonaOrderByCreatedAtAsc(patient, persona.name());
+            if (!dbMsgs.isEmpty()) {
+                List<ChatMessage> converted = new ArrayList<>();
+                for (ChatMessageEntity entity : dbMsgs) {
+                    ChatMessage msg = new ChatMessage(entity.getRole(), entity.getContent());
+                    msg.setTimestamp(entity.getCreatedAt());
+                    converted.add(msg);
+                }
+                session.setAttribute(sessionKey, converted);
+                return converted;
+            }
+        }
+
         List<ChatMessage> history = (List<ChatMessage>) session.getAttribute(sessionKey);
         if (history == null) {
             history = new ArrayList<>();
@@ -139,3 +194,4 @@ public class ChatController {
         return history;
     }
 }
+

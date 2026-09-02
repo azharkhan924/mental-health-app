@@ -46,4 +46,8 @@ public class PatientService {
     public Optional<Patient> findByEmail(String email) {
         return patientRepository.findByEmail(email);
     }
+
+    public Optional<Patient> findById(Long id) {
+        return patientRepository.findById(id);
+    }
 }

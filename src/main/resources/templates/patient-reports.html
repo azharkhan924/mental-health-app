@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="'Patient Clinical Insights — ' + ${patient.name} + ' — Breathe Heal Grow'">Patient Reports</title>
+  <meta name="description" content="Clinical assessment reports and confidential AI behavioral analysis for licensed therapists." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/therapist/dashboard}">Dashboard</a>
+        <a th:href="@{/therapist/dashboard#appointments-section}">Appointments</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-greeting">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span th:text="'Dr. ' + ${userName}">Dr. Therapist</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="dashboard" style="padding-top:2rem; padding-bottom:3rem;">
+    <div class="container">
+
+      <!-- Breadcrumbs / Back navigation -->
+      <div style="margin-bottom:1.25rem;">
+        <a th:href="@{/therapist/dashboard}" style="color:var(--teal); font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem;">
+          ← Back to Therapist Dashboard
+        </a>
+      </div>
+
+      <!-- Flash Messages -->
+      <div th:if="${success}" class="toast toast--success show" th:text="${success}" style="margin-bottom:1rem;"></div>
+      <div th:if="${info}" class="toast show" th:text="${info}" style="margin-bottom:1rem; background-color:var(--teal); color:#fff;"></div>
+      <div th:if="${error}" class="toast toast--error show" th:text="${error}" style="margin-bottom:1rem;"></div>
+
+      <!-- Patient Header & Access Window Banner -->
+      <section class="patient-profile-card fade-up">
+        <div class="patient-profile-header">
+          <div class="patient-profile-avatar">
+            <span th:text="${#strings.substring(patient.name ?: 'P', 0, 1)}">P</span>
+          </div>
+          <div class="patient-profile-details">
+            <h1 class="patient-profile-name" th:text="${patient.name}">Patient Name</h1>
+            <div class="patient-profile-meta">
+              <span>📧 <span th:text="${patient.email}">patient@example.com</span></span>
+              <span>📞 <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
+            </div>
+          </div>
+          <div class="patient-profile-actions">
+            <!-- Access Window Badge -->
+            <div class="access-window-badge">
+              <span class="access-window-dot"></span>
+              <div>
+                <strong>3-Month Consultation Access Active</strong>
+                <div style="font-size:0.75rem; color:rgba(26,60,60,0.75);">Access valid until: <strong th:text="${accessExpiryDate}">31 Dec 2026</strong></div>
+              </div>
+            </div>
+
+            <!-- Refresh Behavioral Report Button -->
+            <form th:action="@{/therapist/patient/{id}/generate-chat-report(id=${patient.id})}" method="post" style="margin-top:0.5rem;">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <button type="submit" class="btn btn-teal btn-sm" title="Analyze latest chat messages with AI companions">
+                ⚡ Refresh AI Behavioral Insights
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Tabs Navigation -->
+      <div class="report-tabs-nav fade-up" style="margin-top:2rem; margin-bottom:1.5rem; display:flex; gap:1rem; border-bottom:2px solid var(--border); padding-bottom:0.5rem;">
+        <button class="report-tab-btn active" onclick="switchReportTab('behavioral')">
+          🔒 AI Chat Behavioral Insights (<span th:text="${#lists.size(behavioralReports)}">0</span>)
+        </button>
+        <button class="report-tab-btn" onclick="switchReportTab('assessment')">
+          📝 Clinical Assessment Tests (<span th:text="${#lists.size(assessmentReports)}">0</span>)
+        </button>
+      </div>
+
+      <!-- TAB 1: CONFIDENTIAL CHAT BEHAVIORAL REPORTS (HIDDEN FROM PATIENT) -->
+      <section id="tab-behavioral" class="report-tab-content active fade-up">
+        <div class="section-header" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2 style="font-size:1.25rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+              <span>🔒 AI Chat Behavioral Analysis</span>
+              <span class="badge-confidential">Confidential • Therapist Only</span>
+            </h2>
+            <p style="font-size:0.85rem; color:var(--muted-foreground); margin-top:0.25rem;">
+              Generated automatically from the patient's conversations with AI companions (Kabir, Aanya, Dr. Priya, Rohan, Meera). Hidden from the patient.
+            </p>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(behavioralReports)}" class="empty-state-card">
+          <p>No behavioral reports compiled yet. When the patient engages in conversations with AI companions, insights will automatically appear here.</p>
+        </div>
+
+        <!-- Behavioral Reports List -->
+        <div class="reports-grid" th:if="${not #lists.isEmpty(behavioralReports)}">
+          <article class="report-card report-card--behavioral" th:each="rpt : ${behavioralReports}">
+            <div class="report-card-header">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span class="report-type-badge report-type-badge--behavioral">BEHAVIORAL BRIEF</span>
+                <span class="report-date" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">02 Sep 2026</span>
+              </div>
+              <span class="report-severity-badge severity-badge--confidential">THERAPIST ACCESS ONLY</span>
+            </div>
+
+            <h3 class="report-card-title" th:text="${rpt.title}">AI Companion Chat Behavioral Analysis</h3>
+            <p class="report-card-summary" th:text="${rpt.summary}">Summary</p>
+
+            <div class="report-card-body">
+              <div class="markdown-body" style="white-space: pre-line; line-height:1.7; font-size:0.9rem;" th:text="${rpt.content}">
+                Content analysis...
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- TAB 2: CLINICAL ASSESSMENT REPORTS (VISIBLE TO PATIENT & THERAPIST) -->
+      <section id="tab-assessment" class="report-tab-content fade-up" style="display:none;">
+        <div class="section-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1.25rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            <span>📝 Clinical Assessment Reports</span>
+            <span class="badge-shared">Shared with Patient</span>
+          </h2>
+          <p style="font-size:0.85rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            Clinically validated self-assessments (PHQ-9, GAD-7, PSS-10, ISI, Burnout) completed by the patient with AI clinical evaluations.
+          </p>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(assessmentReports)}" class="empty-state-card">
+          <p>The patient has not completed any self-assessments yet.</p>
+        </div>
+
+        <!-- Assessment Reports List -->
+        <div class="reports-grid" th:if="${not #lists.isEmpty(assessmentReports)}">
+          <article class="report-card report-card--assessment" th:each="rpt : ${assessmentReports}">
+            <div class="report-card-header">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <span class="report-type-badge report-type-badge--assessment" th:text="${rpt.assessment != null ? rpt.assessment.type.displayName : 'TEST REPORT'}">PHQ-9</span>
+                <span class="report-date" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">02 Sep 2026</span>
+              </div>
+              <span class="report-severity-badge"
+                    th:classappend="'severity-badge--' + ${#strings.toLowerCase(rpt.severity)}"
+                    th:text="${rpt.severity}">MODERATE</span>
+            </div>
+
+            <h3 class="report-card-title" th:text="${rpt.title}">PHQ-9 Depression Clinical Evaluation</h3>
+            <p class="report-card-summary" th:text="${rpt.summary}">Score summary</p>
+
+            <div class="report-card-body">
+              <div class="markdown-body" style="white-space: pre-line; line-height:1.7; font-size:0.9rem;" th:text="${rpt.content}">
+                Content evaluation...
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Script for tab toggling -->
+  <script>
+    function switchReportTab(tab) {
+      document.querySelectorAll('.report-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.report-tab-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+      });
+
+      if (tab === 'behavioral') {
+        document.getElementById('tab-behavioral').style.display = 'block';
+        document.getElementById('tab-behavioral').classList.add('active');
+        event.currentTarget.classList.add('active');
+      } else {
+        document.getElementById('tab-assessment').style.display = 'block';
+        document.getElementById('tab-assessment').classList.add('active');
+        event.currentTarget.classList.add('active');
+      }
+    }
+  </script>
+
+</body>
+</html>
