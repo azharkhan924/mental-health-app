@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard — Breathe Heal Grow</title>
+  <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
+        <a th:href="@{/appointments/book}">Book Session</a>
+        <a href="#">Chat with AI</a>
+        <a th:href="@{/assessments}">Assessments</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-greeting">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span th:text="${userName}">Patient</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== TOAST NOTIFICATIONS ===== -->
+  <div th:if="${success}" class="toast toast--success show" th:text="${success}"></div>
+
+  <!-- ===== DASHBOARD CONTENT ===== -->
+  <main class="dashboard">
+    <div class="container">
+
+      <!-- Welcome Banner -->
+      <section class="dash-welcome fade-up">
+        <div class="dash-welcome__text">
+          <h1 class="dash-welcome__title">
+            Welcome back, <span th:text="${userName}" class="text-coral">User</span> 👋
+          </h1>
+          <p class="dash-welcome__desc">
+            How are you feeling today? You can book appointments with certified therapists or explore self-care tools.
+          </p>
+        </div>
+      </section>
+
+      <!-- Quick Stats Row -->
+      <section class="dash-stats fade-up">
+        <div class="dash-stat-card bg-mint">
+          <span class="dash-stat-card__number text-teal" th:text="${confirmedCount} ?: 0">0</span>
+          <span class="dash-stat-card__label">Confirmed Sessions</span>
+        </div>
+        <div class="dash-stat-card bg-blush">
+          <span class="dash-stat-card__number text-coral" th:text="${pendingCount} ?: 0">0</span>
+          <span class="dash-stat-card__label">Pending Requests</span>
+        </div>
+        <div class="dash-stat-card bg-sand">
+          <span class="dash-stat-card__number text-gold" th:text="${assessmentsCount} ?: 0">0</span>
+          <span class="dash-stat-card__label">Assessments Taken</span>
+        </div>
+      </section>
+
+      <!-- Quick Actions Grid -->
+      <section class="dash-grid">
+
+        <!-- Appointments Card -->
+        <article class="dash-card dash-card--appointments fade-up fade-up-d1">
+          <span class="dash-card__icon bg-blush text-coral">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          </span>
+          <h2 class="dash-card__title">Appointments</h2>
+          <p class="dash-card__body">Schedule confidential one-on-one sessions with our certified therapists.</p>
+          <a th:href="@{/appointments/book}" class="btn btn-coral dash-card__cta">Book New Session</a>
+        </article>
+
+        <!-- Assessment Card -->
+        <article class="dash-card dash-card--assessment fade-up fade-up-d2">
+          <span class="dash-card__icon bg-sand text-gold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <h2 class="dash-card__title">Self-Assessments</h2>
+          <p class="dash-card__body">Take clinically validated tests (PHQ-9, GAD-7) to monitor your mental wellbeing.</p>
+          <a th:href="@{/assessments}" class="btn btn-gold dash-card__cta">Take Assessment</a>
+        </article>
+
+        <!-- AI Chat Card -->
+        <article class="dash-card dash-card--chat fade-up fade-up-d3">
+          <span class="dash-card__icon bg-mint text-teal">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          </span>
+          <h2 class="dash-card__title">Chat with AI</h2>
+          <p class="dash-card__body">Talk to our AI mental health assistant anytime. It's private, supportive, and non-judgemental.</p>
+          <a th:href="@{/chat}" class="btn btn-teal dash-card__cta">Start AI Chat</a>
+        </article>
+
+      </section>
+
+      <!-- ===== APPOINTMENTS SECTION ===== -->
+      <section class="appointments-section fade-up" style="margin-bottom: 2.5rem;">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <div>
+            <h2 style="font-size:1.4rem; color:var(--teal);">My Consultations</h2>
+            <p style="font-size:0.85rem; color:var(--muted-foreground);">Track your appointment schedule and status</p>
+          </div>
+          <a th:href="@{/appointments/book}" class="btn btn-outline-coral btn-sm">+ Book Session</a>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(appointments)}" class="empty-state-card">
+          <p>You haven't booked any appointments yet.</p>
+          <a th:href="@{/appointments/book}" class="btn btn-coral" style="margin-top:1rem;">Book Your First Appointment</a>
+        </div>
+
+        <!-- Appointments List / Table -->
+        <div th:if="${not #lists.isEmpty(appointments)}" class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Therapist</th>
+                <th>Specialization</th>
+                <th>Date & Time</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="apt : ${appointments}">
+                <td>
+                  <strong th:text="${apt.therapist.name}">Dr. Specialist</strong>
+                </td>
+                <td th:text="${apt.therapist.specialization} ?: 'Therapy'">Clinical Psychology</td>
+                <td>
+                  <span th:text="${apt.appointmentDate}">2026-09-10</span><br/>
+                  <small style="color:var(--muted-foreground);" th:text="${apt.appointmentTime}">10:00 AM</small>
+                </td>
+                <td style="max-width:200px;">
+                  <span th:text="${apt.notes} ?: 'No specific notes'" style="font-size:0.82rem; color:rgba(26,60,60,0.8);">Notes</span>
+                </td>
+                <td>
+                  <span class="status-pill"
+                        th:classappend="'status-pill--' + ${#strings.toLowerCase(apt.status)}"
+                        th:text="${apt.status}">PENDING</span>
+                </td>
+                <td>
+                  <form th:if="${apt.status.name() != 'CANCELLED'}"
+                        th:action="@{/appointments/{id}/status(id=${apt.id})}"
+                        method="post"
+                        onsubmit="return confirm('Are you sure you want to cancel this appointment?');"
+                        style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="status" value="CANCELLED" />
+                    <input type="hidden" name="returnTo" value="dashboard" />
+                    <button type="submit" class="btn btn-cancel btn-sm">Cancel</button>
+                  </form>
+                  <span th:if="${apt.status.name() == 'CANCELLED'}" style="font-size:0.78rem; color:var(--muted-foreground);">Closed</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== RECENT ASSESSMENTS SECTION ===== -->
+      <section class="appointments-section fade-up">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <div>
+            <h2 style="font-size:1.4rem; color:var(--teal);">My Self-Assessments</h2>
+            <p style="font-size:0.85rem; color:var(--muted-foreground);">Past screening records (PHQ-9 & GAD-7)</p>
+          </div>
+          <a th:href="@{/assessments}" class="btn btn-outline-coral btn-sm">+ Take New Test</a>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(assessments)}" class="empty-state-card">
+          <p>No assessment records yet. Take a 2-minute test to understand your mental health score.</p>
+          <a th:href="@{/assessments}" class="btn btn-gold" style="margin-top:1rem;">Take Self-Assessment</a>
+        </div>
+
+        <!-- Assessments Table -->
+        <div th:if="${not #lists.isEmpty(assessments)}" class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Assessment</th>
+                <th>Score</th>
+                <th>Severity Level</th>
+                <th>Date Taken</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="a : ${assessments}">
+                <td>
+                  <strong th:text="${a.type.displayName}">PHQ-9 Depression Screening</strong>
+                </td>
+                <td>
+                  <span th:text="${a.totalScore} + ' / ' + ${a.type.maxScore}" style="font-weight:700;">12 / 27</span>
+                </td>
+                <td>
+                  <span class="status-pill status-pill--pending" th:text="${a.severity}">Moderate</span>
+                </td>
+                <td>
+                  <span th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, hh:mm a')}">02 Sep 2026</span>
+                </td>
+                <td>
+                  <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">View Result</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Info Section -->
+      <section class="dash-info fade-up" style="margin-top:2.5rem;">
+        <div class="dash-info__card bg-mint">
+          <h3 class="text-teal">💡 Quick Tip</h3>
+          <p>Taking just 5 minutes a day for mindfulness can significantly reduce stress and anxiety. Try a breathing exercise today!</p>
+        </div>
+        <div class="dash-info__card bg-blush">
+          <h3 class="text-coral">📞 Need Immediate Help?</h3>
+          <p>If you're in crisis, please call a mental health helpline immediately. You are not alone.</p>
+          <a href="tel:988" class="btn btn-coral" style="margin-top:1rem;">Call 988 Lifeline</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-links">
+      <div class="footer-links__inner">
+        <a href="#">Terms and Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
+  </footer>
+
+  <!-- Auto-hide toast -->
+  <script th:if="${success}">
+    setTimeout(function() {
+      var t = document.querySelector('.toast');
+      if (t) t.classList.remove('show');
+    }, 4000);
+  </script>
+
+</body>
+</html>

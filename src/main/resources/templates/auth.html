@@ -95,6 +95,7 @@
 
           <!-- Patient Register -->
           <form th:if="${role != 'therapist'}" th:action="@{/auth/patient/register}" th:object="${patient}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-grid form-grid--2col">
               <label class="field">
                 <span class="field-label">Full Name *</span>
@@ -120,6 +121,7 @@
 
           <!-- Therapist Register -->
           <form th:if="${role == 'therapist'}" th:action="@{/auth/therapist/register}" th:object="${therapist}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-grid form-grid--2col">
               <label class="field">
                 <span class="field-label">Full Name *</span>
@@ -155,9 +157,10 @@
         </div>
 
         <!-- =========================================
-             LOGIN FORM
+             LOGIN FORM (Spring Security handles POST /auth/login)
              ========================================= -->
-        <form th:if="${mode == 'login'}" th:action="@{/auth/login(role=${role})}" method="post">
+        <form th:if="${mode == 'login'}" th:action="@{/auth/login}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <div class="form-grid form-grid--2col">
             <label class="field">
               <span class="field-label">Email *</span>

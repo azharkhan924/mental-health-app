@@ -9,7 +9,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Clean & minimal Auth Controller for Patient & Therapist authentication.
+ * AUTH CONTROLLER
+ * ───────────────
+ * Handles:
+ *   1. Showing the login/register page (GET /auth)
+ *   2. Registering new patients (POST /auth/patient/register)
+ *   3. Registering new therapists (POST /auth/therapist/register)
+ *
+ * NOTE: Login POST is handled by Spring Security automatically.
+ *       We only handle REGISTRATION here.
+ *       See SecurityConfig.java for login configuration.
  */
 @Controller
 @RequestMapping("/auth")
@@ -23,13 +32,33 @@ public class AuthController {
         this.therapistService = therapistService;
     }
 
+    /**
+     * Show the auth page.
+     *
+     * URL examples:
+     *   /auth                         → shows register form for patient
+     *   /auth?mode=login              → shows login form
+     *   /auth?mode=register&role=therapist → shows register form for therapist
+     *   /auth?mode=login&error=true   → shows login form with error message
+     */
     @GetMapping
     public String showAuthPage(@RequestParam(defaultValue = "register") String mode,
                                @RequestParam(defaultValue = "patient") String role,
+                               @RequestParam(required = false) String error,
                                Model model) {
+
+        // Spring Security sends ?error=true when login fails
+        if (error != null) {
+            model.addAttribute("error", "Invalid email or password");
+        }
+
         return renderAuth(model, mode, role);
     }
 
+    /**
+     * Register a new patient.
+     * If email already exists, shows error. Otherwise saves and shows login form.
+     */
     @PostMapping("/patient/register")
     public String registerPatient(@ModelAttribute Patient patient, Model model) {
         try {
@@ -43,6 +72,9 @@ public class AuthController {
         }
     }
 
+    /**
+     * Register a new therapist.
+     */
     @PostMapping("/therapist/register")
     public String registerTherapist(@ModelAttribute Therapist therapist, Model model) {
         try {
@@ -56,29 +88,15 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        @RequestParam(defaultValue = "patient") String role,
-                        Model model) {
-        boolean success = "therapist".equals(role)
-                ? therapistService.login(email, password).isPresent()
-                : patientService.login(email, password).isPresent();
-
-        if (success) {
-            return "redirect:/";
-        }
-
-        model.addAttribute("error", "Invalid email or password");
-        return renderAuth(model, "login", role);
-    }
-
-    // Helper to keep code DRY (Don't Repeat Yourself)
+    /**
+     * Helper method — sets up the model attributes needed by auth.html
+     * This avoids repeating the same code in every method above.
+     */
     private String renderAuth(Model model, String mode, String role) {
         model.addAttribute("mode", mode);
         model.addAttribute("role", role);
         if (!model.containsAttribute("patient")) model.addAttribute("patient", new Patient());
         if (!model.containsAttribute("therapist")) model.addAttribute("therapist", new Therapist());
-        return "auth";
+        return "auth";  // renders auth.html
     }
 }

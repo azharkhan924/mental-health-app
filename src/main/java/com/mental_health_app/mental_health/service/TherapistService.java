@@ -5,10 +5,11 @@ import com.mental_health_app.mental_health.repository.TherapistRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- * Business-logic layer for Therapist registration and authentication.
+ * Business-logic layer for Therapist operations (registration, retrieval, etc.).
  */
 @Service
 public class TherapistService {
@@ -36,7 +37,6 @@ public class TherapistService {
 
     /**
      * Authenticate a therapist by email + raw password.
-     * @return the Therapist if credentials match, empty otherwise.
      */
     public Optional<Therapist> login(String email, String rawPassword) {
         return therapistRepository.findByEmail(email)
@@ -45,5 +45,16 @@ public class TherapistService {
 
     public Optional<Therapist> findByEmail(String email) {
         return therapistRepository.findByEmail(email);
+    }
+
+    public Optional<Therapist> findById(Long id) {
+        return therapistRepository.findById(id);
+    }
+
+    /**
+     * Get all therapists registered in the system (for patients to browse).
+     */
+    public List<Therapist> getAllTherapists() {
+        return therapistRepository.findAll();
     }
 }

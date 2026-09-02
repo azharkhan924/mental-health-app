@@ -1,0 +1,15 @@
+# =============================================
+# Render Blueprint Configuration (render.yaml)
+# =============================================
+services:
+  - type: web
+    name: mental-health-app
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+      - key: PORT
+        value: 10000

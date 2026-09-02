@@ -1,0 +1,8 @@
+.git
+.gitignore
+.agents
+.mvn
+target
+*.log
+*.md
+.DS_Store
