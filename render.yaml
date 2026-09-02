@@ -10,6 +10,6 @@ services:
     healthCheckPath: /actuator/health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
-        value: dev
+        value: prod
       - key: PORT
         value: 10000
