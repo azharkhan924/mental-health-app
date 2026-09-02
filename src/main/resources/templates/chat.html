@@ -106,7 +106,20 @@
       <!-- RIGHT PANEL: ACTIVE CHAT WINDOW -->
       <section class="wa-chat-window">
 
-        <!-- Top WhatsApp Chat Header -->
+        <!-- Mobile-only Persona Selector (replaces sidebar on small screens) -->
+        <div class="mobile-persona-select">
+          <label for="mobilePersonaSelect">Chat with:</label>
+          <select id="mobilePersonaSelect" onchange="window.location.href='/chat?persona=' + this.value;">
+            <option th:each="p : ${personas}"
+                    th:value="${p.name()}"
+                    th:text="${p.displayName}"
+                    th:selected="${p == currentPersona}">
+              Persona
+            </option>
+          </select>
+        </div>
+
+        <!-- Top Chat Header -->
         <div class="wa-chat-header">
           <div class="wa-chat-header-info">
             <div class="wa-contact-avatar-wrap">

@@ -2468,6 +2468,367 @@ ul { list-style: none; }
   }
 }
 
+/* ========================================
+   RESPONSIVE: GLOBAL MOBILE FIXES
+   ======================================== */
+
+/* --- HEADER MOBILE --- */
+@media (max-width: 768px) {
+  .site-header__inner {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding: 0.6rem 0.85rem;
+  }
+  .header-actions {
+    gap: 0.5rem;
+  }
+  .user-greeting {
+    display: none;
+  }
+  .btn-sm {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.68rem;
+  }
+}
+
+/* --- HERO MOBILE --- */
+@media (max-width: 640px) {
+  .hero__img {
+    height: 52vh;
+    min-height: 320px;
+  }
+  .hero__text {
+    max-width: 280px;
+  }
+  .hero__title {
+    font-size: 1.65rem;
+  }
+  .hero__desc {
+    font-size: 0.8rem;
+    max-width: 260px;
+  }
+}
+
+/* --- DASHBOARD MOBILE --- */
+@media (max-width: 640px) {
+  .dashboard {
+    padding: 1.25rem 0;
+  }
+  .dash-welcome__title {
+    font-size: 1.35rem;
+  }
+  .dash-welcome__desc {
+    font-size: 0.82rem;
+  }
+  .dash-stats {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .dash-stat-card {
+    padding: 1rem;
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+  .dash-stat-card__number {
+    font-size: 1.75rem;
+  }
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-card {
+    padding: 1.25rem;
+  }
+}
+
+/* --- TABLE MOBILE (SCROLL) --- */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .custom-table {
+    min-width: 600px;
+  }
+}
+
+/* --- AUTH PAGE MOBILE --- */
+@media (max-width: 640px) {
+  .auth-card {
+    margin: 1rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: 12px;
+  }
+  .auth-card h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* --- BOOK APPOINTMENT MOBILE --- */
+@media (max-width: 640px) {
+  .book-section {
+    padding: 1.25rem 0;
+  }
+  .book-card {
+    padding: 1.35rem;
+    margin: 0 0.5rem;
+  }
+  .book-card h1 {
+    font-size: 1.25rem;
+  }
+}
+
+/* --- ASSESSMENT CARDS MOBILE --- */
+@media (max-width: 640px) {
+  .assessments-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .assessment-card {
+    padding: 1.25rem;
+  }
+}
+
+/* --- QUIZ PAGE MOBILE --- */
+@media (max-width: 640px) {
+  .quiz-page-wrapper {
+    padding: 1rem;
+  }
+  .quiz-page-wrapper h1 {
+    font-size: 1.2rem;
+  }
+}
+
+/* --- RESULT PAGE MOBILE --- */
+@media (max-width: 640px) {
+  .result-card {
+    padding: 1.5rem 1.25rem;
+    margin: 0 0.5rem;
+  }
+}
+
+/* ========================================
+   RESPONSIVE: CHAT PAGE (MOBILE-FIRST)
+   ======================================== */
+
+/* Mobile Chat: Full-screen chat, persona selector instead of hidden sidebar */
+@media (max-width: 768px) {
+  .wa-wrapper {
+    padding: 0;
+    margin: 0;
+  }
+  .wa-container {
+    border-radius: 0;
+    height: calc(100vh - 52px);
+    max-height: none;
+    min-height: auto;
+    border: none;
+    box-shadow: none;
+  }
+
+  /* Sidebar is hidden on mobile — we rely on persona dropdown in header */
+  .wa-sidebar {
+    display: none;
+  }
+
+  /* Chat window takes full space */
+  .wa-chat-window {
+    width: 100%;
+  }
+
+  /* Compact chat header */
+  .wa-chat-header {
+    padding: 0.55rem 0.75rem;
+    gap: 0.35rem;
+  }
+  .wa-chat-header-info {
+    gap: 0.55rem;
+  }
+  .wa-chat-header-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .wa-chat-header-name {
+    font-size: 0.9rem;
+  }
+  .wa-chat-header-status {
+    font-size: 0.68rem;
+  }
+
+  /* Smaller tool icons */
+  .wa-chat-header-tools {
+    gap: 0.25rem;
+  }
+  .wa-chat-header-tools .wa-icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .wa-clear-btn {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  /* Messages area */
+  .wa-messages-area {
+    padding: 0.85rem 0.75rem;
+    gap: 0.65rem;
+  }
+  .wa-encryption-pill {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  /* Intro card mobile */
+  .wa-intro-card {
+    padding: 1.25rem 1rem;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+  .wa-intro-avatar {
+    width: 56px;
+    height: 56px;
+  }
+  .wa-intro-name {
+    font-size: 1.05rem;
+  }
+  .wa-intro-bio {
+    font-size: 0.78rem;
+  }
+  .wa-welcome-speech {
+    font-size: 0.82rem;
+    padding: 0.65rem 0.85rem;
+  }
+  .wa-chip-btn {
+    font-size: 0.76rem;
+    padding: 0.5rem 0.85rem;
+  }
+
+  /* Smaller bubbles */
+  .wa-bubble {
+    max-width: 85%;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem 0.4rem;
+  }
+  .wa-bubble-sender {
+    font-size: 0.65rem;
+  }
+  .wa-bubble--incoming .wa-bubble-time,
+  .wa-bubble--outgoing .wa-bubble-time {
+    font-size: 0.6rem;
+  }
+
+  /* Input bar */
+  .wa-input-bar {
+    padding: 0.5rem 0.65rem;
+  }
+  .wa-input-form {
+    gap: 0.4rem;
+  }
+  .wa-tool-btn {
+    padding: 0.3rem;
+  }
+  .wa-tool-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .wa-text-input {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+  }
+  .wa-send-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .wa-send-btn svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  /* Crisis alert */
+  .wa-crisis-alert {
+    flex-direction: column;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.78rem;
+    gap: 0.5rem;
+  }
+}
+
+/* Mobile Persona Selector (shown only on mobile via chat.html) */
+.mobile-persona-select {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-persona-select {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-persona-select label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--teal);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .mobile-persona-select select {
+    flex: 1;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-family: var(--font-sans);
+    color: var(--foreground);
+    background-color: var(--sand);
+    outline: none;
+    appearance: none;
+  }
+  .mobile-persona-select select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 2px rgba(26, 83, 92, 0.08);
+  }
+}
+
+/* Tablet: Narrower sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wa-sidebar {
+    width: 280px;
+    min-width: 250px;
+  }
+  .wa-contact-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .wa-contact-name {
+    font-size: 0.88rem;
+  }
+}
+
+/* --- THERAPIST DASHBOARD MOBILE --- */
+@media (max-width: 640px) {
+  .therapist-dashboard .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .therapist-dashboard .custom-table {
+    min-width: 550px;
+  }
+}
+
+/* --- FOOTER MOBILE --- */
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 2rem 1rem;
+  }
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+
 
 
 
