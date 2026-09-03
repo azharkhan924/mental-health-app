@@ -56,6 +56,21 @@ public class AppointmentController {
     }
 
     /**
+     * AJAX endpoint: Fetch real-time available time slots for a specific therapist on a selected date.
+     */
+    @GetMapping("/available-slots")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> getAvailableSlots(
+            @RequestParam Long therapistId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+        try {
+            return org.springframework.http.ResponseEntity.ok(appointmentService.getAvailableSlots(therapistId, date));
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Submit an appointment booking request.
      */
     @PostMapping("/book")

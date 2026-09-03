@@ -69,6 +69,10 @@
           <span class="dash-stat-card__number text-gold" th:text="${assessmentsCount} ?: 0">0</span>
           <span class="dash-stat-card__label">Assessments Taken</span>
         </div>
+        <div class="dash-stat-card bg-blush" style="border-top:4px solid var(--coral);">
+          <span class="dash-stat-card__number text-coral" th:text="${pendingAssignedTestsCount} ?: 0">0</span>
+          <span class="dash-stat-card__label">Assigned Tests Pending</span>
+        </div>
       </section>
 
       <!-- Quick Actions Grid -->
@@ -165,6 +169,69 @@
                     <button type="submit" class="btn btn-cancel btn-sm">Cancel</button>
                   </form>
                   <span th:if="${apt.status.name() == 'CANCELLED'}" style="font-size:0.78rem; color:var(--muted-foreground);">Closed</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== ASSIGNED ASSESSMENTS FROM THERAPIST ===== -->
+      <section th:if="${not #lists.isEmpty(assignedTests)}" class="appointments-section fade-up" style="margin-bottom: 2.5rem;">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <div>
+            <h2 style="font-size:1.4rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+              <span>🔔 Clinical Tests Assigned by Your Therapist</span>
+              <span class="badge-confidential" style="font-size:0.75rem;">Action Required</span>
+            </h2>
+            <p style="font-size:0.85rem; color:var(--muted-foreground);">Personalized questionnaires requested by your consulting doctor</p>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Test Title</th>
+                <th>Assigned By</th>
+                <th>Assigned On</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="assign : ${assignedTests}">
+                <td>
+                  <strong th:text="${assign.customTest.title}">Custom Test Title</strong>
+                  <div style="font-size:0.75rem; color:var(--muted-foreground);" th:text="${assign.customTest.category}">Category</div>
+                </td>
+                <td>
+                  <span th:text="'Dr. ' + ${assign.assignedBy.name}">Dr. Therapist</span>
+                </td>
+                <td>
+                  <span th:text="${#temporals.format(assign.assignedAt, 'dd MMM yyyy')}">02 Sep 2026</span>
+                </td>
+                <td>
+                  <span class="status-pill"
+                        th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}"
+                        th:text="${assign.status}">PENDING</span>
+                </td>
+                <td>
+                  <span th:if="${assign.status == 'COMPLETED'}" th:text="${assign.totalScore} + ' / ' + ${assign.customTest.maxScore}" style="font-weight:700;">14 / 30</span>
+                  <span th:if="${assign.status != 'COMPLETED'}" style="color:var(--muted-foreground); font-size:0.82rem;">Not taken</span>
+                </td>
+                <td>
+                  <a th:if="${assign.status == 'PENDING'}"
+                     th:href="@{/assessments/custom/{id}(id=${assign.id})}"
+                     class="btn btn-coral btn-sm">
+                    ✍️ Take Test
+                  </a>
+                  <a th:if="${assign.status == 'COMPLETED'}"
+                     th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
+                     class="btn btn-outline-coral btn-sm">
+                    📊 View Results
+                  </a>
                 </td>
               </tr>
             </tbody>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="'Results — ' + ${test.title} + ' — Breathe Heal Grow'">Custom Assessment Result</title>
+  <meta name="description" content="Your custom mental health evaluation result and AI diagnostic insights." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/appointments/book}">Book Session</a>
+        <a th:href="@{/chat}">Chat with AI</a>
+        <a th:href="@{/assessments}">Assessments</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-greeting">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span th:text="${assignment.patient.name}">Patient</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="dashboard">
+    <div class="container" style="max-width: 820px;">
+
+      <!-- Breadcrumbs -->
+      <div style="margin-bottom: 1.5rem;">
+        <a th:href="@{/assessments}" style="color:var(--teal); font-weight:600; display:inline-flex; align-items:center; gap:0.4rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Assessments
+        </a>
+      </div>
+
+      <!-- Result Card -->
+      <section class="result-card fade-up">
+
+        <div class="result-card__header">
+          <span class="eyebrow text-teal" th:text="${test.category} ?: 'Clinical Assessment'">Category</span>
+          <h1 class="result-card__title" th:text="${test.title}">Assessment Title</h1>
+          <p style="font-size:0.85rem; color:var(--muted-foreground);" 
+             th:text="'Assigned by Dr. ' + ${assignment.assignedBy.name} + ' · Completed on ' + ${#temporals.format(assignment.completedAt, 'dd MMMM yyyy, hh:mm a')}">
+            Completed on 02 September 2026
+          </p>
+        </div>
+
+        <!-- Score Display Box -->
+        <div class="result-score-box">
+          <div class="result-score-number">
+            <span th:text="${assignment.totalScore}">14</span>
+            <small th:text="'/ ' + ${test.maxScore}">/ 30</small>
+          </div>
+
+          <div class="result-score-meta">
+            <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted-foreground);">
+              Clinical Severity Level
+            </div>
+            <div class="result-severity-badge" th:text="${assignment.severity}">
+              Moderate
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Progress Bar -->
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" th:style="'width: ' + ${scorePercentage} + '%;'"></div>
+        </div>
+
+        <!-- AI Clinical Analysis Box -->
+        <div class="result-ai-report-box" style="margin-top:1.5rem;">
+          <div class="report-visual-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="report-visual-icon">🤖</span>
+              <div>
+                <h3 style="font-size:1.1rem; color:var(--teal); margin:0;">AI Clinical Diagnostic Evaluation</h3>
+                <span style="font-size:0.75rem; color:var(--muted-foreground);">Personalized clinical evaluation for your consulting therapist</span>
+              </div>
+            </div>
+            <span class="report-auto-badge">Therapist Shared</span>
+          </div>
+
+          <div class="report-visual-content" th:utext="${assignment.aiEvaluation}">
+            Detailed AI analysis content...
+          </div>
+
+          <div class="report-visual-footer">
+            <span>ℹ️</span> This completed evaluation has been automatically updated in Dr. <strong th:text="${assignment.assignedBy.name}">Therapist</strong>'s clinical dashboard.
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="result-actions" style="margin-top:2rem;">
+          <a th:href="@{/appointments/book(therapistId=${assignment.assignedBy.id})}" class="btn btn-coral" style="flex:1;">
+            📅 Schedule Follow-up with Dr. <span th:text="${assignment.assignedBy.name}">Therapist</span>
+          </a>
+          <a th:href="@{/assessments}" class="btn btn-outline-coral">
+            All Assessments
+          </a>
+          <a th:href="@{/dashboard}" class="btn btn-teal">
+            Dashboard
+          </a>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-links">
+      <div class="footer-links__inner">
+        <a href="#">Terms and Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
+  </footer>
+
+</body>
+</html>

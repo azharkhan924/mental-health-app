@@ -48,10 +48,32 @@ public class Therapist {
     private String licenseNumber;
 
     // Short professional bio shown to patients
+    @Column(length = 2000)
     private String bio;
 
     // How many years they have been practicing
     private Integer yearsOfExperience;
+
+    // Clinic / Office Physical Address & Location
+    @Column(length = 500)
+    private String clinicAddress;
+
+    private String city;
+
+    // Degrees, Diplomas, Board Certifications (e.g. "M.Phil Clinical Psych, RCI Certified")
+    private String qualifications;
+
+    // Languages spoken (e.g. "English, Hindi, Marathi")
+    private String languages;
+
+    // Consultation Fee (e.g. "₹1,500 / session")
+    private String consultationFee;
+
+    // Standard working days (e.g. "Mon, Tue, Wed, Thu, Fri")
+    private String availableDays;
+
+    // Standard working hours (e.g. "09:00 AM - 06:00 PM")
+    private String availableHours;
 
     // --- Role ---
 
@@ -120,6 +142,20 @@ public class Therapist {
 
     public Integer getYearsOfExperience() { return yearsOfExperience; }
 
+    public String getClinicAddress() { return clinicAddress; }
+
+    public String getCity() { return city; }
+
+    public String getQualifications() { return qualifications; }
+
+    public String getLanguages() { return languages; }
+
+    public String getConsultationFee() { return consultationFee; }
+
+    public String getAvailableDays() { return availableDays; }
+
+    public String getAvailableHours() { return availableHours; }
+
     public Role getRole() { return role; }
 
     public boolean isEnabled() { return enabled; }
@@ -149,6 +185,20 @@ public class Therapist {
     public void setBio(String bio) { this.bio = bio; }
 
     public void setYearsOfExperience(Integer yearsOfExperience) { this.yearsOfExperience = yearsOfExperience; }
+
+    public void setClinicAddress(String clinicAddress) { this.clinicAddress = clinicAddress; }
+
+    public void setCity(String city) { this.city = city; }
+
+    public void setQualifications(String qualifications) { this.qualifications = qualifications; }
+
+    public void setLanguages(String languages) { this.languages = languages; }
+
+    public void setConsultationFee(String consultationFee) { this.consultationFee = consultationFee; }
+
+    public void setAvailableDays(String availableDays) { this.availableDays = availableDays; }
+
+    public void setAvailableHours(String availableHours) { this.availableHours = availableHours; }
 
     public void setRole(Role role) { this.role = role; }
 

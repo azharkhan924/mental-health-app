@@ -32,17 +32,20 @@ public class DashboardController {
     private final AppointmentService appointmentService;
     private final AssessmentService assessmentService;
     private final com.mental_health_app.mental_health.service.ReportService reportService;
+    private final com.mental_health_app.mental_health.service.CustomTestService customTestService;
 
     public DashboardController(PatientService patientService,
                                TherapistService therapistService,
                                AppointmentService appointmentService,
                                AssessmentService assessmentService,
-                               com.mental_health_app.mental_health.service.ReportService reportService) {
+                               com.mental_health_app.mental_health.service.ReportService reportService,
+                               com.mental_health_app.mental_health.service.CustomTestService customTestService) {
         this.patientService = patientService;
         this.therapistService = therapistService;
         this.appointmentService = appointmentService;
         this.assessmentService = assessmentService;
         this.reportService = reportService;
+        this.customTestService = customTestService;
     }
 
     /**
@@ -71,6 +74,13 @@ public class DashboardController {
 
             // Fetch patient's AI assessment reports
             model.addAttribute("reports", reportService.getReportsForPatient(patient));
+
+            // Fetch custom tests assigned by therapists
+            List<com.mental_health_app.mental_health.entity.CustomTestAssignment> assignedTests = 
+                    customTestService.getAssignmentsForPatient(patient);
+            model.addAttribute("assignedTests", assignedTests);
+            model.addAttribute("pendingAssignedTestsCount", 
+                    assignedTests.stream().filter(a -> "PENDING".equals(a.getStatus())).count());
 
             // Statistics
             model.addAttribute("pendingCount", appointmentService.countByPatientAndStatus(patient, AppointmentStatus.PENDING));
@@ -117,6 +127,16 @@ public class DashboardController {
             model.addAttribute("activePatientsCount", uniquePatients);
             model.addAttribute("upcomingSessionsCount", confirmedCount);
             model.addAttribute("pendingRequestsCount", pendingCount);
+
+            // Schedule & Availabilities (all 7 days)
+            model.addAttribute("availabilities", appointmentService.getOrCreateTherapistAvailabilities(therapist));
+
+            // Custom Tests & Patient Assignments
+            model.addAttribute("customTests", customTestService.getTestsByTherapist(therapist));
+            model.addAttribute("testAssignments", customTestService.getAssignmentsByTherapist(therapist));
+
+            // Available patients for test assignment
+            model.addAttribute("allPatients", patientService.getAllPatients());
         }
 
         return "therapist-dashboard";

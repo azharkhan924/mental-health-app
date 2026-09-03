@@ -27,4 +27,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Count appointments by patient and status
     long countByPatientAndStatus(Patient patient, AppointmentStatus status);
+
+    // Check if an appointment slot is already booked (status not CANCELLED)
+    boolean existsByTherapistAndAppointmentDateAndAppointmentTimeAndStatusNot(Therapist therapist, 
+                                                                               java.time.LocalDate appointmentDate, 
+                                                                               String appointmentTime, 
+                                                                               AppointmentStatus status);
+
+    // Find all active/pending appointments for a therapist on a specific date
+    List<Appointment> findByTherapistAndAppointmentDateAndStatusNot(Therapist therapist, 
+                                                                    java.time.LocalDate appointmentDate, 
+                                                                    AppointmentStatus status);
 }

@@ -5,6 +5,7 @@ import com.mental_health_app.mental_health.entity.AssessmentType;
 import com.mental_health_app.mental_health.entity.Patient;
 import com.mental_health_app.mental_health.entity.PatientReport;
 import com.mental_health_app.mental_health.service.AssessmentService;
+import com.mental_health_app.mental_health.service.CustomTestService;
 import com.mental_health_app.mental_health.service.PatientService;
 import com.mental_health_app.mental_health.service.ReportService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,17 +32,20 @@ public class AssessmentController {
     private final AssessmentService assessmentService;
     private final PatientService patientService;
     private final ReportService reportService;
+    private final CustomTestService customTestService;
 
     public AssessmentController(AssessmentService assessmentService,
                                 PatientService patientService,
-                                ReportService reportService) {
+                                ReportService reportService,
+                                CustomTestService customTestService) {
         this.assessmentService = assessmentService;
         this.patientService = patientService;
         this.reportService = reportService;
+        this.customTestService = customTestService;
     }
 
     /**
-     * Assessments Landing Page — Displays all 5 assessment cards and past history.
+     * Assessments Landing Page — Displays all 5 assessment cards, custom therapist tests, and past history.
      */
     @GetMapping
     public String showAssessmentsOverview(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -52,6 +56,7 @@ public class AssessmentController {
             model.addAttribute("userName", patient.getName());
             model.addAttribute("assessments", assessmentService.getPatientAssessments(patient));
             model.addAttribute("reports", reportService.getReportsForPatient(patient));
+            model.addAttribute("assignedTests", customTestService.getAssignmentsForPatient(patient));
         }
 
         return "assessments";

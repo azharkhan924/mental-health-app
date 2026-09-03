@@ -50,4 +50,8 @@ public class PatientService {
     public Optional<Patient> findById(Long id) {
         return patientRepository.findById(id);
     }
+
+    public java.util.List<Patient> getAllPatients() {
+        return patientRepository.findAll();
+    }
 }

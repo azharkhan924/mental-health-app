@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Book an Appointment — Breathe Heal Grow</title>
-  <meta name="description" content="Book a confidential mental health consultation with a licensed therapist." />
+  <title>Book a Consultation — Breathe Heal Grow</title>
+  <meta name="description" content="Book a confidential mental health consultation with a licensed therapist. View clinic location, fees, and real-time available slots." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 <body>
@@ -20,8 +20,8 @@
       <nav class="site-nav">
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}" style="color:var(--coral);font-weight:700;">Book Session</a>
-        <a href="#">Chat with AI</a>
-        <a href="#">Assessments</a>
+        <a th:href="@{/chat}">Chat with AI</a>
+        <a th:href="@{/assessments}">Assessments</a>
       </nav>
       <div class="header-actions">
         <span class="user-greeting">
@@ -52,85 +52,89 @@
       <section class="dash-welcome fade-up">
         <h1 class="dash-welcome__title">Book a Consultation 🗓️</h1>
         <p class="dash-welcome__desc">
-          Choose a certified mental health professional and schedule a one-on-one session at your convenience.
+          Choose a certified mental health professional, review clinic credentials, and select from real-time available time slots.
         </p>
       </section>
 
       <!-- Error Toast -->
-      <div th:if="${error}" class="toast toast--error show" th:text="${error}"></div>
+      <div th:if="${error}" class="toast toast--error show" th:text="${error}" style="margin-bottom:1.5rem;"></div>
 
       <!-- Grid: Form + Available Therapists -->
       <div class="booking-grid">
 
         <!-- Booking Form Card -->
         <section class="booking-form-card fade-up fade-up-d1">
-          <h2 style="font-size:1.3rem; margin-bottom:1.5rem; color:var(--teal);">Schedule Your Session</h2>
+          <h2 style="font-size:1.3rem; margin-bottom:1.25rem; color:var(--teal);">Schedule Your Session</h2>
 
           <div th:if="${#lists.isEmpty(therapists)}" class="empty-state" style="padding: 2rem; background: var(--muted); border-radius: var(--radius); text-align: center;">
             <p>No therapists are currently available. Please check back soon!</p>
           </div>
 
-          <form th:if="${not #lists.isEmpty(therapists)}" th:action="@{/appointments/book}" method="post">
+          <form th:if="${not #lists.isEmpty(therapists)}" th:action="@{/appointments/book}" method="post" id="bookingForm">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <!-- Select Therapist -->
             <label class="field" style="margin-bottom: 1.25rem;">
-              <span class="field-label">Select Therapist *</span>
-              <select name="therapistId" class="field-input field-select" required>
+              <span class="field-label">Select Specialist *</span>
+              <select name="therapistId" id="therapistSelect" class="field-input field-select" required onchange="loadAvailableSlots()">
                 <option value="" disabled th:selected="${selectedTherapistId == null}">-- Choose a therapist --</option>
                 <option th:each="t : ${therapists}"
                         th:value="${t.id}"
-                        th:text="${t.name} + ' (' + (${t.specialization} ?: 'General Therapist') + ')'"
+                        th:text="${t.name} + ' — ' + (${t.specialization} ?: 'General Counseling') + (${t.city != null ? ' (' + t.city + ')' : ''})"
                         th:selected="${selectedTherapistId != null and selectedTherapistId == t.id}">
-                  Dr. Name (Specialization)
+                  Dr. Name
                 </option>
               </select>
             </label>
 
-            <!-- Date & Time Row -->
-            <div class="form-grid form-grid--2col" style="margin-top:0; margin-bottom: 1.25rem;">
-              <label class="field">
-                <span class="field-label">Appointment Date *</span>
-                <input type="date" name="appointmentDate" class="field-input" th:min="${minDate}" required />
-              </label>
+            <!-- Appointment Date -->
+            <label class="field" style="margin-bottom: 1.25rem;">
+              <span class="field-label">Consultation Date *</span>
+              <input type="date" name="appointmentDate" id="appointmentDate" class="field-input" th:min="${minDate}" required onchange="loadAvailableSlots()" />
+            </label>
 
-              <label class="field">
-                <span class="field-label">Time Slot *</span>
-                <select name="appointmentTime" class="field-input field-select" required>
-                  <option value="" disabled selected>-- Select time slot --</option>
-                  <option value="09:00 AM">09:00 AM - 10:00 AM</option>
-                  <option value="10:30 AM">10:30 AM - 11:30 AM</option>
-                  <option value="01:00 PM">01:00 PM - 02:00 PM</option>
-                  <option value="02:30 PM">02:30 PM - 03:30 PM</option>
-                  <option value="04:00 PM">04:00 PM - 05:00 PM</option>
-                  <option value="05:30 PM">05:30 PM - 06:30 PM</option>
-                </select>
-              </label>
+            <!-- Time Slots Interactive Selection -->
+            <div style="margin-bottom: 1.25rem;">
+              <span class="field-label" style="display:block; margin-bottom:0.5rem; font-weight:600; font-size:0.88rem; color:var(--teal);">
+                Available Time Slots * <span style="font-weight:400; font-size:0.75rem; color:var(--muted-foreground);">(Booked slots are locked)</span>
+              </span>
+
+              <!-- Real-time dynamic slots container -->
+              <div id="slotsContainer" class="slots-pill-grid">
+                <div class="slots-hint">
+                  📅 Select a specialist and consultation date above to view live available slots.
+                </div>
+              </div>
+
+              <!-- Hidden input bound to selected slot -->
+              <input type="hidden" name="appointmentTime" id="selectedTimeSlot" required />
             </div>
 
             <!-- Notes / Reason -->
             <label class="field" style="margin-bottom: 1.5rem;">
-              <span class="field-label">Reason / Notes (Optional)</span>
-              <textarea name="notes" rows="4" class="field-input" style="height:auto; padding-top:1.5rem; resize:vertical;" placeholder="Briefly describe what you would like to discuss..."></textarea>
+              <span class="field-label">Reason / Consultation Notes (Optional)</span>
+              <textarea name="notes" rows="3" class="field-input" style="height:auto; padding-top:1.5rem; resize:vertical;" placeholder="Briefly share symptoms, topics, or questions you'd like to discuss..."></textarea>
             </label>
 
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-coral" style="width:100%; padding:0.9rem;">
-              Confirm Booking Request
+            <button type="submit" id="bookSubmitBtn" class="btn btn-coral" style="width:100%; padding:0.9rem;" disabled>
+              Select a Date & Available Slot to Book
             </button>
           </form>
         </section>
 
         <!-- Therapist Directory -->
         <section class="booking-directory fade-up fade-up-d2">
-          <h2 style="font-size:1.3rem; margin-bottom:1.5rem; color:var(--teal);">Available Specialists</h2>
+          <h2 style="font-size:1.3rem; margin-bottom:1.5rem; color:var(--teal);">Therapist Profiles & Clinic Information</h2>
 
           <div th:if="${#lists.isEmpty(therapists)}" class="empty-state">
             <p>No therapist profiles found.</p>
           </div>
 
           <div class="therapist-list">
-            <div th:each="t : ${therapists}" class="therapist-card">
+            <div th:each="t : ${therapists}" class="therapist-card" th:id="'therapist-card-' + ${t.id}">
+              
+              <!-- Header with Name, Spec, Experience -->
               <div class="therapist-card__header">
                 <div>
                   <h3 class="therapist-card__name" th:text="${t.name}">Dr. John Doe</h3>
@@ -139,18 +143,70 @@
                 <span class="badge badge--exp" th:if="${t.yearsOfExperience != null}" th:text="${t.yearsOfExperience} + ' yrs exp'">5 yrs exp</span>
               </div>
 
-              <p class="therapist-card__bio" th:text="${t.bio} ?: 'Dedicated mental health professional offering empathetic care and support.'">
+              <!-- Qualifications & Languages -->
+              <div class="therapist-meta-tags">
+                <span class="meta-tag meta-tag--qual" th:if="${t.qualifications != null and !t.qualifications.isBlank()}" th:text="'🎓 ' + ${t.qualifications}">
+                  🎓 M.Phil Clinical Psychology
+                </span>
+                <span class="meta-tag meta-tag--lang" th:if="${t.languages != null and !t.languages.isBlank()}" th:text="'🗣️ ' + ${t.languages}">
+                  🗣️ English, Hindi
+                </span>
+                <span class="meta-tag meta-tag--fee" th:if="${t.consultationFee != null and !t.consultationFee.isBlank()}" th:text="'💰 ' + ${t.consultationFee}">
+                  💰 ₹1,500 / session
+                </span>
+              </div>
+
+              <!-- Clinic Location & Contact Details -->
+              <div class="therapist-contact-box">
+                <div class="therapist-contact-row" th:if="${t.clinicAddress != null and !t.clinicAddress.isBlank()}">
+                  <span class="contact-icon">📍</span>
+                  <div>
+                    <strong>Clinic / Office:</strong>
+                    <span th:text="${t.clinicAddress}">Suite 402, MindWell Clinic, Bandra</span>
+                    <span th:if="${t.city != null and !t.city.isBlank()}" th:text="', ' + ${t.city}">, Mumbai</span>
+                  </div>
+                </div>
+
+                <div class="therapist-contact-row" th:if="${t.phoneNumber != null and !t.phoneNumber.isBlank()}">
+                  <span class="contact-icon">📞</span>
+                  <div>
+                    <strong>Direct Desk:</strong> <a th:href="'tel:' + ${t.phoneNumber}" th:text="${t.phoneNumber}" style="color:var(--teal); font-weight:600;">+91-9876543210</a>
+                  </div>
+                </div>
+
+                <div class="therapist-contact-row" th:if="${t.email != null}">
+                  <span class="contact-icon">📧</span>
+                  <div>
+                    <strong>Consultation Email:</strong> <span th:text="${t.email}">doctor@example.com</span>
+                  </div>
+                </div>
+
+                <div class="therapist-contact-row" th:if="${t.availableDays != null or t.availableHours != null}">
+                  <span class="contact-icon">🕒</span>
+                  <div>
+                    <strong>Consultation Hours:</strong> 
+                    <span th:text="${t.availableDays ?: 'Mon - Sat'}">Mon - Fri</span> · 
+                    <span th:text="${t.availableHours ?: '09:00 AM - 06:00 PM'}">09:00 AM - 06:00 PM</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <p class="therapist-card__bio" th:text="${t.bio} ?: 'Dedicated licensed mental health professional offering compassionate, evidence-based care.'">
                 Bio description...
               </p>
 
+              <!-- Footer with License and Select Action -->
               <div class="therapist-card__footer">
                 <span class="therapist-card__license" th:if="${t.licenseNumber != null}">
-                  Lic: <strong th:text="${t.licenseNumber}">#12345</strong>
+                  License: <strong th:text="${t.licenseNumber}">#12345</strong>
                 </span>
-                <a th:href="@{/appointments/book(therapistId=${t.id})}" class="btn btn-outline-coral btn-sm">
-                  Select
-                </a>
+                <button type="button" class="btn btn-outline-coral btn-sm"
+                        th:onclick="'selectTherapist(' + ${t.id} + ');'">
+                  Select Specialist
+                </button>
               </div>
+
             </div>
           </div>
         </section>
@@ -171,6 +227,114 @@
     </div>
     <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
   </footer>
+
+  <!-- ===== SCRIPT: DYNAMIC REAL-TIME SLOT SELECTION & CONFLICT PREVENTION ===== -->
+  <script>
+    function selectTherapist(therapistId) {
+      const select = document.getElementById('therapistSelect');
+      if (select) {
+        select.value = therapistId;
+        loadAvailableSlots();
+        // Smooth scroll up to form on mobile
+        document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    async function loadAvailableSlots() {
+      const therapistId = document.getElementById('therapistSelect').value;
+      const date = document.getElementById('appointmentDate').value;
+      const container = document.getElementById('slotsContainer');
+      const hiddenInput = document.getElementById('selectedTimeSlot');
+      const submitBtn = document.getElementById('bookSubmitBtn');
+
+      hiddenInput.value = '';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Select a Slot to Book';
+
+      if (!therapistId || !date) {
+        container.innerHTML = '<div class="slots-hint">📅 Please select both a specialist and consultation date to view available slots.</div>';
+        return;
+      }
+
+      container.innerHTML = '<div class="slots-loading">⏳ Checking specialist availability and booked slots...</div>';
+
+      try {
+        const response = await fetch('/appointments/available-slots?therapistId=' + encodeURIComponent(therapistId) + '&date=' + encodeURIComponent(date));
+        if (!response.ok) {
+          throw new Error('Could not fetch slots.');
+        }
+
+        const slots = await response.json();
+
+        if (!slots || slots.length === 0) {
+          container.innerHTML = '<div class="slots-alert slots-alert--off">❌ The specialist is not taking appointments on this day (day off). Please select an alternative date.</div>';
+          return;
+        }
+
+        let html = '';
+        let availableCount = 0;
+
+        slots.forEach(slot => {
+          if (slot.available) {
+            availableCount++;
+            html += `
+              <button type="button" class="slot-pill slot-pill--available" onclick="pickSlot(this, '${slot.slotTime}')">
+                <span class="slot-time">${slot.slotTime}</span>
+                <span class="slot-status-text">Available</span>
+              </button>
+            `;
+          } else {
+            html += `
+              <button type="button" class="slot-pill slot-pill--booked" disabled title="Slot already taken by another patient">
+                <span class="slot-time">${slot.slotTime}</span>
+                <span class="slot-status-text">🔒 Booked</span>
+              </button>
+            `;
+          }
+        });
+
+        if (availableCount === 0) {
+          html = '<div class="slots-alert slots-alert--full">⚠️ All consultation slots are booked for this day. Please select another date.</div>' + html;
+        }
+
+        container.innerHTML = html;
+
+      } catch (err) {
+        container.innerHTML = '<div class="slots-alert slots-alert--error">⚠️ Could not load schedule slots. Please try again or refresh.</div>';
+      }
+    }
+
+    function pickSlot(btn, slotTime) {
+      // Remove selected state from other pills
+      document.querySelectorAll('.slot-pill').forEach(p => p.classList.remove('slot-pill--selected'));
+      btn.classList.add('slot-pill--selected');
+
+      const hiddenInput = document.getElementById('selectedTimeSlot');
+      const submitBtn = document.getElementById('bookSubmitBtn');
+
+      hiddenInput.value = slotTime;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Confirm Booking for ' + slotTime;
+    }
+
+    // Auto-trigger if therapist was pre-selected in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const select = document.getElementById('therapistSelect');
+      const dateInput = document.getElementById('appointmentDate');
+      // Set tomorrow as default date if empty
+      if (!dateInput.value) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+      if (select && select.value) {
+        loadAvailableSlots();
+      }
+    });
+  </script>
 
 </body>
 </html>

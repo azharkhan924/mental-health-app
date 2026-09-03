@@ -52,8 +52,41 @@
       <section class="dash-welcome fade-up">
         <h1 class="dash-welcome__title">Mental Health Self-Assessments 📋</h1>
         <p class="dash-welcome__desc">
-          Clinically standard check-in questionnaires for depression, anxiety, daily stress, sleep quality, and academic burnout.
+          Clinically standard check-in questionnaires for depression, anxiety, daily stress, sleep quality, and academic burnout, plus custom evaluations assigned by your doctor.
         </p>
+      </section>
+
+      <!-- Assigned Tests from Therapist -->
+      <section th:if="${not #lists.isEmpty(assignedTests)}" class="fade-up" style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(245, 213, 200, 0.25), rgba(197, 232, 224, 0.25)); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+          <h2 style="font-size:1.25rem; color:var(--teal); margin:0; display:inline-flex; align-items:center; gap:0.5rem;">
+            <span>🔔 Assigned by Your Consulting Therapist</span>
+            <span class="badge-confidential" style="font-size:0.72rem;">Doctor Requested</span>
+          </h2>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
+          <div th:each="assign : ${assignedTests}" class="dash-card" style="margin:0; border-top: 4px solid var(--coral);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+              <span class="report-type-badge report-type-badge--behavioral" th:text="${assign.customTest.category}">Category</span>
+              <span class="status-pill" th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}" th:text="${assign.status}">PENDING</span>
+            </div>
+            <h3 style="font-size:1.1rem; color:var(--teal); margin-bottom:0.4rem;" th:text="${assign.customTest.title}">Test Title</h3>
+            <p style="font-size:0.85rem; color:var(--muted-foreground); margin-bottom:1rem;" th:text="'Assigned by Dr. ' + ${assign.assignedBy.name} + ' on ' + ${#temporals.format(assign.assignedAt, 'dd MMM yyyy')}">
+              Assigned by Dr. Therapist
+            </p>
+            <div th:if="${assign.status == 'PENDING'}">
+              <a th:href="@{/assessments/custom/{id}(id=${assign.id})}" class="btn btn-coral" style="width:100%;">
+                Take Assigned Test ✍️
+              </a>
+            </div>
+            <div th:if="${assign.status == 'COMPLETED'}">
+              <a th:href="@{/assessments/custom/{id}/result(id=${assign.id})}" class="btn btn-outline-coral" style="width:100%;">
+                View Completed Score 📊
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- 5 Assessment Cards Grid -->
