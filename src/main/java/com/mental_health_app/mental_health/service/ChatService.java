@@ -44,10 +44,10 @@ public class ChatService {
     public String sendMessage(String userMessage, List<ChatMessage> history, ChatPersona persona) {
         String systemPrompt = (persona != null) ? persona.getSystemPrompt() : ChatPersona.KABIR.getSystemPrompt();
 
-        // 1. Try Groq with Key Rotation
+        // 1. Try Groq with Key Rotation (350 tokens for conversational chat)
         List<String> groqKeys = getKeysList(groqKeysConfig);
         if (!groqKeys.isEmpty()) {
-            String groqReply = tryGroqWithKeyRotation(userMessage, history, groqKeys, systemPrompt);
+            String groqReply = tryGroqWithKeyRotation(userMessage, history, groqKeys, systemPrompt, 350);
             if (groqReply != null && !groqReply.isBlank()) {
                 return groqReply;
             }
@@ -56,7 +56,7 @@ public class ChatService {
         // 2. Fallback: Try Gemini with Key Rotation
         List<String> geminiKeys = getKeysList(geminiKeysConfig);
         if (!geminiKeys.isEmpty()) {
-            String geminiReply = tryGeminiWithKeyRotation(userMessage, history, geminiKeys, systemPrompt);
+            String geminiReply = tryGeminiWithKeyRotation(userMessage, history, geminiKeys, systemPrompt, 350);
             if (geminiReply != null && !geminiReply.isBlank()) {
                 return geminiReply;
             }
@@ -69,13 +69,25 @@ public class ChatService {
     }
 
     /**
-     * Generic completion generator for clinical reports and behavioral analysis.
+     * Generic completion generator for conversational use (350 tokens).
      */
     public String generateCompletion(String systemPrompt, String userPrompt) {
+        return generateCompletionWithTokens(systemPrompt, userPrompt, 350);
+    }
+
+    /**
+     * Report-specific completion generator with higher token budget (1024 tokens)
+     * to prevent truncation of clinical reports and behavioral analyses.
+     */
+    public String generateReportCompletion(String systemPrompt, String userPrompt) {
+        return generateCompletionWithTokens(systemPrompt, userPrompt, 1024);
+    }
+
+    private String generateCompletionWithTokens(String systemPrompt, String userPrompt, int maxTokens) {
         List<ChatMessage> emptyHistory = Collections.emptyList();
         List<String> groqKeys = getKeysList(groqKeysConfig);
         if (!groqKeys.isEmpty()) {
-            String groqReply = tryGroqWithKeyRotation(userPrompt, emptyHistory, groqKeys, systemPrompt);
+            String groqReply = tryGroqWithKeyRotation(userPrompt, emptyHistory, groqKeys, systemPrompt, maxTokens);
             if (groqReply != null && !groqReply.isBlank()) {
                 return groqReply;
             }
@@ -83,7 +95,7 @@ public class ChatService {
 
         List<String> geminiKeys = getKeysList(geminiKeysConfig);
         if (!geminiKeys.isEmpty()) {
-            String geminiReply = tryGeminiWithKeyRotation(userPrompt, emptyHistory, geminiKeys, systemPrompt);
+            String geminiReply = tryGeminiWithKeyRotation(userPrompt, emptyHistory, geminiKeys, systemPrompt, maxTokens);
             if (geminiReply != null && !geminiReply.isBlank()) {
                 return geminiReply;
             }
@@ -94,7 +106,7 @@ public class ChatService {
     /**
      * Call Groq API with round-robin key rotation on rate-limits / failures.
      */
-    private String tryGroqWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt) {
+    private String tryGroqWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt, int maxTokens) {
         String url = "https://api.groq.com/openai/v1/chat/completions";
         int totalKeys = keys.size();
 
@@ -115,7 +127,7 @@ public class ChatService {
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("model", groqModel);
                 payload.put("temperature", 0.5); // Grounded, low-hallucination conversational temperature
-                payload.put("max_tokens", 350);
+                payload.put("max_tokens", maxTokens);
 
                 List<Map<String, String>> messages = new ArrayList<>();
                 messages.add(Map.of("role", "system", "content", systemPrompt));
@@ -152,7 +164,7 @@ public class ChatService {
     /**
      * Call Gemini API with round-robin key rotation on rate-limits / failures.
      */
-    private String tryGeminiWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt) {
+    private String tryGeminiWithKeyRotation(String userMessage, List<ChatMessage> history, List<String> keys, String systemPrompt, int maxTokens) {
         int totalKeys = keys.size();
 
         // Take last 12 messages for grounded context
@@ -174,7 +186,7 @@ public class ChatService {
                 Map<String, Object> sysInst = Map.of("parts", List.of(Map.of("text", systemPrompt)));
                 payload.put("system_instruction", sysInst);
 
-                Map<String, Object> genConfig = Map.of("temperature", 0.5, "maxOutputTokens", 350);
+                Map<String, Object> genConfig = Map.of("temperature", 0.5, "maxOutputTokens", maxTokens);
                 payload.put("generationConfig", genConfig);
 
                 List<Map<String, Object>> contents = new ArrayList<>();

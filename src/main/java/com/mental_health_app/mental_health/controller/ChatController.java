@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,7 +105,68 @@ public class ChatController {
     }
 
     /**
-     * Send a message to the active companion with persistent contextual memory.
+     * Send a message to the active companion via AJAX/Fetch without full page reload.
+     */
+     @PostMapping(value = "/send", produces = MediaType.APPLICATION_JSON_VALUE)
+     @ResponseBody
+     public ResponseEntity<?> sendMessageAjax(@RequestParam String message,
+                                              @RequestParam(defaultValue = "KABIR") ChatPersona persona,
+                                              @AuthenticationPrincipal UserDetails userDetails,
+                                              HttpSession session) {
+
+         if (message == null || message.trim().isEmpty()) {
+             return ResponseEntity.badRequest().body(Map.of("error", "Message cannot be empty"));
+         }
+
+         Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+         Patient patient = patientOpt.orElse(null);
+
+         List<ChatMessage> chatHistory = loadChatHistory(patient, session, persona);
+
+         // Get AI response using persona-specific system prompt and past conversation context
+         String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona);
+
+         ChatMessage userMsg = new ChatMessage("user", message.trim());
+         ChatMessage assistantMsg = new ChatMessage("assistant", aiResponse);
+
+         chatHistory.add(userMsg);
+         chatHistory.add(assistantMsg);
+         session.setAttribute("chatHistory_" + persona.name(), chatHistory);
+
+         // Persist to Database for continuity and therapist behavioral analysis
+         if (patient != null) {
+             try {
+                 chatMessageRepository.save(new ChatMessageEntity(patient, persona.name(), "user", message.trim()));
+                 chatMessageRepository.save(new ChatMessageEntity(patient, persona.name(), "assistant", aiResponse));
+
+                 // Trigger behavioral report update if sufficient conversation data is recorded
+                 long count = chatMessageRepository.countByPatientAndRole(patient, "user");
+                 if (count >= 3 && count % 4 == 0) {
+                     reportService.generateChatBehavioralReport(patient);
+                 }
+             } catch (Exception e) {
+                 // Log and continue gracefully
+             }
+         }
+
+         DateTimeFormatter timeFmt = DateTimeFormatter.ofPattern("hh:mm a");
+         boolean showCrisisAlert = chatService.containsCrisisKeywords(message.trim());
+
+         Map<String, Object> resp = new HashMap<>();
+         resp.put("success", true);
+         resp.put("userMessage", userMsg.getContent());
+         resp.put("userTime", userMsg.getTimestamp().format(timeFmt));
+         resp.put("aiResponse", aiResponse);
+         resp.put("aiTime", assistantMsg.getTimestamp().format(timeFmt));
+         resp.put("persona", persona.name());
+         resp.put("personaDisplayName", persona.getDisplayName());
+         resp.put("showCrisisAlert", showCrisisAlert);
+
+         return ResponseEntity.ok(resp);
+     }
+
+    /**
+     * Send a message to the active companion with persistent contextual memory (Standard form submit fallback).
      */
     @PostMapping("/send")
     public String sendMessage(@RequestParam String message,

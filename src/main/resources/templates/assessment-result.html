@@ -90,18 +90,26 @@
         </div>
 
         <!-- AI Clinical Analysis & Report -->
-        <div th:if="${aiReport != null}" class="result-ai-report-box" style="margin-top:1.5rem; background: #ffffff; border: 1px solid var(--border); border-radius:12px; padding:1.5rem; box-shadow: var(--shadow-soft);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom: 1px solid var(--border); padding-bottom:0.75rem;">
-            <div style="display:flex; align-items:center; gap:0.5rem;">
-              <span style="font-size:1.25rem;">🤖</span>
-              <h3 style="font-size:1.1rem; color:var(--teal); margin:0;">AI Clinical Analysis & Diagnostic Insights</h3>
+        <div th:if="${aiReport != null}" class="result-ai-report-box" style="margin-top:1.5rem;">
+
+          <!-- Report Header -->
+          <div class="report-visual-header">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span class="report-visual-icon">🤖</span>
+              <div>
+                <h3 style="font-size:1.1rem; color:var(--teal); margin:0;">AI Clinical Insights</h3>
+                <span style="font-size:0.75rem; color:var(--muted-foreground);">Personalized for you based on your responses</span>
+              </div>
             </div>
-            <span class="report-severity-badge severity-badge--low" style="font-size:0.72rem;">Automated Clinical Briefing</span>
+            <span class="report-auto-badge">Auto-Generated</span>
           </div>
-          <div class="markdown-body" style="white-space: pre-line; line-height:1.75; font-size:0.92rem; color:var(--foreground);" th:text="${aiReport.content}">
+
+          <!-- Rendered Report Content (HTML from AI) -->
+          <div class="report-visual-content" th:utext="${aiReport.content}">
             Detailed AI analysis content...
           </div>
-          <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px dashed var(--border); font-size:0.78rem; color:var(--muted-foreground); display:flex; align-items:center; gap:0.4rem;">
+
+          <div class="report-visual-footer">
             <span>ℹ️</span> This report is automatically generated for your records and shared with your consulting therapist upon booking.
           </div>
         </div>

@@ -76,7 +76,8 @@
              th:href="@{/chat(persona=${p.name()})}"
              class="wa-contact-item"
              th:classappend="${p == currentPersona} ? 'wa-contact-item--active' : ''"
-             th:data-name="${p.displayName}">
+             th:data-name="${p.displayName}"
+             th:data-persona="${p.name()}">
 
             <!-- Profile Picture (Online Dot ONLY on currently active chat) -->
             <div class="wa-contact-avatar-wrap">
@@ -154,7 +155,7 @@
         </div>
 
         <!-- Crisis Helpline Banner if trigger detected -->
-        <div th:if="${showCrisisAlert}" class="wa-crisis-alert">
+        <div id="crisisAlertBanner" class="wa-crisis-alert" th:style="${showCrisisAlert} ? 'display:flex;' : 'display:none;'">
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span>⚠️</span>
             <span><strong>We're with you:</strong> If you're going through a crisis or having thoughts of self-harm, please reach out to the <strong>988 Lifeline</strong> (free, 24/7).</span>
@@ -233,7 +234,7 @@
 
         <!-- WhatsApp Bottom Input Bar -->
         <div class="wa-input-bar">
-          <form th:action="@{/chat/send}" method="post" class="wa-input-form" id="chatForm" onsubmit="handleSend()">
+          <form th:action="@{/chat/send}" method="post" class="wa-input-form" id="chatForm">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="hidden" name="persona" th:value="${currentPersona.name()}" />
 
@@ -269,42 +270,215 @@
     </div>
   </main>
 
-  <!-- JS: Presence Management, Auto-scroll, Typing Animation -->
+  <!-- JS: Asynchronous AJAX Chat, Presence Management, Auto-scroll, Typing Animation -->
   <script>
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatMessages = document.getElementById('chatMessages');
+    const typingBubbleRow = document.getElementById('typingBubbleRow');
+    const headerStatusText = document.getElementById('headerStatusText');
+    const headerOnlineDot = document.getElementById('headerOnlineDot');
+
     function scrollChatToBottom() {
-      var box = document.getElementById('chatMessages');
-      if (box) {
-        box.scrollTop = box.scrollHeight;
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     }
     window.onload = scrollChatToBottom;
 
-    // Trigger typing state when user submits message
-    function handleSend() {
-      var statusEl = document.getElementById('headerStatusText');
-      var typingRow = document.getElementById('typingBubbleRow');
-      if (statusEl) {
-        statusEl.textContent = 'typing...';
-        statusEl.style.color = '#25d366';
-        statusEl.style.fontStyle = 'italic';
+    function formatTimeNow() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const strHours = hours.toString().padStart(2, '0');
+      return `${strHours}:${minutes} ${ampm}`;
+    }
+
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function appendUserBubble(text, timeStr) {
+      // Remove welcome intro card if this is the first message
+      const introCard = chatMessages.querySelector('.wa-intro-card');
+      if (introCard) {
+        introCard.remove();
       }
-      if (typingRow) {
-        typingRow.style.display = 'flex';
+
+      const row = document.createElement('div');
+      row.className = 'wa-bubble-row wa-bubble-row--outgoing';
+      row.innerHTML = `
+        <div class="wa-bubble wa-bubble--outgoing">
+          <div class="wa-bubble-text">${escapeHtml(text)}</div>
+          <div class="wa-bubble-meta">
+            <span class="wa-bubble-time">${timeStr}</span>
+            <span class="wa-ticks" title="Delivered & Read">✓✓</span>
+          </div>
+        </div>
+      `;
+      if (typingBubbleRow) {
+        chatMessages.insertBefore(row, typingBubbleRow);
+      } else {
+        chatMessages.appendChild(row);
+      }
+      scrollChatToBottom();
+    }
+
+    function appendAssistantBubble(senderName, text, timeStr) {
+      const row = document.createElement('div');
+      row.className = 'wa-bubble-row wa-bubble-row--incoming';
+      row.innerHTML = `
+        <div class="wa-bubble wa-bubble--incoming">
+          <span class="wa-bubble-sender">${escapeHtml(senderName)}</span>
+          <div class="wa-bubble-text" style="white-space: pre-wrap;">${escapeHtml(text)}</div>
+          <div class="wa-bubble-meta">
+            <span class="wa-bubble-time">${timeStr}</span>
+          </div>
+        </div>
+      `;
+      if (typingBubbleRow) {
+        chatMessages.insertBefore(row, typingBubbleRow);
+      } else {
+        chatMessages.appendChild(row);
+      }
+      scrollChatToBottom();
+    }
+
+    function updateSidebarLastMessage(personaName, text, timeStr) {
+      const contactItem = document.querySelector(`.wa-contact-item[data-persona="${personaName}"]`);
+      if (contactItem) {
+        const preview = contactItem.querySelector('.wa-contact-preview');
+        const time = contactItem.querySelector('.wa-contact-time');
+        if (preview) {
+          const previewSnippet = text.length > 38 ? text.substring(0, 35) + '...' : text;
+          preview.textContent = previewSnippet;
+        }
+        if (time) {
+          time.textContent = timeStr;
+          time.classList.add('wa-contact-time--online');
+        }
+      }
+    }
+
+    async function submitChatMessage(messageText) {
+      if (!messageText || !messageText.trim()) return;
+      const trimmed = messageText.trim();
+
+      const timeNow = formatTimeNow();
+      appendUserBubble(trimmed, timeNow);
+
+      // Clear input and keep focus
+      messageInput.value = '';
+
+      // Display typing animation indicator
+      if (typingBubbleRow) {
+        typingBubbleRow.style.display = 'flex';
+      }
+      if (headerStatusText) {
+        headerStatusText.textContent = 'typing...';
+        headerStatusText.style.color = '#25d366';
+        headerStatusText.style.fontStyle = 'italic';
+      }
+      if (headerOnlineDot) {
+        headerOnlineDot.style.display = 'block';
+      }
+      scrollChatToBottom();
+
+      // Temporarily disable send button while AI processes
+      if (sendBtn) sendBtn.disabled = true;
+
+      // Update sidebar preview immediately
+      const personaInput = chatForm.querySelector('input[name="persona"]');
+      const personaName = personaInput ? personaInput.value : '';
+      updateSidebarLastMessage(personaName, 'You: ' + trimmed, timeNow);
+
+      try {
+        const formData = new FormData(chatForm);
+        formData.set('message', trimmed);
+
+        const response = await fetch(chatForm.action, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json'
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Server returned HTTP ' + response.status);
+        }
+
+        const data = await response.json();
+
+        // Hide typing indicator
+        if (typingBubbleRow) {
+          typingBubbleRow.style.display = 'none';
+        }
+        if (headerStatusText) {
+          headerStatusText.textContent = 'online';
+          headerStatusText.style.color = '';
+          headerStatusText.style.fontStyle = 'normal';
+        }
+
+        // Render AI assistant reply
+        const aiTime = data.aiTime || formatTimeNow();
+        appendAssistantBubble(data.personaDisplayName || 'Assistant', data.aiResponse, aiTime);
+
+        // Update sidebar preview with AI reply
+        updateSidebarLastMessage(data.persona, data.aiResponse, aiTime);
+
+        // Show crisis helpline alert banner if triggered
+        if (data.showCrisisAlert) {
+          const crisisBanner = document.getElementById('crisisAlertBanner');
+          if (crisisBanner) {
+            crisisBanner.style.display = 'flex';
+          }
+        }
+
+      } catch (err) {
+        console.error('Chat error:', err);
+        if (typingBubbleRow) {
+          typingBubbleRow.style.display = 'none';
+        }
+        if (headerStatusText) {
+          headerStatusText.textContent = 'online';
+          headerStatusText.style.color = '';
+          headerStatusText.style.fontStyle = 'normal';
+        }
+        appendAssistantBubble('System', '⚠️ Could not reach AI service. Please check your network or try again shortly.', formatTimeNow());
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        messageInput.focus();
         scrollChatToBottom();
       }
     }
 
+    // Form submit event handler
+    if (chatForm) {
+      chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitChatMessage(messageInput.value);
+      });
+    }
+
+    // Starter Chip click handler
     function sendChip(text) {
-      var input = document.getElementById('messageInput');
-      input.value = text;
-      handleSend();
-      document.getElementById('chatForm').submit();
+      submitChatMessage(text);
     }
 
     function insertEmoji(emoji) {
-      var input = document.getElementById('messageInput');
-      input.value += emoji + ' ';
-      input.focus();
+      messageInput.value += emoji + ' ';
+      messageInput.focus();
     }
 
     function filterContacts() {
@@ -320,11 +494,9 @@
       });
     }
 
-    // Dynamic presence feedback while user types
-    var typingTimer;
     function handleUserTyping() {
       var statusEl = document.getElementById('headerStatusText');
-      if (statusEl) {
+      if (statusEl && statusEl.textContent !== 'typing...') {
         statusEl.textContent = 'online';
         statusEl.style.fontStyle = 'normal';
       }

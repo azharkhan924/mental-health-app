@@ -3099,7 +3099,336 @@ ul { list-style: none; }
   margin-top: 0;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   RENDERED REPORT CONTENT — HTML from AI (headings, bullets, bold)
+   ═══════════════════════════════════════════════════════════════════ */
 
+.report-rendered-content,
+.report-visual-content {
+  line-height: 1.8;
+  font-size: 0.92rem;
+  color: var(--foreground);
+}
+
+.report-rendered-content h3,
+.report-visual-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--teal);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(127, 176, 165, 0.2);
+}
+
+.report-rendered-content h3:first-child,
+.report-visual-content h3:first-child {
+  margin-top: 0;
+}
+
+.report-rendered-content ul,
+.report-visual-content ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0 1rem 0;
+}
+
+.report-rendered-content ul li,
+.report-visual-content ul li {
+  position: relative;
+  padding: 0.55rem 0.75rem 0.55rem 1.75rem;
+  margin-bottom: 0.35rem;
+  background: rgba(197, 232, 224, 0.12);
+  border-radius: 8px;
+  border-left: 3px solid var(--teal);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  transition: background 0.2s ease;
+}
+
+.report-rendered-content ul li:hover,
+.report-visual-content ul li:hover {
+  background: rgba(197, 232, 224, 0.22);
+}
+
+.report-rendered-content ul li::before,
+.report-visual-content ul li::before {
+  content: "▸";
+  position: absolute;
+  left: 0.55rem;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.report-rendered-content ul li strong,
+.report-visual-content ul li strong {
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.report-rendered-content p,
+.report-visual-content p {
+  margin: 0.5rem 0 0.75rem 0;
+  line-height: 1.7;
+  color: rgba(26, 60, 60, 0.88);
+}
+
+/* Behavioral report variant — coral accent on bullets */
+.report-card--behavioral .report-rendered-content ul li {
+  background: rgba(245, 213, 200, 0.12);
+  border-left-color: var(--coral);
+}
+
+.report-card--behavioral .report-rendered-content ul li:hover {
+  background: rgba(245, 213, 200, 0.22);
+}
+
+.report-card--behavioral .report-rendered-content ul li::before {
+  color: var(--coral);
+}
+
+.report-card--behavioral .report-rendered-content ul li strong {
+  color: var(--coral);
+}
+
+.report-card--behavioral .report-rendered-content h3 {
+  color: var(--coral);
+  border-bottom-color: rgba(212, 100, 74, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PATIENT-FACING VISUAL REPORT CARD (assessment-result.html)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.result-ai-report-box {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+.report-visual-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(197, 232, 224, 0.15), rgba(245, 213, 200, 0.1));
+  border-bottom: 1px solid var(--border);
+}
+
+.report-visual-icon {
+  font-size: 1.5rem;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mint);
+  border-radius: 10px;
+}
+
+.report-auto-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.report-visual-content {
+  padding: 1.5rem;
+}
+
+.report-visual-footer {
+  padding: 0.85rem 1.5rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(250, 245, 238, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PDF EXPORT BUTTON
+   ═══════════════════════════════════════════════════════════════════ */
+
+.btn-export-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--teal);
+  background: var(--mint);
+  border: 1px solid rgba(127, 176, 165, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+.btn-export-pdf:hover {
+  background: var(--teal);
+  color: #ffffff;
+  border-color: var(--teal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRINT HEADER (visible only during print / PDF export)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.print-header {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   @MEDIA PRINT — Clean branded PDF export
+   ═══════════════════════════════════════════════════════════════════ */
+
+@media print {
+  /* Hide non-essential elements */
+  .no-print,
+  .site-header,
+  .report-tabs-nav,
+  .patient-profile-actions,
+  .toast,
+  .btn-export-pdf,
+  footer {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    font-size: 11pt;
+    color: #1a1a1a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Show branded print header */
+  .print-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 3px solid #1a3c3c;
+  }
+
+  .print-header-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .print-logo-text {
+    font-family: var(--font-display);
+    font-size: 22pt;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .print-logo-b { color: #1a3c3c; }
+  .print-logo-h { color: #d4644a; margin: 0 0.15em; }
+  .print-logo-g { color: #7fb0a5; }
+
+  .print-tagline {
+    font-size: 8pt;
+    color: #666;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .print-header-meta {
+    text-align: right;
+    font-size: 9pt;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .print-patient-name {
+    font-weight: 700;
+    font-size: 11pt;
+    color: #1a3c3c;
+  }
+
+  /* Only print the targeted report card */
+  .report-card {
+    display: none !important;
+  }
+
+  .report-card.print-target {
+    display: block !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    padding: 0;
+  }
+
+  .report-card.print-target .report-card-body {
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* Ensure all tab content is visible during print */
+  .report-tab-content {
+    display: block !important;
+  }
+
+  /* Clean up report rendered content for print */
+  .report-rendered-content ul li,
+  .report-visual-content ul li {
+    background: transparent !important;
+    border-left: 2px solid #1a3c3c;
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+    page-break-inside: avoid;
+  }
+
+  .report-rendered-content h3,
+  .report-visual-content h3 {
+    color: #1a3c3c !important;
+    border-bottom-color: #ccc !important;
+    page-break-after: avoid;
+  }
+
+  /* Patient profile card in print */
+  .patient-profile-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+
+  /* Add confidential watermark for behavioral reports */
+  .report-card--behavioral.print-target::after {
+    content: "CONFIDENTIAL — THERAPIST USE ONLY";
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 700;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm 2cm;
+    size: A4;
+  }
+}
 
 
 

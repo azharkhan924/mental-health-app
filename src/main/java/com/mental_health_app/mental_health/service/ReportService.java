@@ -54,15 +54,29 @@ public class ReportService {
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
 
         String systemPrompt = """
-                You are a senior Clinical Psychologist writing a concise, compassionate mental health evaluation report.
-                Format the report clearly in clean markdown with 3 sections:
-                ### 1. Clinical Overview
-                (Summarize what this score indicates in everyday empathetic terms)
-                ### 2. Symptom & Vulnerability Profile
-                (Highlight primary challenges, energy/mood impact, and key areas of attention)
-                ### 3. Recommendations & Next Steps
-                (Provide actionable self-care techniques for the patient and focus points for the therapist)
-                Keep the tone professional, supportive, non-stigmatizing, and concise (approx 200-250 words).
+                You are a senior Clinical Psychologist writing a concise, compassionate mental health evaluation.
+                You MUST output clean HTML (no markdown). Structure the report exactly as follows:
+                
+                <h3>🔍 What Your Results Suggest</h3>
+                <p>A brief 2-3 sentence empathetic summary of what the score means in everyday language. Do NOT use clinical jargon.</p>
+                
+                <h3>⚡ Key Areas to Watch</h3>
+                <ul>
+                <li><strong>Area name</strong> — One sentence description of the concern</li>
+                </ul>
+                (Include 3-5 bullet points identifying mood, energy, sleep, concentration, or motivation patterns)
+                
+                <h3>💡 Your Next Steps</h3>
+                <ul>
+                <li><strong>Action</strong> — One sentence practical self-care tip</li>
+                </ul>
+                (Include 3-4 actionable, warm, non-clinical bullet points the patient can follow today)
+                
+                Rules:
+                - Write like a caring friend who happens to be a doctor, NOT a textbook
+                - Use simple everyday language, NO medical terminology
+                - Keep it concise — max 250 words total
+                - Output ONLY the HTML, no markdown, no code fences
                 """;
 
         String userPrompt = String.format("""
@@ -72,10 +86,10 @@ public class ReportService {
                 Clinical Severity: %s
                 Standard Recommendation: %s
                 
-                Please generate the complete clinical evaluation report.
+                Please generate the complete clinical evaluation report in HTML format.
                 """, patient.getName(), type.getDisplayName(), score, maxScore, severity, assessment.getRecommendation());
 
-        String aiAnalysis = chatService.generateCompletion(systemPrompt, userPrompt);
+        String aiAnalysis = chatService.generateReportCompletion(systemPrompt, userPrompt);
 
         if (aiAnalysis == null || aiAnalysis.isBlank()) {
             aiAnalysis = buildFallbackAssessmentReport(assessment);
@@ -122,16 +136,36 @@ public class ReportService {
         String systemPrompt = """
                 You are a Clinical Behavioral Analyst preparing a confidential briefing for a licensed therapist.
                 Analyze the patient's recent text conversations with mental health companions.
-                Structure your report clearly in markdown with the following sections:
-                ### 1. Emotional Tone & Psychological State
-                (Observed emotional baseline, anxiety/sadness markers, energy patterns)
-                ### 2. Recurrent Themes & Triggers
-                (Academic/work pressure, loneliness, self-doubt, sleep disruptions, relationship issues)
-                ### 3. Communication Dynamics & Coping Styles
-                (How does the patient express distress? Do they seek validation, problem-solving, or venting?)
-                ### 4. Therapist Action Items & Consultation Focus
-                (Key questions and therapeutic approaches suggested for the upcoming 1-on-1 session)
-                Keep it objective, clinical, constructive, and concise (approx 250-300 words).
+                You MUST output clean HTML (no markdown). Structure the report exactly as follows:
+                
+                <h3>1. Emotional Tone & Psychological State</h3>
+                <ul>
+                <li><strong>Observation</strong> — Description of emotional baseline, anxiety/sadness markers, energy patterns</li>
+                </ul>
+                (3-4 bullet points)
+                
+                <h3>2. Recurrent Themes & Triggers</h3>
+                <ul>
+                <li><strong>Theme</strong> — Academic pressure, loneliness, self-doubt, sleep issues, relationship concerns</li>
+                </ul>
+                (3-4 bullet points)
+                
+                <h3>3. Communication Dynamics & Coping Styles</h3>
+                <ul>
+                <li><strong>Pattern</strong> — How the patient expresses distress, seeks validation, problem-solving, or venting</li>
+                </ul>
+                (2-3 bullet points)
+                
+                <h3>4. Therapist Action Items & Session Focus</h3>
+                <ul>
+                <li><strong>Action</strong> — Specific therapeutic approaches and questions for the consultation</li>
+                </ul>
+                (3-4 bullet points)
+                
+                Rules:
+                - Be objective, clinical, constructive, and concise (approx 300-350 words)
+                - Use clear professional language suitable for a therapist briefing
+                - Output ONLY the HTML, no markdown, no code fences
                 """;
 
         String userPrompt = String.format("""
@@ -139,10 +173,10 @@ public class ReportService {
                 Chat Sample Transcript:
                 %s
                 
-                Please generate the Confidential Chat Behavioral Analysis report for the consulting therapist.
+                Please generate the Confidential Chat Behavioral Analysis report for the consulting therapist in HTML format.
                 """, patient.getName(), chatTranscript.toString());
 
-        String aiAnalysis = chatService.generateCompletion(systemPrompt, userPrompt);
+        String aiAnalysis = chatService.generateReportCompletion(systemPrompt, userPrompt);
 
         if (aiAnalysis == null || aiAnalysis.isBlank()) {
             aiAnalysis = buildFallbackBehavioralReport(patient, sample.size());
@@ -232,15 +266,22 @@ public class ReportService {
 
     private String buildFallbackAssessmentReport(Assessment assessment) {
         return String.format("""
-                ### 1. Clinical Overview
-                The patient completed the **%s** evaluation and scored **%d/%d**, classifying their symptoms under the **%s** severity bracket.
+                <h3>🔍 What Your Results Suggest</h3>
+                <p>You completed the <strong>%s</strong> evaluation and scored <strong>%d/%d</strong>, which falls in the <strong>%s</strong> range. This gives us a helpful snapshot of where you are right now.</p>
                 
-                ### 2. Symptom & Vulnerability Profile
-                Key emotional and physiological markers reflect: %s. The primary distress factors correspond with standard clinical benchmarks for this severity range.
+                <h3>⚡ Key Areas to Watch</h3>
+                <ul>
+                <li><strong>Emotional patterns</strong> — Your responses suggest %s-level impact on daily functioning</li>
+                <li><strong>Energy &amp; motivation</strong> — Pay attention to changes in your routine energy levels</li>
+                <li><strong>Sleep &amp; rest</strong> — Quality rest plays a big role in how you feel day-to-day</li>
+                </ul>
                 
-                ### 3. Recommendations & Next Steps
-                - **For the Patient**: %s
-                - **For the Therapist**: Explore underlying stressors, review coping mechanisms, and tailor cognitive behavioral or mindfulness strategies accordingly.
+                <h3>💡 Your Next Steps</h3>
+                <ul>
+                <li><strong>Self-care first</strong> — %s</li>
+                <li><strong>Talk to someone</strong> — Consider booking a session with one of our therapists for personalized guidance</li>
+                <li><strong>Check in again</strong> — Retake this assessment in 2 weeks to track your progress</li>
+                </ul>
                 """,
                 assessment.getType().getDisplayName(),
                 assessment.getTotalScore(),
@@ -252,19 +293,30 @@ public class ReportService {
 
     private String buildFallbackBehavioralReport(Patient patient, int messageCount) {
         return String.format("""
-                ### 1. Emotional Tone & Psychological State
-                Based on %d recent chat interactions, the patient frequently uses the AI companion as a non-judgmental space for debriefing daily stressors and emotional decompression.
+                <h3>1. Emotional Tone &amp; Psychological State</h3>
+                <ul>
+                <li><strong>Conversational engagement</strong> — Based on %d recent chat interactions, the patient frequently uses the AI companion as a non-judgmental space for emotional decompression</li>
+                <li><strong>Emotional baseline</strong> — Communication patterns suggest a need for consistent emotional validation and active listening</li>
+                </ul>
                 
-                ### 2. Recurrent Themes & Triggers
-                Primary themes detected across companion chats include daily workload tension, overthinking patterns, and seeking reassurance during periods of low mood.
+                <h3>2. Recurrent Themes &amp; Triggers</h3>
+                <ul>
+                <li><strong>Daily stressors</strong> — Workload tension and overthinking patterns appear across conversations</li>
+                <li><strong>Reassurance-seeking</strong> — Patient seeks reassurance during periods of low mood or self-doubt</li>
+                </ul>
                 
-                ### 3. Communication Dynamics & Coping Styles
-                The patient communicates openly when greeted with empathetic, listener-first responses, showing strong receptivity to structured reflection.
+                <h3>3. Communication Dynamics &amp; Coping Styles</h3>
+                <ul>
+                <li><strong>Openness</strong> — Patient communicates openly when greeted with empathetic, listener-first responses</li>
+                <li><strong>Receptivity</strong> — Shows strong receptivity to structured reflection and guided exercises</li>
+                </ul>
                 
-                ### 4. Therapist Action Items & Consultation Focus
-                - Validate recent efforts at self-reflection.
-                - Probe for triggers related to routine disruption and self-criticism.
-                - Introduce grounded boundary-setting exercises.
+                <h3>4. Therapist Action Items &amp; Session Focus</h3>
+                <ul>
+                <li><strong>Validate efforts</strong> — Acknowledge recent self-reflection attempts</li>
+                <li><strong>Explore triggers</strong> — Probe for triggers related to routine disruption and self-criticism</li>
+                <li><strong>Boundary exercises</strong> — Introduce grounded boundary-setting exercises</li>
+                </ul>
                 """, messageCount);
     }
 }
