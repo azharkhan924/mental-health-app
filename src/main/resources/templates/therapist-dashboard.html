@@ -21,6 +21,7 @@
         <a th:href="@{/therapist/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
         <a href="#appointments-section">Appointments</a>
         <a href="#tests-section">AI Test Studio</a>
+        <a href="#prediagnosis-section">Pre-Diagnosis</a>
         <a href="#schedule-section">Schedule & Slots</a>
         <a href="#profile-section">Clinic Profile</a>
       </nav>
@@ -160,6 +161,23 @@
                        title="View clinical tests and confidential AI chat behavioral insights">
                       📋 Reports
                     </a>
+
+                    <!-- Prescribe / Add Session Notes -->
+                    <button type="button"
+                            class="btn btn-sm"
+                            th:classappend="${notesMap != null and notesMap.containsKey(apt.id)} ? 'btn-teal' : 'btn-outline-coral'"
+                            th:title="${notesMap != null and notesMap.containsKey(apt.id)} ? 'Edit Session Notes & Prescription' : 'Add Session Notes & Prescription for Consultation'"
+                            th:data-apptid="${apt.id}"
+                            th:data-patientname="${apt.patient.name}"
+                            th:data-appttime="${apt.appointmentDate} + ' at ' + ${apt.appointmentTime}"
+                            th:data-complaint="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).chiefComplaint : ''}"
+                            th:data-obs="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).clinicalObservations : ''}"
+                            th:data-rx="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).prescription : ''}"
+                            th:data-plan="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).followUpPlan : ''}"
+                            onclick="openRxModalFromBtn(this)">
+                      <span th:if="${notesMap != null and notesMap.containsKey(apt.id)}">✏️ Rx / Notes</span>
+                      <span th:unless="${notesMap != null and notesMap.containsKey(apt.id)}">✍️ Prescribe</span>
+                    </button>
 
                     <!-- Cancel Button (If CONFIRMED) -->
                     <form th:if="${apt.status.name() == 'CONFIRMED'}"
@@ -430,6 +448,73 @@
       </section>
 
       <!-- ══════════════════════════════════════════════════════════════
+           SECTION: AI PRE-APPOINTMENT DIAGNOSTIC TASKS
+           ══════════════════════════════════════════════════════════════ -->
+      <section id="prediagnosis-section" class="fade-up" style="margin-top:3rem;">
+        <div class="section-header" style="margin-bottom:1.25rem;">
+          <h2 style="font-size:1.4rem; color:var(--teal);">🤖 AI Pre-Appointment Diagnostic Tasks</h2>
+          <p style="font-size:0.85rem; color:var(--muted-foreground);">
+            Assign AI-guided screening conversations to patients before their appointment. The AI follows your custom instructions to collect diagnostic information.
+          </p>
+        </div>
+
+        <!-- Create New Task Form -->
+        <div style="background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-soft);">
+          <h3 style="font-size:1.1rem; color:var(--teal); margin-bottom:1rem;">📋 Create New Pre-Appointment Task</h3>
+          <form th:action="@{/therapist/pre-diagnosis/create}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="form-grid form-grid--2col">
+              <label class="field">
+                <span class="field-label">Select Patient *</span>
+                <select name="patientId" class="field-input" required>
+                  <option value="">Choose a patient...</option>
+                  <option th:each="p : ${allPatients}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.email} + ')'">Patient</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field-label">Task Title *</span>
+                <input type="text" name="title" class="field-input" placeholder="e.g. Pre-Session Symptom Check" required />
+              </label>
+            </div>
+            <label class="field" style="margin-top:1rem;">
+              <span class="field-label">AI Instructions (What should the AI ask/diagnose?) *</span>
+              <textarea name="instructions" class="field-input" rows="3" required
+                        placeholder="e.g. Ask about sleep patterns over the past week, anxiety triggers, mood fluctuations, and appetite changes. Also screen for any social withdrawal or concentration difficulties."></textarea>
+            </label>
+            <button type="submit" class="btn btn-teal" style="margin-top:1rem;">🤖 Assign AI Pre-Diagnosis Task</button>
+          </form>
+        </div>
+
+        <!-- Existing Tasks List -->
+        <div th:if="${preDiagnosisTasks != null and not #lists.isEmpty(preDiagnosisTasks)}">
+          <h3 style="font-size:1rem; color:var(--foreground); margin-bottom:0.75rem;">Assigned Tasks</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:1rem;">
+            <div th:each="pt : ${preDiagnosisTasks}" class="dash-card" style="margin:0; border-top: 4px solid var(--teal);">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                <strong style="font-size:1rem; color:var(--teal);" th:text="${pt.title}">Task</strong>
+                <span class="status-pill"
+                      th:classappend="${pt.status == 'COMPLETED'} ? 'status-pill--completed' : (${pt.status == 'IN_PROGRESS'} ? 'status-pill--in-progress' : 'status-pill--pending')"
+                      th:text="${pt.status}">PENDING</span>
+              </div>
+              <p style="font-size:0.82rem; color:var(--muted-foreground); margin-bottom:0.4rem;">
+                Patient: <strong th:text="${pt.patient.name}">Patient</strong>
+                · Assigned <span th:text="${#temporals.format(pt.createdAt, 'dd MMM yyyy')}">Date</span>
+              </p>
+              <p style="font-size:0.78rem; color:var(--foreground); background:rgba(250,245,238,0.6); border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.75rem;">
+                📝 <em th:text="${#strings.abbreviate(pt.instructions, 120)}">Instructions</em>
+              </p>
+              <div th:if="${pt.status == 'COMPLETED'}">
+                <details style="font-size:0.82rem;">
+                  <summary style="cursor:pointer; color:var(--teal); font-weight:600;">📊 View AI Diagnostic Summary</summary>
+                  <div style="margin-top:0.5rem; padding:0.75rem; background:rgba(197,232,224,0.15); border-radius:8px; font-size:0.82rem; line-height:1.55;" th:utext="${pt.aiSummary}">Summary</div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════════════════
            SECTION 4: THERAPIST PROFILE & CLINIC INFORMATION
            ══════════════════════════════════════════════════════════════ -->
       <section id="profile-section" class="profile-section fade-up">
@@ -553,6 +638,57 @@
     </div>
   </div>
 
+  <!-- ===== MODAL: APPOINTMENT SESSION NOTES & PRESCRIPTION ===== -->
+  <div id="rxModal" class="custom-modal-overlay" style="display:none;">
+    <div class="custom-modal-card" style="max-width:650px;">
+      <div class="custom-modal-header">
+        <h3 style="margin:0; font-size:1.2rem; color:var(--teal);">✍️ Clinical Notes & Prescription</h3>
+        <button type="button" class="btn-close-modal" onclick="closeRxModal()">✕</button>
+      </div>
+
+      <form th:action="@{/therapist/appointment-notes/save}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="appointmentId" id="modalRxApptId" />
+
+        <div style="padding:1rem 0;">
+          <div style="background:rgba(197,232,224,0.15); border-radius:8px; padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.85rem;">
+            Patient: <strong id="modalRxPatientName" class="text-teal">Patient</strong>
+            · Session: <strong id="modalRxApptTime">Time</strong>
+          </div>
+
+          <label class="field" style="margin-bottom:0.75rem;">
+            <span class="field-label">Chief Complaint / Primary Reason for Visit</span>
+            <input type="text" name="chiefComplaint" id="modalRxComplaint" class="field-input" placeholder="e.g. Acute anxiety before exams, persistent insomnia" />
+          </label>
+
+          <label class="field" style="margin-bottom:0.75rem;">
+            <span class="field-label">Clinical Observations & Mental State Exam</span>
+            <textarea name="clinicalObservations" id="modalRxObs" class="field-input" rows="3" placeholder="e.g. Patient appeared visibly distressed, restless psychomotor activity, rational thought process with catastrophic cognitive distortions."></textarea>
+          </label>
+
+          <label class="field" style="margin-bottom:0.75rem;">
+            <span class="field-label">💊 Prescription & Therapeutic Interventions *</span>
+            <textarea name="prescription" id="modalRxPrescription" class="field-input" rows="3" required placeholder="e.g. 1. Practice 4-7-8 diaphragmatic breathing 2x daily.&#10;2. Cognitive Restructuring Journaling template.&#10;3. Tab Escitalopram 10mg once daily after breakfast (if psychiatrist).&#10;4. Sleep hygiene protocol."></textarea>
+          </label>
+
+          <label class="field" style="margin-bottom:0.75rem;">
+            <span class="field-label">📅 Follow-Up Plan & Goals</span>
+            <textarea name="followUpPlan" id="modalRxPlan" class="field-input" rows="2" placeholder="e.g. Next review in 2 weeks; track daily mood on app; assess medication tolerance."></textarea>
+          </label>
+
+          <div style="font-size:0.78rem; color:var(--muted-foreground); background:rgba(250,245,238,0.8); border-radius:6px; padding:0.5rem 0.75rem; border:1px solid var(--border);">
+            🤖 <strong>AI Enhancement:</strong> When submitted, AI will automatically analyze your clinical observations and prescription to synthesize a structured, professional session report available on the Patient Reports Hub.
+          </div>
+        </div>
+
+        <div class="custom-modal-footer">
+          <button type="button" class="btn btn-outline-coral btn-sm" onclick="closeRxModal()">Cancel</button>
+          <button type="submit" class="btn btn-teal btn-sm">💾 Save & Generate AI Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ===== FOOTER ===== -->
   <footer>
     <div class="footer-links">
@@ -663,6 +799,21 @@
 
     function closeAssignModal() {
       document.getElementById('assignModal').style.display = 'none';
+    }
+
+    function openRxModalFromBtn(btn) {
+      document.getElementById('modalRxApptId').value = btn.dataset.apptid;
+      document.getElementById('modalRxPatientName').textContent = btn.dataset.patientname;
+      document.getElementById('modalRxApptTime').textContent = btn.dataset.appttime;
+      document.getElementById('modalRxComplaint').value = btn.dataset.complaint || '';
+      document.getElementById('modalRxObs').value = btn.dataset.obs || '';
+      document.getElementById('modalRxPrescription').value = btn.dataset.rx || '';
+      document.getElementById('modalRxPlan').value = btn.dataset.plan || '';
+      document.getElementById('rxModal').style.display = 'flex';
+    }
+
+    function closeRxModal() {
+      document.getElementById('rxModal').style.display = 'none';
     }
   </script>
 

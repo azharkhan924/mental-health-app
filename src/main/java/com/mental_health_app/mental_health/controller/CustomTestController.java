@@ -306,4 +306,190 @@ public class CustomTestController {
 
         return "custom-test-result";
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // THERAPIST: AI PRE-APPOINTMENT DIAGNOSTIC TASKS
+    // ─────────────────────────────────────────────────────────────
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.mental_health_app.mental_health.service.PreAppointmentService preAppointmentService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.mental_health_app.mental_health.repository.AppointmentNotesRepository appointmentNotesRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.mental_health_app.mental_health.service.ReportService reportService;
+
+    /**
+     * Create a new AI pre-appointment diagnostic task for a patient.
+     */
+    @PostMapping("/therapist/pre-diagnosis/create")
+    public String createPreDiagnosisTask(@RequestParam Long patientId,
+                                          @RequestParam String title,
+                                          @RequestParam String instructions,
+                                          @RequestParam(required = false) Long appointmentId,
+                                          @AuthenticationPrincipal UserDetails userDetails,
+                                          RedirectAttributes redirectAttributes) {
+
+        Optional<Therapist> therapistOpt = therapistService.findByEmail(userDetails.getUsername());
+        if (therapistOpt.isEmpty()) return "redirect:/auth?mode=login";
+
+        Optional<Patient> patientOpt = patientService.findByEmail(null);
+        // Find patient by ID
+        com.mental_health_app.mental_health.entity.Patient patient = null;
+        for (com.mental_health_app.mental_health.entity.Patient p : patientService.getAllPatients()) {
+            if (p.getId().equals(patientId)) { patient = p; break; }
+        }
+
+        if (patient == null) {
+            redirectAttributes.addFlashAttribute("error", "Patient not found.");
+            return "redirect:/therapist/dashboard#prediagnosis-section";
+        }
+
+        com.mental_health_app.mental_health.entity.Appointment appointment = null;
+        if (appointmentId != null) {
+            appointment = appointmentService.getAppointmentById(appointmentId).orElse(null);
+        }
+
+        preAppointmentService.createTask(therapistOpt.get(), patient, title.trim(), instructions.trim(), appointment);
+        redirectAttributes.addFlashAttribute("success", "AI Pre-Appointment Task assigned to " + patient.getName() + " successfully!");
+
+        return "redirect:/therapist/dashboard#prediagnosis-section";
+    }
+
+    /**
+     * Patient: View the pre-diagnosis AI chat interface.
+     */
+    @GetMapping("/pre-diagnosis/{taskId}")
+    public String preDiagnosisChat(@PathVariable Long taskId,
+                                    @AuthenticationPrincipal UserDetails userDetails,
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
+
+        Optional<Patient> patientOpt = patientService.findByEmail(userDetails.getUsername());
+        if (patientOpt.isEmpty()) return "redirect:/auth?mode=login";
+
+        Optional<com.mental_health_app.mental_health.entity.PreAppointmentTask> taskOpt = preAppointmentService.getTaskById(taskId);
+        if (taskOpt.isEmpty() || !taskOpt.get().getPatient().getId().equals(patientOpt.get().getId())) {
+            redirectAttributes.addFlashAttribute("error", "Pre-appointment task not found.");
+            return "redirect:/dashboard";
+        }
+
+        com.mental_health_app.mental_health.entity.PreAppointmentTask task = taskOpt.get();
+        if ("COMPLETED".equals(task.getStatus())) {
+            redirectAttributes.addFlashAttribute("info", "This pre-appointment check-in has already been completed.");
+            return "redirect:/dashboard";
+        }
+
+        // Parse conversation for display
+        List<Map<String, Object>> messages = new java.util.ArrayList<>();
+        try {
+            List<Map<String, String>> conv = objectMapper.readValue(
+                    task.getConversationJson() != null ? task.getConversationJson() : "[]",
+                    new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, String>>>() {});
+            for (Map<String, String> msg : conv) {
+                Map<String, Object> m = new java.util.HashMap<>(msg);
+                messages.add(m);
+            }
+        } catch (Exception ignored) {}
+
+        model.addAttribute("userName", patientOpt.get().getName());
+        model.addAttribute("task", task);
+        model.addAttribute("messages", messages);
+
+        return "pre-diagnosis-chat";
+    }
+
+    /**
+     * AJAX: Patient sends a message in the pre-diagnosis conversation.
+     */
+    @PostMapping(value = "/pre-diagnosis/{taskId}/send", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> preDiagnosisSendMessage(
+            @PathVariable Long taskId,
+            @RequestParam String message,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        try {
+            Map<String, Object> result = preAppointmentService.sendMessage(taskId, message.trim());
+            result.put("success", true);
+            return org.springframework.http.ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Patient: Complete the pre-diagnosis conversation and trigger AI summary generation.
+     */
+    @PostMapping("/pre-diagnosis/{taskId}/complete")
+    public String preDiagnosisComplete(@PathVariable Long taskId,
+                                        @AuthenticationPrincipal UserDetails userDetails,
+                                        RedirectAttributes redirectAttributes) {
+
+        try {
+            preAppointmentService.completeTask(taskId);
+            redirectAttributes.addFlashAttribute("success", "Pre-appointment check-in completed! Your therapist will review your responses before the session.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Could not complete: " + e.getMessage());
+        }
+        return "redirect:/dashboard";
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // THERAPIST: APPOINTMENT SESSION NOTES & PRESCRIPTIONS
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Save session notes, prescriptions, and observations for an appointment.
+     * Triggers AI to generate a structured clinical summary.
+     */
+    @PostMapping("/therapist/appointment-notes/save")
+    public String saveAppointmentNotes(@RequestParam Long appointmentId,
+                                        @RequestParam(required = false) String chiefComplaint,
+                                        @RequestParam(required = false) String clinicalObservations,
+                                        @RequestParam(required = false) String prescription,
+                                        @RequestParam(required = false) String followUpPlan,
+                                        @AuthenticationPrincipal UserDetails userDetails,
+                                        RedirectAttributes redirectAttributes) {
+
+        Optional<Therapist> therapistOpt = therapistService.findByEmail(userDetails.getUsername());
+        if (therapistOpt.isEmpty()) return "redirect:/auth?mode=login";
+
+        Optional<com.mental_health_app.mental_health.entity.Appointment> apptOpt = appointmentService.getAppointmentById(appointmentId);
+        if (apptOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Appointment not found.");
+            return "redirect:/therapist/dashboard";
+        }
+
+        com.mental_health_app.mental_health.entity.Appointment appointment = apptOpt.get();
+
+        // Check if notes already exist for this appointment
+        com.mental_health_app.mental_health.entity.AppointmentNotes notes =
+                appointmentNotesRepository.findByAppointment(appointment).orElse(null);
+
+        if (notes == null) {
+            notes = new com.mental_health_app.mental_health.entity.AppointmentNotes(
+                    appointment, therapistOpt.get(), appointment.getPatient());
+        }
+
+        if (chiefComplaint != null) notes.setChiefComplaint(chiefComplaint.trim());
+        if (clinicalObservations != null) notes.setClinicalObservations(clinicalObservations.trim());
+        if (prescription != null) notes.setPrescription(prescription.trim());
+        if (followUpPlan != null) notes.setFollowUpPlan(followUpPlan.trim());
+
+        appointmentNotesRepository.save(notes);
+
+        // Generate AI clinical summary
+        try {
+            reportService.generateAppointmentNotesReport(notes);
+            redirectAttributes.addFlashAttribute("success", "Session notes saved and AI clinical summary generated!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("success", "Session notes saved. AI summary generation will be retried.");
+        }
+
+        return "redirect:/therapist/dashboard#appointments-section";
+    }
 }
+

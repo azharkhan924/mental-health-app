@@ -42,12 +42,30 @@ public class ChatService {
      * Send a message to AI using the selected persona's dedicated system prompt.
      */
     public String sendMessage(String userMessage, List<ChatMessage> history, ChatPersona persona) {
-        String systemPrompt = (persona != null) ? persona.getSystemPrompt() : ChatPersona.KABIR.getSystemPrompt();
+        return sendMessage(userMessage, history, persona, null);
+    }
+
+    /**
+     * Send a message to AI using persona and patient demographics (age, gender, name)
+     * so that AI responses are personalized, age-appropriate, and gender-sensitive.
+     */
+    public String sendMessage(String userMessage, List<ChatMessage> history, ChatPersona persona, com.mental_health_app.mental_health.entity.Patient patient) {
+        String basePrompt = (persona != null) ? persona.getSystemPrompt() : ChatPersona.KABIR.getSystemPrompt();
+        StringBuilder systemPrompt = new StringBuilder(basePrompt);
+
+        if (patient != null) {
+            systemPrompt.append("\n\nPATIENT DEMOGRAPHIC CONTEXT:");
+            if (patient.getName() != null) systemPrompt.append("\n- Name: ").append(patient.getName());
+            if (patient.getAge() != null) systemPrompt.append("\n- Age: ").append(patient.getAge()).append(" years old");
+            if (patient.getGender() != null && !patient.getGender().isBlank()) systemPrompt.append("\n- Gender: ").append(patient.getGender());
+        }
+
+        String prompt = systemPrompt.toString();
 
         // 1. Try Groq with Key Rotation (350 tokens for conversational chat)
         List<String> groqKeys = getKeysList(groqKeysConfig);
         if (!groqKeys.isEmpty()) {
-            String groqReply = tryGroqWithKeyRotation(userMessage, history, groqKeys, systemPrompt, 350);
+            String groqReply = tryGroqWithKeyRotation(userMessage, history, groqKeys, prompt, 350);
             if (groqReply != null && !groqReply.isBlank()) {
                 return groqReply;
             }
@@ -56,7 +74,7 @@ public class ChatService {
         // 2. Fallback: Try Gemini with Key Rotation
         List<String> geminiKeys = getKeysList(geminiKeysConfig);
         if (!geminiKeys.isEmpty()) {
-            String geminiReply = tryGeminiWithKeyRotation(userMessage, history, geminiKeys, systemPrompt, 350);
+            String geminiReply = tryGeminiWithKeyRotation(userMessage, history, geminiKeys, prompt, 350);
             if (geminiReply != null && !geminiReply.isBlank()) {
                 return geminiReply;
             }
@@ -81,6 +99,14 @@ public class ChatService {
      */
     public String generateReportCompletion(String systemPrompt, String userPrompt) {
         return generateCompletionWithTokens(systemPrompt, userPrompt, 1024);
+    }
+
+    /**
+     * Custom token budget completion generator for specialized use cases
+     * (e.g., pre-appointment diagnostic screening at 512 tokens).
+     */
+    public String generateCompletionWithCustomTokens(String systemPrompt, String userPrompt, int maxTokens) {
+        return generateCompletionWithTokens(systemPrompt, userPrompt, maxTokens);
     }
 
     private String generateCompletionWithTokens(String systemPrompt, String userPrompt, int maxTokens) {

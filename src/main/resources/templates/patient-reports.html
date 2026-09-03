@@ -3,9 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title th:text="'Patient Clinical Insights — ' + ${patient.name} + ' — Breathe Heal Grow'">Patient Reports</title>
-  <meta name="description" content="Clinical assessment reports and confidential AI behavioral analysis for licensed therapists." />
+  <title th:text="'Comprehensive Report Hub — ' + ${patient.name} + ' — Breathe Heal Grow'">Patient Reports</title>
+  <meta name="description" content="Comprehensive patient report hub with AI chat analysis, clinical assessments, pre-diagnosis screening, and appointment notes." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <style>
+    /* ══ REPORT HUB SPECIFIC STYLES ══ */
+    .report-hub-tabs { display:flex; gap:0.35rem; flex-wrap:wrap; border-bottom:2px solid var(--border); padding-bottom:0.5rem; margin:1.75rem 0 1.25rem 0; }
+    .report-hub-tab { background:none; border:2px solid transparent; border-bottom:none; padding:0.6rem 1rem; border-radius:10px 10px 0 0; font-size:0.82rem; font-weight:600; cursor:pointer; color:var(--muted-foreground); transition:all 0.2s; display:flex; align-items:center; gap:0.4rem; }
+    .report-hub-tab:hover { color:var(--foreground); background:rgba(197,232,224,0.1); }
+    .report-hub-tab.active { color:var(--teal); border-color:var(--teal); background:rgba(197,232,224,0.08); }
+    .report-hub-tab .tab-count { background:var(--teal); color:#fff; font-size:0.65rem; padding:0.12rem 0.45rem; border-radius:50px; font-weight:700; }
+    .report-hub-tab.active .tab-count { background:var(--coral); }
+
+    .report-section { display:none; animation: fadeSlide 0.3s ease-out; }
+    .report-section.active { display:block; }
+    @keyframes fadeSlide { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .rpt-card { background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; box-shadow:var(--shadow-soft); transition:box-shadow 0.2s; }
+    .rpt-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+    .rpt-card-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem; }
+    .rpt-card-type { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0.2rem 0.7rem; border-radius:50px; }
+    .rpt-type-behavioral { background:rgba(237,168,58,0.12); color:#b8860b; }
+    .rpt-type-assessment { background:rgba(59,130,246,0.1); color:#1d4ed8; }
+    .rpt-type-custom { background:rgba(147,51,234,0.1); color:#7c3aed; }
+    .rpt-type-prediag { background:rgba(16,185,129,0.1); color:#047857; }
+    .rpt-type-notes { background:rgba(212,100,74,0.1); color:var(--coral); }
+
+    .rpt-card-title { font-size:1.05rem; font-weight:700; color:var(--foreground); margin-bottom:0.35rem; }
+    .rpt-card-meta { font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem; }
+    .rpt-card-body { font-size:0.88rem; line-height:1.7; color:var(--foreground); }
+    .rpt-card-body h3 { font-size:1rem; color:var(--teal); margin:1rem 0 0.4rem 0; }
+    .rpt-card-body ul { padding-left:1.25rem; margin:0.3rem 0 0.5rem 0; }
+    .rpt-card-body li { margin-bottom:0.35rem; line-height:1.55; }
+    .rpt-card-body strong { color:var(--foreground); }
+
+    /* PDF Section Selector */
+    .pdf-selector { background:linear-gradient(135deg, rgba(197,232,224,0.15), rgba(250,245,238,0.3)); border:1.5px solid var(--border); border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:1.75rem; }
+    .pdf-selector h3 { font-size:1.05rem; color:var(--teal); margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; }
+    .pdf-section-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.6rem; margin-bottom:1rem; }
+    .pdf-section-check { display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; padding:0.5rem 0.75rem; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.2s; background:#fff; }
+    .pdf-section-check:hover { border-color:var(--teal); background:rgba(197,232,224,0.08); }
+    .pdf-section-check input:checked + span { color:var(--teal); font-weight:600; }
+
+    .btn-export-pdf-lg { display:inline-flex; align-items:center; gap:0.5rem; padding:0.65rem 1.5rem; background:var(--coral); color:#fff; border:none; border-radius:8px; font-size:0.88rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-export-pdf-lg:hover { background:#c0543a; transform:translateY(-1px); }
+
+    /* Status pill for in-progress */
+    .status-pill--in-progress { background:rgba(237,168,58,0.15); color:#b8860b; }
+
+    /* Print CSS */
+    @media print {
+      .no-print, .site-header, .report-hub-tabs, .pdf-selector { display:none !important; }
+      .print-header { display:flex !important; }
+      .report-section { display:none !important; }
+      .report-section.print-include { display:block !important; }
+      .rpt-card { break-inside:avoid; page-break-inside:avoid; box-shadow:none; border-color:#ddd; }
+      body { font-size:11pt; }
+    }
+  </style>
 </head>
 <body>
 
@@ -35,17 +90,18 @@
   </header>
 
   <!-- ===== PRINT HEADER (visible only when printing) ===== -->
-  <div class="print-header">
+  <div class="print-header" style="display:none;">
     <div class="print-header-brand">
       <div class="print-logo-text">
         <span class="print-logo-b">Breathe</span>
         <span class="print-logo-h">Heal</span>
         <span class="print-logo-g">Grow</span>
       </div>
-      <div class="print-tagline">Mental Health & Wellness Platform</div>
+      <div class="print-tagline">Mental Health & Wellness Platform — Confidential Clinical Report</div>
     </div>
     <div class="print-header-meta">
       <div class="print-patient-name" th:text="'Patient: ' + ${patient.name}">Patient Name</div>
+      <div th:if="${patient.age != null}" style="font-size:0.85rem;">Age: <span th:text="${patient.age}">22</span> · Gender: <span th:text="${patient.gender ?: 'Not specified'}">NA</span></div>
       <div class="print-date">Report exported on: <span id="printDateStamp"></span></div>
       <div class="print-therapist" th:text="'Prepared for: Dr. ' + ${userName}">Dr. Therapist</div>
     </div>
@@ -55,7 +111,7 @@
   <main class="dashboard" style="padding-top:2rem; padding-bottom:3rem;">
     <div class="container">
 
-      <!-- Breadcrumbs / Back navigation -->
+      <!-- Breadcrumbs -->
       <div class="no-print" style="margin-bottom:1.25rem;">
         <a th:href="@{/therapist/dashboard}" style="color:var(--teal); font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem;">
           ← Back to Therapist Dashboard
@@ -67,7 +123,7 @@
       <div th:if="${info}" class="toast show no-print" th:text="${info}" style="margin-bottom:1rem; background-color:var(--teal); color:#fff;"></div>
       <div th:if="${error}" class="toast toast--error show no-print" th:text="${error}" style="margin-bottom:1rem;"></div>
 
-      <!-- Patient Header & Access Window Banner -->
+      <!-- Patient Profile Card -->
       <section class="patient-profile-card fade-up">
         <div class="patient-profile-header">
           <div class="patient-profile-avatar">
@@ -78,10 +134,11 @@
             <div class="patient-profile-meta">
               <span>📧 <span th:text="${patient.email}">patient@example.com</span></span>
               <span>📞 <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
+              <span th:if="${patient.age != null}">🎂 <span th:text="${patient.age}">22</span> yrs</span>
+              <span th:if="${patient.gender != null and patient.gender != ''}">⚤ <span th:text="${patient.gender}">Gender</span></span>
             </div>
           </div>
           <div class="patient-profile-actions no-print">
-            <!-- Access Window Badge -->
             <div class="access-window-badge">
               <span class="access-window-dot"></span>
               <div>
@@ -89,8 +146,6 @@
                 <div style="font-size:0.75rem; color:rgba(26,60,60,0.75);">Access valid until: <strong th:text="${accessExpiryDate}">31 Dec 2026</strong></div>
               </div>
             </div>
-
-            <!-- Refresh Behavioral Report Button -->
             <form th:action="@{/therapist/patient/{id}/generate-chat-report(id=${patient.id})}" method="post" style="margin-top:0.5rem;">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <button type="submit" class="btn btn-teal btn-sm" title="Analyze latest chat messages with AI companions">
@@ -101,104 +156,232 @@
         </div>
       </section>
 
-      <!-- Section Tabs Navigation -->
-      <div class="report-tabs-nav fade-up no-print" style="margin-top:2rem; margin-bottom:1.5rem; display:flex; gap:1rem; border-bottom:2px solid var(--border); padding-bottom:0.5rem;">
-        <button class="report-tab-btn active" onclick="switchReportTab('behavioral')">
-          🔒 AI Chat Behavioral Insights (<span th:text="${#lists.size(behavioralReports)}">0</span>)
-        </button>
-        <button class="report-tab-btn" onclick="switchReportTab('assessment')">
-          📝 Clinical Assessment Tests (<span th:text="${#lists.size(assessmentReports)}">0</span>)
+      <!-- ═══ PDF SECTION SELECTOR ═══ -->
+      <div class="pdf-selector fade-up no-print">
+        <h3>📄 Export to PDF — Select Sections to Include</h3>
+        <div class="pdf-section-grid">
+          <label class="pdf-section-check">
+            <input type="checkbox" data-section="behavioral" checked onchange="togglePrintSection(this)" />
+            <span>🔒 AI Chat Behavioral Insights</span>
+          </label>
+          <label class="pdf-section-check">
+            <input type="checkbox" data-section="assessment" checked onchange="togglePrintSection(this)" />
+            <span>📝 Clinical Assessment Tests</span>
+          </label>
+          <label class="pdf-section-check">
+            <input type="checkbox" data-section="customtest" checked onchange="togglePrintSection(this)" />
+            <span>🧪 Custom Test Evaluations</span>
+          </label>
+          <label class="pdf-section-check">
+            <input type="checkbox" data-section="prediag" checked onchange="togglePrintSection(this)" />
+            <span>🤖 Pre-Diagnosis AI Screening</span>
+          </label>
+          <label class="pdf-section-check">
+            <input type="checkbox" data-section="notes" checked onchange="togglePrintSection(this)" />
+            <span>📋 Appointment Notes & Rx</span>
+          </label>
+        </div>
+        <button class="btn-export-pdf-lg" onclick="exportCombinedPDF()">
+          📄 Generate Combined PDF Report
         </button>
       </div>
 
-      <!-- TAB 1: CONFIDENTIAL CHAT BEHAVIORAL REPORTS (HIDDEN FROM PATIENT) -->
-      <section id="tab-behavioral" class="report-tab-content active fade-up">
-        <div class="section-header" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <h2 style="font-size:1.25rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-              <span>🔒 AI Chat Behavioral Analysis</span>
-              <span class="badge-confidential">Confidential • Therapist Only</span>
-            </h2>
-            <p style="font-size:0.85rem; color:var(--muted-foreground); margin-top:0.25rem;">
-              Generated automatically from the patient's conversations with AI companions (Kabir, Aanya, Dr. Priya, Rohan, Meera). Hidden from the patient.
-            </p>
-          </div>
-        </div>
+      <!-- ═══ TAB NAVIGATION ═══ -->
+      <div class="report-hub-tabs fade-up no-print">
+        <button class="report-hub-tab active" onclick="switchTab('behavioral', this)">
+          🔒 AI Chat Analysis <span class="tab-count" th:text="${#lists.size(behavioralReports)}">0</span>
+        </button>
+        <button class="report-hub-tab" onclick="switchTab('assessment', this)">
+          📝 Clinical Tests <span class="tab-count" th:text="${#lists.size(assessmentReports)}">0</span>
+        </button>
+        <button class="report-hub-tab" onclick="switchTab('customtest', this)">
+          🧪 Custom Tests <span class="tab-count" th:text="${#lists.size(customTestResults)}">0</span>
+        </button>
+        <button class="report-hub-tab" onclick="switchTab('prediag', this)">
+          🤖 Pre-Diagnosis AI <span class="tab-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>
+        </button>
+        <button class="report-hub-tab" onclick="switchTab('notes', this)">
+          📋 Session Notes <span class="tab-count" th:text="${#lists.size(appointmentNotes)}">0</span>
+        </button>
+      </div>
 
-        <!-- Empty State -->
+      <!-- ═══ TAB 1: AI CHAT BEHAVIORAL INSIGHTS ═══ -->
+      <section id="tab-behavioral" class="report-section active print-include fade-up">
+        <div class="section-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            🔒 AI Chat Behavioral Analysis
+            <span class="badge-confidential">Confidential • Therapist Only</span>
+          </h2>
+          <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            Generated from patient's conversations with AI companions (Kabir, Aanya, Dr. Priya, Rohan, Meera).
+          </p>
+        </div>
         <div th:if="${#lists.isEmpty(behavioralReports)}" class="empty-state-card">
-          <p>No behavioral reports compiled yet. When the patient engages in conversations with AI companions, insights will automatically appear here.</p>
+          <p>No behavioral reports compiled yet. Click "Refresh AI Behavioral Insights" above to generate.</p>
         </div>
-
-        <!-- Behavioral Reports List -->
-        <div class="reports-grid" th:if="${not #lists.isEmpty(behavioralReports)}">
-          <article class="report-card report-card--behavioral" th:each="rpt : ${behavioralReports}">
-            <div class="report-card-header">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span class="report-type-badge report-type-badge--behavioral">BEHAVIORAL BRIEF</span>
-                <span class="report-date" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">02 Sep 2026</span>
+        <div th:each="rpt : ${behavioralReports}">
+          <article class="rpt-card">
+            <div class="rpt-card-header">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span class="rpt-card-type rpt-type-behavioral">BEHAVIORAL BRIEF</span>
+                <span class="rpt-card-meta" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">Date</span>
               </div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span class="report-severity-badge severity-badge--confidential">THERAPIST ACCESS ONLY</span>
-                <button type="button" class="btn-export-pdf no-print" onclick="exportReportToPDF(this)" title="Export to PDF">
-                  📄 Export PDF
-                </button>
-              </div>
+              <span class="report-severity-badge severity-badge--confidential" style="font-size:0.7rem;">THERAPIST ONLY</span>
             </div>
-
-            <h3 class="report-card-title" th:text="${rpt.title}">AI Companion Chat Behavioral Analysis</h3>
-            <p class="report-card-summary" th:text="${rpt.summary}">Summary</p>
-
-            <div class="report-card-body">
-              <div class="report-rendered-content" th:utext="${rpt.content}">
-                Content analysis...
-              </div>
-            </div>
+            <h3 class="rpt-card-title" th:text="${rpt.title}">Title</h3>
+            <p class="rpt-card-meta" th:text="${rpt.summary}">Summary</p>
+            <div class="rpt-card-body" th:utext="${rpt.content}">Content</div>
           </article>
         </div>
       </section>
 
-      <!-- TAB 2: CLINICAL ASSESSMENT REPORTS (VISIBLE TO PATIENT & THERAPIST) -->
-      <section id="tab-assessment" class="report-tab-content fade-up" style="display:none;">
+      <!-- ═══ TAB 2: CLINICAL ASSESSMENT TESTS ═══ -->
+      <section id="tab-assessment" class="report-section print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
-          <h2 style="font-size:1.25rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            <span>📝 Clinical Assessment Reports</span>
+          <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            📝 Clinical Assessment Reports
             <span class="badge-shared">Shared with Patient</span>
           </h2>
-          <p style="font-size:0.85rem; color:var(--muted-foreground); margin-top:0.25rem;">
-            Clinically validated self-assessments (PHQ-9, GAD-7, PSS-10, ISI, Burnout) completed by the patient with AI clinical evaluations.
+          <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            Clinically validated self-assessments (PHQ-9, GAD-7, PSS-10, ISI, Burnout) with AI evaluations.
           </p>
         </div>
-
-        <!-- Empty State -->
         <div th:if="${#lists.isEmpty(assessmentReports)}" class="empty-state-card">
-          <p>The patient has not completed any self-assessments yet.</p>
+          <p>No clinical assessments completed yet.</p>
         </div>
-
-        <!-- Assessment Reports List -->
-        <div class="reports-grid" th:if="${not #lists.isEmpty(assessmentReports)}">
-          <article class="report-card report-card--assessment" th:each="rpt : ${assessmentReports}">
-            <div class="report-card-header">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span class="report-type-badge report-type-badge--assessment" th:text="${rpt.assessment != null ? rpt.assessment.type.displayName : 'TEST REPORT'}">PHQ-9</span>
-                <span class="report-date" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">02 Sep 2026</span>
+        <div th:each="rpt : ${assessmentReports}">
+          <article class="rpt-card">
+            <div class="rpt-card-header">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span class="rpt-card-type rpt-type-assessment" th:text="${rpt.assessment != null ? rpt.assessment.type.displayName : 'ASSESSMENT'}">PHQ-9</span>
+                <span class="rpt-card-meta" th:text="${#temporals.format(rpt.createdAt, 'dd MMM yyyy · hh:mm a')}">Date</span>
               </div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span class="report-severity-badge"
-                      th:classappend="'severity-badge--' + ${#strings.toLowerCase(rpt.severity)}"
-                      th:text="${rpt.severity}">MODERATE</span>
-                <button type="button" class="btn-export-pdf no-print" onclick="exportReportToPDF(this)" title="Export to PDF">
-                  📄 Export PDF
-                </button>
+              <span class="report-severity-badge"
+                    th:classappend="'severity-badge--' + ${#strings.toLowerCase(rpt.severity)}"
+                    th:text="${rpt.severity}">MODERATE</span>
+            </div>
+            <h3 class="rpt-card-title" th:text="${rpt.title}">Title</h3>
+            <p class="rpt-card-meta" th:text="${rpt.summary}">Summary</p>
+            <div class="rpt-card-body" th:utext="${rpt.content}">Content</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══ TAB 3: CUSTOM TEST EVALUATIONS ═══ -->
+      <section id="tab-customtest" class="report-section print-include fade-up">
+        <div class="section-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            🧪 Custom Test Evaluations
+          </h2>
+          <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            Results from therapist-designed assessments with AI clinical interpretation.
+          </p>
+        </div>
+        <div th:if="${#lists.isEmpty(customTestResults)}" class="empty-state-card">
+          <p>No custom tests completed yet.</p>
+        </div>
+        <div th:each="ct : ${customTestResults}">
+          <article class="rpt-card">
+            <div class="rpt-card-header">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span class="rpt-card-type rpt-type-custom" th:text="${ct.customTest.category ?: 'CUSTOM TEST'}">Custom</span>
+                <span class="rpt-card-meta" th:text="${ct.completedAt != null ? #temporals.format(ct.completedAt, 'dd MMM yyyy · hh:mm a') : 'Date pending'}">Date</span>
+              </div>
+              <span class="report-severity-badge"
+                    th:classappend="'severity-badge--' + ${#strings.toLowerCase(ct.severity ?: 'moderate')}"
+                    th:text="${ct.severity ?: 'N/A'}">Severity</span>
+            </div>
+            <h3 class="rpt-card-title" th:text="${ct.customTest.title}">Test Title</h3>
+            <p class="rpt-card-meta">
+              Score: <strong th:text="${ct.totalScore ?: 0}">0</strong> / <span th:text="${ct.customTest.maxScore}">20</span>
+              · Assigned by Dr. <span th:text="${ct.assignedBy.name}">Therapist</span>
+            </p>
+            <div class="rpt-card-body" th:utext="${ct.aiEvaluation ?: '<p>No AI evaluation available.</p>'}">Evaluation</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══ TAB 4: PRE-DIAGNOSIS AI SCREENING ═══ -->
+      <section id="tab-prediag" class="report-section print-include fade-up">
+        <div class="section-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            🤖 Pre-Diagnosis AI Screening Results
+            <span class="badge-confidential">Confidential • Therapist Only</span>
+          </h2>
+          <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            AI-guided pre-appointment conversations completed by the patient following your diagnostic instructions.
+          </p>
+        </div>
+        <div th:if="${#lists.isEmpty(preDiagnosisTasks)}" class="empty-state-card">
+          <p>No pre-diagnosis screenings completed yet.</p>
+        </div>
+        <div th:each="pt : ${preDiagnosisTasks}">
+          <article class="rpt-card">
+            <div class="rpt-card-header">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span class="rpt-card-type rpt-type-prediag">PRE-DIAGNOSIS</span>
+                <span class="rpt-card-meta" th:text="${pt.completedAt != null ? #temporals.format(pt.completedAt, 'dd MMM yyyy · hh:mm a') : 'In progress'}">Date</span>
+              </div>
+              <span class="status-pill status-pill--completed">COMPLETED</span>
+            </div>
+            <h3 class="rpt-card-title" th:text="${pt.title}">Task Title</h3>
+            <p class="rpt-card-meta">
+              <strong>Your instructions:</strong> <em th:text="${#strings.abbreviate(pt.instructions, 150)}">Instructions</em>
+            </p>
+            <div class="rpt-card-body" th:utext="${pt.aiSummary ?: '<p>Summary is being generated...</p>'}">AI Summary</div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══ TAB 5: APPOINTMENT NOTES & PRESCRIPTIONS ═══ -->
+      <section id="tab-notes" class="report-section print-include fade-up">
+        <div class="section-header" style="margin-bottom:1rem;">
+          <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
+            📋 Appointment Notes & Prescriptions
+          </h2>
+          <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
+            Session notes, clinical observations, and prescriptions recorded during appointments.
+          </p>
+        </div>
+        <div th:if="${#lists.isEmpty(appointmentNotes)}" class="empty-state-card">
+          <p>No session notes recorded yet. Use the "Add Session Notes" button on your appointment cards.</p>
+        </div>
+        <div th:each="note : ${appointmentNotes}">
+          <article class="rpt-card">
+            <div class="rpt-card-header">
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span class="rpt-card-type rpt-type-notes">SESSION NOTES</span>
+                <span class="rpt-card-meta" th:text="${#temporals.format(note.createdAt, 'dd MMM yyyy · hh:mm a')}">Date</span>
               </div>
             </div>
+            <h3 class="rpt-card-title">
+              Session on <span th:text="${note.appointment.appointmentDate}">Date</span>
+              at <span th:text="${note.appointment.appointmentTime}">Time</span>
+            </h3>
 
-            <h3 class="report-card-title" th:text="${rpt.title}">PHQ-9 Depression Clinical Evaluation</h3>
-            <p class="report-card-summary" th:text="${rpt.summary}">Score summary</p>
+            <!-- Structured Notes Display -->
+            <div class="rpt-card-body">
+              <div th:if="${note.chiefComplaint != null and note.chiefComplaint != ''}" style="margin-bottom:0.75rem;">
+                <strong style="color:var(--coral);">Chief Complaint:</strong>
+                <p style="margin:0.25rem 0 0 0;" th:text="${note.chiefComplaint}">Complaint</p>
+              </div>
+              <div th:if="${note.clinicalObservations != null and note.clinicalObservations != ''}" style="margin-bottom:0.75rem;">
+                <strong style="color:var(--teal);">Clinical Observations:</strong>
+                <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.clinicalObservations}">Observations</p>
+              </div>
+              <div th:if="${note.prescription != null and note.prescription != ''}" style="margin-bottom:0.75rem; background:rgba(245,213,200,0.15); border-radius:8px; padding:0.6rem 0.8rem;">
+                <strong style="color:var(--coral);">💊 Prescription:</strong>
+                <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.prescription}">Rx</p>
+              </div>
+              <div th:if="${note.followUpPlan != null and note.followUpPlan != ''}" style="margin-bottom:0.75rem;">
+                <strong style="color:var(--teal);">📅 Follow-Up Plan:</strong>
+                <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.followUpPlan}">Plan</p>
+              </div>
 
-            <div class="report-card-body">
-              <div class="report-rendered-content" th:utext="${rpt.content}">
-                Content evaluation...
+              <!-- AI Clinical Summary -->
+              <div th:if="${note.aiClinicalSummary != null and note.aiClinicalSummary != ''}" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                <strong style="color:var(--teal); font-size:0.92rem;">🤖 AI Clinical Summary:</strong>
+                <div style="margin-top:0.5rem; line-height:1.65;" th:utext="${note.aiClinicalSummary}">Summary</div>
               </div>
             </div>
           </article>
@@ -208,46 +391,52 @@
     </div>
   </main>
 
-  <!-- Script for tab toggling and PDF export -->
+  <!-- ═══ SCRIPTS ═══ -->
   <script>
     // Set print date stamp
-    document.getElementById('printDateStamp').textContent = new Date().toLocaleDateString('en-IN', {
+    const ds = document.getElementById('printDateStamp');
+    if (ds) ds.textContent = new Date().toLocaleDateString('en-IN', {
       day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
     });
 
-    function switchReportTab(tab) {
-      document.querySelectorAll('.report-tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.report-tab-content').forEach(content => {
-        content.style.display = 'none';
-        content.classList.remove('active');
-      });
+    // Tab switching
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.report-hub-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.report-section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      const sec = document.getElementById('tab-' + tabId);
+      if (sec) sec.classList.add('active');
+    }
 
-      if (tab === 'behavioral') {
-        document.getElementById('tab-behavioral').style.display = 'block';
-        document.getElementById('tab-behavioral').classList.add('active');
-        event.currentTarget.classList.add('active');
-      } else {
-        document.getElementById('tab-assessment').style.display = 'block';
-        document.getElementById('tab-assessment').classList.add('active');
-        event.currentTarget.classList.add('active');
+    // Toggle print inclusion for a section
+    function togglePrintSection(checkbox) {
+      const sectionId = 'tab-' + checkbox.dataset.section;
+      const sec = document.getElementById(sectionId);
+      if (sec) {
+        if (checkbox.checked) {
+          sec.classList.add('print-include');
+        } else {
+          sec.classList.remove('print-include');
+        }
       }
     }
 
-    function exportReportToPDF(button) {
-      // Find the parent report card
-      const reportCard = button.closest('.report-card');
-      if (!reportCard) return;
+    // Export combined PDF with selected sections
+    function exportCombinedPDF() {
+      // Ensure all checked sections have print-include class
+      document.querySelectorAll('.pdf-section-check input[type="checkbox"]').forEach(cb => {
+        const sectionId = 'tab-' + cb.dataset.section;
+        const sec = document.getElementById(sectionId);
+        if (sec) {
+          if (cb.checked) {
+            sec.classList.add('print-include');
+          } else {
+            sec.classList.remove('print-include');
+          }
+        }
+      });
 
-      // Mark this card for printing
-      reportCard.classList.add('print-target');
-
-      // Trigger browser print dialog (Save as PDF)
       window.print();
-
-      // Remove the print target class after printing
-      setTimeout(() => {
-        reportCard.classList.remove('print-target');
-      }, 1000);
     }
   </script>
 

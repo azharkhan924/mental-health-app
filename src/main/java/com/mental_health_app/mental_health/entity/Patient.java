@@ -41,6 +41,10 @@ public class Patient {
 
     private String bio;
 
+    private Integer age;
+
+    private String gender;
+
     // --- Role ---
 
     @Enumerated(EnumType.STRING)  // stores "PATIENT" as text in DB
@@ -98,6 +102,10 @@ public class Patient {
 
     public String getBio() { return bio; }
 
+    public Integer getAge() { return age; }
+
+    public String getGender() { return gender; }
+
     public Role getRole() { return role; }
 
     public boolean isEnabled() { return enabled; }
@@ -121,6 +129,10 @@ public class Patient {
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
     public void setBio(String bio) { this.bio = bio; }
+
+    public void setAge(Integer age) { this.age = age; }
+
+    public void setGender(String gender) { this.gender = gender; }
 
     public void setRole(Role role) { this.role = role; }
 

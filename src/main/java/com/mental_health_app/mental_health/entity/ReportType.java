@@ -5,7 +5,10 @@ package com.mental_health_app.mental_health.entity;
  */
 public enum ReportType {
     ASSESSMENT("Clinical Assessment Report", true),
-    CHAT_BEHAVIORAL("AI Chat Behavioral Analysis (Therapist Only)", false);
+    CHAT_BEHAVIORAL("AI Chat Behavioral Analysis (Therapist Only)", false),
+    CUSTOM_TEST("Custom Test Evaluation", true),
+    PRE_DIAGNOSIS("AI Pre-Diagnosis Analysis", false),
+    APPOINTMENT_NOTES("Appointment Clinical Notes", false);
 
     private final String displayName;
     private final boolean defaultVisibleToPatient;

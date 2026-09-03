@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="'My Health Reports & Prescriptions — ' + ${userName} + ' — Breathe Heal Grow'">My Reports</title>
+  <meta name="description" content="View your comprehensive mental health reports, assessment outcomes, prescriptions, and pre-appointment check-ins." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <style>
+    .report-tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin: 1.75rem 0 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    .report-tab-btn {
+      background: none;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 0.6rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .report-tab-btn:hover {
+      color: var(--teal);
+      background: rgba(197, 232, 224, 0.15);
+    }
+    .report-tab-btn.active {
+      color: var(--teal);
+      border-color: var(--teal);
+      background: rgba(197, 232, 224, 0.18);
+    }
+    .report-tab-btn .badge-count {
+      background: var(--teal);
+      color: #fff;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 50px;
+    }
+    .report-tab-btn.active .badge-count {
+      background: var(--coral);
+    }
+
+    .report-tab-panel {
+      display: none;
+      animation: tabFadeIn 0.3s ease-out;
+    }
+    .report-tab-panel.active {
+      display: block;
+    }
+    @keyframes tabFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .patient-report-card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .patient-report-card:hover {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .patient-report-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+    .patient-report-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--foreground);
+      margin-bottom: 0.25rem;
+    }
+    .patient-report-meta {
+      font-size: 0.8rem;
+      color: var(--muted-foreground);
+      margin-bottom: 0.75rem;
+    }
+
+    .clean-bullet-list {
+      padding-left: 1.25rem;
+      margin: 0.5rem 0;
+    }
+    .clean-bullet-list li {
+      margin-bottom: 0.4rem;
+      line-height: 1.6;
+    }
+
+    .rx-box {
+      background: linear-gradient(135deg, rgba(245, 213, 200, 0.2), rgba(197, 232, 224, 0.15));
+      border-left: 4px solid var(--coral);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-top: 0.75rem;
+    }
+
+    @media print {
+      .no-print, .site-header, .report-tabs-nav { display: none !important; }
+      .print-header { display: flex !important; }
+      .report-tab-panel { display: block !important; margin-bottom: 2rem; }
+      .patient-report-card { break-inside: avoid; page-break-inside: avoid; border-color: #ccc; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SITE HEADER ===== -->
+  <header class="site-header no-print">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/appointments/book}">Book Session</a>
+        <a th:href="@{/chat}">Chat with AI</a>
+        <a th:href="@{/assessments}">Assessments</a>
+        <a th:href="@{/reports}" style="color:var(--coral); font-weight:700;">My Reports</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-greeting">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span th:text="${userName}">Patient</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PRINT HEADER (visible only when printing) ===== -->
+  <div class="print-header" style="display:none;">
+    <div class="print-header-brand">
+      <div class="print-logo-text">
+        <span class="print-logo-b">Breathe</span>
+        <span class="print-logo-h">Heal</span>
+        <span class="print-logo-g">Grow</span>
+      </div>
+      <div class="print-tagline">Personal Health Record & Clinical Reports</div>
+    </div>
+    <div class="print-header-meta">
+      <div class="print-patient-name" th:text="'Patient: ' + ${patient.name}">Patient Name</div>
+      <div th:if="${patient.age != null}" style="font-size:0.85rem;">Age: <span th:text="${patient.age}">22</span> · Gender: <span th:text="${patient.gender ?: 'Not specified'}">NA</span></div>
+      <div class="print-date">Generated on: <span id="printDateStamp"></span></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="dashboard" style="padding-top:2rem; padding-bottom:4rem;">
+    <div class="container">
+
+      <!-- Breadcrumbs -->
+      <div class="no-print" style="margin-bottom:1.25rem;">
+        <a th:href="@{/dashboard}" style="color:var(--teal); font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem;">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Welcome Card -->
+      <section class="patient-profile-card fade-up">
+        <div class="patient-profile-header">
+          <div class="patient-profile-avatar">
+            <span th:text="${#strings.substring(patient.name ?: 'P', 0, 1)}">P</span>
+          </div>
+          <div class="patient-profile-details">
+            <h1 class="patient-profile-name">
+              <span th:text="${patient.name}">Patient</span>'s Health Reports 📑
+            </h1>
+            <div class="patient-profile-meta">
+              <span>📧 <span th:text="${patient.email}">patient@example.com</span></span>
+              <span>📞 <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
+              <span th:if="${patient.age != null}">🎂 <span th:text="${patient.age}">22</span> yrs old</span>
+              <span th:if="${patient.gender != null and patient.gender != ''}">⚤ <span th:text="${patient.gender}">Gender</span></span>
+            </div>
+          </div>
+          <div class="patient-profile-actions no-print">
+            <button type="button" class="btn btn-outline-coral btn-sm" onclick="window.print()">
+              🖨️ Export PDF / Print
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Summary Stats -->
+      <div class="grid grid--4col fade-up" style="gap:1rem; margin-top:1.5rem; margin-bottom:1.5rem;">
+        <div class="dash-stat-card bg-mint">
+          <span class="dash-stat-card__number text-teal" th:text="${#lists.size(assessmentReports)}">0</span>
+          <span class="dash-stat-card__label">Clinical Tests</span>
+        </div>
+        <div class="dash-stat-card bg-blush">
+          <span class="dash-stat-card__number text-coral" th:text="${#lists.size(customTestResults)}">0</span>
+          <span class="dash-stat-card__label">Doctor Assigned Tests</span>
+        </div>
+        <div class="dash-stat-card bg-lemon">
+          <span class="dash-stat-card__number" style="color:#b8860b;" th:text="${#lists.size(preDiagnosisTasks)}">0</span>
+          <span class="dash-stat-card__label">Pre-Diagnosis Screenings</span>
+        </div>
+        <div class="dash-stat-card bg-lavender">
+          <span class="dash-stat-card__number text-lavender" th:text="${#lists.size(appointmentNotes)}">0</span>
+          <span class="dash-stat-card__label">Prescriptions & Rx</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="report-tabs-nav fade-up no-print">
+        <button class="report-tab-btn active" onclick="switchPatientTab('rx', this)">
+          💊 Prescriptions & Plans (<span class="badge-count" th:text="${#lists.size(appointmentNotes)}">0</span>)
+        </button>
+        <button class="report-tab-btn" onclick="switchPatientTab('assessments', this)">
+          📝 Clinical Assessments (<span class="badge-count" th:text="${#lists.size(assessmentReports)}">0</span>)
+        </button>
+        <button class="report-tab-btn" onclick="switchPatientTab('custom', this)">
+          🧪 Doctor Assigned Tests (<span class="badge-count" th:text="${#lists.size(customTestResults)}">0</span>)
+        </button>
+        <button class="report-tab-btn" onclick="switchPatientTab('prediag', this)">
+          🤖 Pre-Appointment Screenings (<span class="badge-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>)
+        </button>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB 1: PRESCRIPTIONS & THERAPIST PLANS
+           ════════════════════════════════════════════════════════════════ -->
+      <section id="panel-rx" class="report-tab-panel active fade-up">
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          💊 Prescriptions & Session Plans
+        </h2>
+
+        <div th:if="${#lists.isEmpty(appointmentNotes)}" class="empty-state-card">
+          <p>No prescriptions or session notes recorded yet. After your consultation, Dr. will provide recommendations and prescriptions here.</p>
+        </div>
+
+        <div th:each="note : ${appointmentNotes}">
+          <article class="patient-report-card">
+            <div class="patient-report-card-header">
+              <div>
+                <span class="report-type-badge report-type-badge--assessment" style="background:rgba(212,100,74,0.1); color:var(--coral);">
+                  SESSION PRESCRIPTION
+                </span>
+                <span class="patient-report-meta" style="margin-left:0.5rem;" th:text="${#temporals.format(note.createdAt, 'dd MMMM yyyy · hh:mm a')}">Date</span>
+              </div>
+              <span style="font-size:0.82rem; color:var(--teal); font-weight:600;">
+                Consultation with Dr. <span th:text="${note.therapist.name}">Doctor</span>
+              </span>
+            </div>
+
+            <h3 class="patient-report-title">
+              Consultation on <span th:text="${note.appointment.appointmentDate}">Date</span>
+            </h3>
+
+            <!-- Prescription Box -->
+            <div th:if="${note.prescription != null and note.prescription != ''}" class="rx-box">
+              <strong style="color:var(--coral); font-size:0.95rem;">💊 Doctor's Prescription & Advice:</strong>
+              <div style="margin-top:0.4rem; white-space:pre-line; font-size:0.9rem; line-height:1.6;" th:text="${note.prescription}">
+                Prescription details...
+              </div>
+            </div>
+
+            <!-- Follow-up Plan -->
+            <div th:if="${note.followUpPlan != null and note.followUpPlan != ''}" style="margin-top:1rem; background:rgba(197,232,224,0.15); border-radius:8px; padding:0.75rem 1rem;">
+              <strong style="color:var(--teal); font-size:0.9rem;">📅 Next Steps & Follow-up Plan:</strong>
+              <div style="margin-top:0.3rem; white-space:pre-line; font-size:0.88rem; line-height:1.55;" th:text="${note.followUpPlan}">
+                Plan...
+              </div>
+            </div>
+
+            <!-- AI Summary for Patient -->
+            <div th:if="${note.aiClinicalSummary != null and note.aiClinicalSummary != ''}" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+              <details style="font-size:0.85rem;">
+                <summary style="cursor:pointer; color:var(--teal); font-weight:600;">📋 View AI Clinical Session Summary</summary>
+                <div style="margin-top:0.5rem; line-height:1.65;" th:utext="${note.aiClinicalSummary}">Summary</div>
+              </details>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB 2: CLINICAL ASSESSMENT TESTS (PHQ-9, GAD-7, etc.)
+           ════════════════════════════════════════════════════════════════ -->
+      <section id="panel-assessments" class="report-tab-panel fade-up">
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
+          📝 Clinically Validated Assessments
+        </h2>
+
+        <div th:if="${#lists.isEmpty(assessmentReports)}" class="empty-state-card">
+          <p>You haven't completed any self-assessments yet. <a th:href="@{/assessments}" style="color:var(--teal); font-weight:600;">Take an assessment here</a>.</p>
+        </div>
+
+        <div th:each="rpt : ${assessmentReports}">
+          <article class="patient-report-card">
+            <div class="patient-report-card-header">
+              <span class="report-type-badge report-type-badge--assessment"
+                    th:text="${rpt.assessment != null ? rpt.assessment.type.displayName : 'CLINICAL TEST'}">PHQ-9</span>
+              <span class="report-severity-badge"
+                    th:classappend="'severity-badge--' + ${#strings.toLowerCase(rpt.severity)}"
+                    th:text="${rpt.severity}">MODERATE</span>
+            </div>
+
+            <h3 class="patient-report-title" th:text="${rpt.title}">Evaluation Title</h3>
+            <p class="patient-report-meta" th:text="${rpt.summary}">Summary</p>
+
+            <div class="report-rendered-content" th:utext="${rpt.content}">
+              Content...
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB 3: DOCTOR ASSIGNED CUSTOM TESTS
+           ════════════════════════════════════════════════════════════════ -->
+      <section id="panel-custom" class="report-tab-panel fade-up">
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
+          🧪 Doctor-Assigned Custom Assessments
+        </h2>
+
+        <div th:if="${#lists.isEmpty(customTestResults)}" class="empty-state-card">
+          <p>No assigned tests completed yet.</p>
+        </div>
+
+        <div th:each="ct : ${customTestResults}">
+          <article class="patient-report-card">
+            <div class="patient-report-card-header">
+              <span class="report-type-badge report-type-badge--assessment" style="background:rgba(147,51,234,0.1); color:#7c3aed;"
+                    th:text="${ct.customTest.category ?: 'CUSTOM'}">Category</span>
+              <span class="report-severity-badge"
+                    th:classappend="'severity-badge--' + ${#strings.toLowerCase(ct.severity ?: 'moderate')}"
+                    th:text="${ct.severity ?: 'Moderate'}">Severity</span>
+            </div>
+
+            <h3 class="patient-report-title" th:text="${ct.customTest.title}">Test Title</h3>
+            <p class="patient-report-meta">
+              Score: <strong th:text="${ct.totalScore ?: 0}">0</strong> / <span th:text="${ct.customTest.maxScore}">20</span>
+              · Assigned by Dr. <span th:text="${ct.assignedBy.name}">Therapist</span>
+              · Completed on <span th:text="${ct.completedAt != null ? #temporals.format(ct.completedAt, 'dd MMM yyyy') : 'Recently'}">Date</span>
+            </p>
+
+            <div class="report-rendered-content" th:utext="${ct.aiEvaluation}">
+              Evaluation...
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════════
+           TAB 4: PRE-APPOINTMENT AI SCREENINGS
+           ════════════════════════════════════════════════════════════════ -->
+      <section id="panel-prediag" class="report-tab-panel fade-up">
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
+          🤖 Pre-Appointment Check-in Screenings
+        </h2>
+
+        <div th:if="${#lists.isEmpty(preDiagnosisTasks)}" class="empty-state-card">
+          <p>No pre-appointment check-ins completed yet. When your doctor assigns an AI check-in before your appointment, it will appear on your dashboard.</p>
+        </div>
+
+        <div th:each="pt : ${preDiagnosisTasks}">
+          <article class="patient-report-card">
+            <div class="patient-report-card-header">
+              <span class="report-type-badge report-type-badge--assessment" style="background:rgba(16,185,129,0.1); color:#047857;">
+                PRE-SESSION SCREENING
+              </span>
+              <span class="status-pill status-pill--completed">COMPLETED</span>
+            </div>
+
+            <h3 class="patient-report-title" th:text="${pt.title}">Screening Title</h3>
+            <p class="patient-report-meta">
+              Conducted for Dr. <strong th:text="${pt.therapist.name}">Doctor</strong>
+              · Completed on <span th:text="${pt.completedAt != null ? #temporals.format(pt.completedAt, 'dd MMM yyyy') : 'Recently'}">Date</span>
+            </p>
+
+            <div class="report-rendered-content" th:utext="${pt.aiSummary}">
+              Summary...
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script>
+    const printStamp = document.getElementById('printDateStamp');
+    if (printStamp) {
+      printStamp.textContent = new Date().toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function switchPatientTab(tabName, btn) {
+      document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.report-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.getElementById('panel-' + tabName);
+      if (panel) panel.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

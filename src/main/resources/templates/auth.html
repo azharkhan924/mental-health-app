@@ -108,6 +108,22 @@
             </div>
             <div class="form-grid form-grid--2col" style="margin-top:1rem;">
               <label class="field">
+                <span class="field-label">Age</span>
+                <input type="number" th:field="*{age}" class="field-input" placeholder="e.g. 22" min="10" max="100" />
+              </label>
+              <label class="field">
+                <span class="field-label">Gender</span>
+                <select th:field="*{gender}" class="field-input">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Non-Binary">Non-Binary</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid form-grid--2col" style="margin-top:1rem;">
+              <label class="field">
                 <span class="field-label">Email *</span>
                 <input type="email" th:field="*{email}" class="field-input" required />
               </label>

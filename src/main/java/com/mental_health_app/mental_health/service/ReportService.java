@@ -1,6 +1,7 @@
 package com.mental_health_app.mental_health.service;
 
 import com.mental_health_app.mental_health.entity.*;
+import com.mental_health_app.mental_health.repository.AppointmentNotesRepository;
 import com.mental_health_app.mental_health.repository.AppointmentRepository;
 import com.mental_health_app.mental_health.repository.ChatMessageRepository;
 import com.mental_health_app.mental_health.repository.PatientReportRepository;
@@ -25,15 +26,18 @@ public class ReportService {
     private final PatientReportRepository reportRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentNotesRepository appointmentNotesRepository;
     private final ChatService chatService;
 
     public ReportService(PatientReportRepository reportRepository,
                          ChatMessageRepository chatMessageRepository,
                          AppointmentRepository appointmentRepository,
+                         AppointmentNotesRepository appointmentNotesRepository,
                          ChatService chatService) {
         this.reportRepository = reportRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.appointmentRepository = appointmentRepository;
+        this.appointmentNotesRepository = appointmentNotesRepository;
         this.chatService = chatService;
     }
 
@@ -79,6 +83,10 @@ public class ReportService {
                 - Output ONLY the HTML, no markdown, no code fences
                 """;
 
+        String demoInfo = patient.getName();
+        if (patient.getAge() != null) demoInfo += " (Age: " + patient.getAge() + ")";
+        if (patient.getGender() != null && !patient.getGender().isBlank()) demoInfo += " (Gender: " + patient.getGender() + ")";
+
         String userPrompt = String.format("""
                 Patient: %s
                 Assessment Taken: %s
@@ -87,7 +95,7 @@ public class ReportService {
                 Standard Recommendation: %s
                 
                 Please generate the complete clinical evaluation report in HTML format.
-                """, patient.getName(), type.getDisplayName(), score, maxScore, severity, assessment.getRecommendation());
+                """, demoInfo, type.getDisplayName(), score, maxScore, severity, assessment.getRecommendation());
 
         String aiAnalysis = chatService.generateReportCompletion(systemPrompt, userPrompt);
 
@@ -168,13 +176,17 @@ public class ReportService {
                 - Output ONLY the HTML, no markdown, no code fences
                 """;
 
+        String demoBio = patient.getName();
+        if (patient.getAge() != null) demoBio += ", Age: " + patient.getAge();
+        if (patient.getGender() != null && !patient.getGender().isBlank()) demoBio += ", Gender: " + patient.getGender();
+
         String userPrompt = String.format("""
-                Patient Name: %s
+                Patient Demographics: %s
                 Chat Sample Transcript:
                 %s
                 
                 Please generate the Confidential Chat Behavioral Analysis report for the consulting therapist in HTML format.
-                """, patient.getName(), chatTranscript.toString());
+                """, demoBio, chatTranscript.toString());
 
         String aiAnalysis = chatService.generateReportCompletion(systemPrompt, userPrompt);
 
@@ -252,6 +264,94 @@ public class ReportService {
 
     public Optional<PatientReport> getReportForAssessment(Assessment assessment) {
         return reportRepository.findByAssessment(assessment);
+    }
+
+    /**
+     * Generate an AI Clinical Summary from therapist's appointment session notes.
+     */
+    public AppointmentNotes generateAppointmentNotesReport(AppointmentNotes notes) {
+        Patient patient = notes.getPatient();
+
+        String demographicInfo = "Name: " + patient.getName();
+        if (patient.getAge() != null) demographicInfo += ", Age: " + patient.getAge();
+        if (patient.getGender() != null && !patient.getGender().isBlank()) demographicInfo += ", Gender: " + patient.getGender();
+
+        String systemPrompt = """
+                You are a Clinical Documentation Specialist generating a structured session summary from a therapist's raw notes.
+                Output clean HTML (no markdown). Structure exactly:
+                
+                <h3>📋 Session Summary</h3>
+                <p>2-3 sentence professional summary of the consultation.</p>
+                
+                <h3>🔍 Clinical Assessment</h3>
+                <ul>
+                <li><strong>Finding</strong> — Description based on therapist observations</li>
+                </ul>
+                (3-4 bullet points)
+                
+                <h3>💊 Treatment Plan</h3>
+                <ul>
+                <li><strong>Intervention</strong> — Details of prescribed treatment or therapy</li>
+                </ul>
+                
+                <h3>📅 Follow-Up Recommendations</h3>
+                <ul>
+                <li><strong>Next Step</strong> — Timeline and action items</li>
+                </ul>
+                
+                Rules:
+                - Be concise, professional, and clinical (max 300 words)
+                - Output ONLY the HTML, no markdown
+                """;
+
+        String userPrompt = String.format("""
+                PATIENT: %s
+                APPOINTMENT DATE: %s
+                THERAPIST: Dr. %s
+                
+                CHIEF COMPLAINT:
+                %s
+                
+                CLINICAL OBSERVATIONS:
+                %s
+                
+                PRESCRIPTION:
+                %s
+                
+                FOLLOW-UP PLAN:
+                %s
+                """,
+                demographicInfo,
+                notes.getAppointment().getAppointmentDate(),
+                notes.getTherapist().getName(),
+                notes.getChiefComplaint() != null ? notes.getChiefComplaint() : "Not specified",
+                notes.getClinicalObservations() != null ? notes.getClinicalObservations() : "No observations recorded",
+                notes.getPrescription() != null ? notes.getPrescription() : "No prescriptions",
+                notes.getFollowUpPlan() != null ? notes.getFollowUpPlan() : "No follow-up plan specified");
+
+        String aiSummary = chatService.generateReportCompletion(systemPrompt, userPrompt);
+
+        if (aiSummary == null || aiSummary.isBlank()) {
+            aiSummary = String.format("""
+                    <h3>📋 Session Summary</h3>
+                    <p>Dr. %s conducted a consultation with %s on %s. The session addressed the patient's presenting concerns and a treatment plan was established.</p>
+                    <h3>💊 Treatment Plan</h3>
+                    <ul><li><strong>Prescription</strong> — %s</li></ul>
+                    <h3>📅 Follow-Up</h3>
+                    <ul><li><strong>Plan</strong> — %s</li></ul>
+                    """,
+                    notes.getTherapist().getName(), patient.getName(),
+                    notes.getAppointment().getAppointmentDate(),
+                    notes.getPrescription() != null ? notes.getPrescription() : "As discussed",
+                    notes.getFollowUpPlan() != null ? notes.getFollowUpPlan() : "Follow up as needed");
+        }
+
+        notes.setAiClinicalSummary(aiSummary);
+        return appointmentNotesRepository.save(notes);
+    }
+
+    public List<AppointmentNotes> getAppointmentNotesForPatient(Patient patient) {
+        return appointmentNotesRepository.findByPatientOrderByCreatedAtDesc(patient);
     }
 
     // --- Helpers ---

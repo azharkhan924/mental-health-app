@@ -194,4 +194,11 @@ public class AppointmentService {
     public long countByPatientAndStatus(Patient patient, AppointmentStatus status) {
         return appointmentRepository.countByPatientAndStatus(patient, status);
     }
+
+    /**
+     * Find an appointment by its ID.
+     */
+    public Optional<Appointment> getAppointmentById(Long id) {
+        return appointmentRepository.findById(id);
+    }
 }

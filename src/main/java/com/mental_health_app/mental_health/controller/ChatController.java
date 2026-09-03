@@ -123,8 +123,8 @@ public class ChatController {
 
          List<ChatMessage> chatHistory = loadChatHistory(patient, session, persona);
 
-         // Get AI response using persona-specific system prompt and past conversation context
-         String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona);
+         // Get AI response using persona-specific system prompt and past conversation context + patient demographics
+         String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona, patient);
 
          ChatMessage userMsg = new ChatMessage("user", message.trim());
          ChatMessage assistantMsg = new ChatMessage("assistant", aiResponse);
@@ -183,8 +183,8 @@ public class ChatController {
 
         List<ChatMessage> chatHistory = loadChatHistory(patient, session, persona);
 
-        // Get AI response using persona-specific system prompt and past conversation context
-        String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona);
+        // Get AI response using persona-specific system prompt and past conversation context + patient demographics
+        String aiResponse = chatService.sendMessage(message.trim(), chatHistory, persona, patient);
 
         ChatMessage userMsg = new ChatMessage("user", message.trim());
         ChatMessage assistantMsg = new ChatMessage("assistant", aiResponse);

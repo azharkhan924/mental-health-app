@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="'Pre-Appointment Check-in — ' + ${task.title} + ' — Breathe Heal Grow'">Pre-Diagnosis</title>
+  <meta name="description" content="AI-guided pre-appointment diagnostic conversation assigned by your therapist." />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body class="wa-body">
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <nav class="site-nav">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/chat}">Messages</a>
+        <a th:href="@{/assessments}">Assessments</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-greeting">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span th:text="${userName}">Patient</span>
+        </span>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PRE-DIAGNOSIS CHAT INTERFACE ===== -->
+  <main class="wa-wrapper">
+    <div class="wa-container" style="max-width: 900px; margin: 0 auto;">
+
+      <!-- Full-width chat panel (no sidebar needed) -->
+      <section class="wa-chat-window" style="width: 100%; border-radius: 14px;">
+
+        <!-- Chat Header -->
+        <div class="wa-chat-header">
+          <div class="wa-chat-header-info">
+            <div class="wa-contact-avatar-wrap">
+              <div class="wa-contact-avatar" style="background: linear-gradient(135deg, var(--teal), var(--coral)); color: #fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; width:40px; height:40px; border-radius:50%;">
+                🤖
+              </div>
+              <span class="wa-online-dot" id="headerOnlineDot"></span>
+            </div>
+            <div>
+              <h2 class="wa-chat-header-name" th:text="${task.title}">Pre-Appointment Check-in</h2>
+              <span class="wa-chat-header-status" id="headerStatusText" style="font-size: 0.75rem;">
+                Assigned by Dr. <span th:text="${task.therapist.name}">Therapist</span>
+              </span>
+            </div>
+          </div>
+          <div class="wa-chat-header-tools">
+            <form th:action="@{/pre-diagnosis/{id}/complete(id=${task.id})}" method="post" style="display:inline;" id="completeForm">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <button type="submit" class="btn btn-teal btn-sm" onclick="return confirm('Are you sure you want to complete this check-in? Your therapist will review all your responses.');">
+                ✅ Complete & Submit
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Therapist Instructions Banner -->
+        <div style="background: linear-gradient(135deg, rgba(245, 213, 200, 0.3), rgba(197, 232, 224, 0.3)); border-bottom: 1px solid var(--border); padding: 0.75rem 1.25rem; font-size: 0.82rem; color: var(--foreground);">
+          <strong style="color: var(--coral);">📋 Dr. <span th:text="${task.therapist.name}">Therapist</span>'s request:</strong>
+          <span th:text="${task.instructions}">Please complete this check-in before your appointment.</span>
+          <span th:if="${task.appointment != null}" style="display:block; margin-top:0.25rem; font-size:0.78rem; color:var(--muted-foreground);">
+            📅 Appointment on <strong th:text="${task.appointment.appointmentDate}">Date</strong> at <strong th:text="${task.appointment.appointmentTime}">Time</strong>
+          </span>
+        </div>
+
+        <!-- Messages Area -->
+        <div class="wa-messages-area" id="chatMessages">
+
+          <!-- Encryption Pill -->
+          <div class="wa-encryption-pill">
+            🔒 This conversation is confidential and will be shared only with Dr. <span th:text="${task.therapist.name}">Therapist</span>.
+          </div>
+
+          <!-- Welcome Card (shown when no messages yet) -->
+          <div th:if="${#lists.isEmpty(messages)}" class="wa-intro-card">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">🤖</div>
+            <h3 class="wa-intro-name" th:text="${task.title}">Pre-Appointment Check-in</h3>
+            <p class="wa-intro-role">AI Clinical Screening Assistant</p>
+            <p class="wa-intro-bio">
+              I'm here to help gather some information before your appointment with Dr. <span th:text="${task.therapist.name}">Therapist</span>.
+              This is a safe space — just answer honestly and at your own pace. Your responses will help your therapist better prepare for your session.
+            </p>
+            <div class="wa-welcome-speech">
+              <p>Start by telling me how you've been feeling lately, and I'll guide you through from there. 💚</p>
+            </div>
+            <div class="wa-suggestions-wrap">
+              <button type="button" class="wa-chip-btn" onclick="sendChip(this.textContent)">I've been feeling anxious lately</button>
+              <button type="button" class="wa-chip-btn" onclick="sendChip(this.textContent)">My sleep hasn't been great</button>
+              <button type="button" class="wa-chip-btn" onclick="sendChip(this.textContent)">I'd like to talk about my mood</button>
+            </div>
+          </div>
+
+          <!-- Existing Messages -->
+          <div th:each="msg : ${messages}"
+               class="wa-bubble-row"
+               th:classappend="${msg.get('role') == 'user'} ? 'wa-bubble-row--outgoing' : 'wa-bubble-row--incoming'">
+            <div class="wa-bubble"
+                 th:classappend="${msg.get('role') == 'user'} ? 'wa-bubble--outgoing' : 'wa-bubble--incoming'">
+              <span th:if="${msg.get('role') != 'user'}" class="wa-bubble-sender">AI Screening Assistant</span>
+              <div class="wa-bubble-text" th:text="${msg.get('content')}">Message</div>
+            </div>
+          </div>
+
+          <!-- Typing Bubble -->
+          <div id="typingBubbleRow" class="wa-bubble-row wa-bubble-row--incoming" style="display:none;">
+            <div class="wa-bubble wa-bubble--incoming wa-typing-bubble">
+              <span class="wa-typing-dot"></span>
+              <span class="wa-typing-dot"></span>
+              <span class="wa-typing-dot"></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Input Bar -->
+        <div class="wa-input-bar">
+          <form id="chatForm" onsubmit="return false;" class="wa-input-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" id="csrfToken" />
+            <input type="text"
+                   id="messageInput"
+                   class="wa-text-input"
+                   placeholder="Share how you're feeling..."
+                   autocomplete="off"
+                   required />
+            <button type="button" class="wa-send-btn" aria-label="Send Message" id="sendBtn" onclick="submitMessage()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </form>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Script: AJAX Chat for Pre-Diagnosis -->
+  <script th:inline="javascript">
+    const taskId = [[${task.id}]];
+    const csrfToken = document.getElementById('csrfToken').value;
+    const csrfHeader = [[${_csrf.headerName}]];
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const typingBubbleRow = document.getElementById('typingBubbleRow');
+    const sendBtn = document.getElementById('sendBtn');
+    const headerStatusText = document.getElementById('headerStatusText');
+
+    function scrollToBottom() {
+      if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    window.onload = scrollToBottom;
+
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function appendBubble(role, text) {
+      const introCard = chatMessages.querySelector('.wa-intro-card');
+      if (introCard) introCard.remove();
+
+      const row = document.createElement('div');
+      const isUser = role === 'user';
+      row.className = 'wa-bubble-row ' + (isUser ? 'wa-bubble-row--outgoing' : 'wa-bubble-row--incoming');
+      row.innerHTML = `
+        <div class="wa-bubble ${isUser ? 'wa-bubble--outgoing' : 'wa-bubble--incoming'}">
+          ${!isUser ? '<span class="wa-bubble-sender">AI Screening Assistant</span>' : ''}
+          <div class="wa-bubble-text" style="white-space: pre-wrap;">${escapeHtml(text)}</div>
+        </div>
+      `;
+      if (typingBubbleRow) {
+        chatMessages.insertBefore(row, typingBubbleRow);
+      } else {
+        chatMessages.appendChild(row);
+      }
+      scrollToBottom();
+    }
+
+    function sendChip(text) {
+      messageInput.value = text;
+      submitMessage();
+    }
+
+    async function submitMessage() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+
+      appendBubble('user', text);
+      messageInput.value = '';
+
+      // Show typing indicator
+      if (typingBubbleRow) typingBubbleRow.style.display = 'flex';
+      if (headerStatusText) { headerStatusText.textContent = 'analyzing...'; headerStatusText.style.fontStyle = 'italic'; }
+      if (sendBtn) sendBtn.disabled = true;
+      scrollToBottom();
+
+      try {
+        const formData = new FormData();
+        formData.set('message', text);
+
+        const resp = await fetch(`/pre-diagnosis/${taskId}/send`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', [csrfHeader]: csrfToken },
+          body: formData
+        });
+
+        if (!resp.ok) throw new Error('Server error ' + resp.status);
+        const data = await resp.json();
+
+        if (typingBubbleRow) typingBubbleRow.style.display = 'none';
+        if (headerStatusText) { headerStatusText.textContent = 'online'; headerStatusText.style.fontStyle = 'normal'; }
+
+        appendBubble('assistant', data.aiResponse);
+
+      } catch (err) {
+        console.error('Pre-diagnosis chat error:', err);
+        if (typingBubbleRow) typingBubbleRow.style.display = 'none';
+        if (headerStatusText) { headerStatusText.textContent = 'online'; headerStatusText.style.fontStyle = 'normal'; }
+        appendBubble('assistant', '⚠️ Could not reach AI service. Please try again shortly.');
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        messageInput.focus();
+        scrollToBottom();
+      }
+    }
+
+    // Enter key to send
+    messageInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); submitMessage(); }
+    });
+  </script>
+
+</body>
+</html>

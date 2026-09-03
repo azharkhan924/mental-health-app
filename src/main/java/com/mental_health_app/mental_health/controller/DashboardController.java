@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -33,19 +34,25 @@ public class DashboardController {
     private final AssessmentService assessmentService;
     private final com.mental_health_app.mental_health.service.ReportService reportService;
     private final com.mental_health_app.mental_health.service.CustomTestService customTestService;
+    private final com.mental_health_app.mental_health.service.PreAppointmentService preAppointmentService;
+    private final com.mental_health_app.mental_health.repository.AppointmentNotesRepository appointmentNotesRepository;
 
     public DashboardController(PatientService patientService,
                                TherapistService therapistService,
                                AppointmentService appointmentService,
                                AssessmentService assessmentService,
                                com.mental_health_app.mental_health.service.ReportService reportService,
-                               com.mental_health_app.mental_health.service.CustomTestService customTestService) {
+                               com.mental_health_app.mental_health.service.CustomTestService customTestService,
+                               com.mental_health_app.mental_health.service.PreAppointmentService preAppointmentService,
+                               com.mental_health_app.mental_health.repository.AppointmentNotesRepository appointmentNotesRepository) {
         this.patientService = patientService;
         this.therapistService = therapistService;
         this.appointmentService = appointmentService;
         this.assessmentService = assessmentService;
         this.reportService = reportService;
         this.customTestService = customTestService;
+        this.preAppointmentService = preAppointmentService;
+        this.appointmentNotesRepository = appointmentNotesRepository;
     }
 
     /**
@@ -81,6 +88,11 @@ public class DashboardController {
             model.addAttribute("assignedTests", assignedTests);
             model.addAttribute("pendingAssignedTestsCount", 
                     assignedTests.stream().filter(a -> "PENDING".equals(a.getStatus())).count());
+
+            // Fetch pre-appointment diagnostic tasks
+            var preTasks = preAppointmentService.getPendingTasksForPatient(patient);
+            model.addAttribute("pendingPreTasks", preTasks);
+            model.addAttribute("pendingPreTasksCount", preTasks.size());
 
             // Statistics
             model.addAttribute("pendingCount", appointmentService.countByPatientAndStatus(patient, AppointmentStatus.PENDING));
@@ -137,6 +149,20 @@ public class DashboardController {
 
             // Available patients for test assignment
             model.addAttribute("allPatients", patientService.getAllPatients());
+
+            // Pre-appointment diagnostic tasks
+            model.addAttribute("preDiagnosisTasks", preAppointmentService.getTasksForTherapist(therapist));
+
+            // Session Notes & Prescriptions mapped by appointment ID
+            List<com.mental_health_app.mental_health.entity.AppointmentNotes> therapistNotes =
+                    appointmentNotesRepository.findByTherapistOrderByCreatedAtDesc(therapist);
+            Map<Long, com.mental_health_app.mental_health.entity.AppointmentNotes> notesMap = new java.util.HashMap<>();
+            for (com.mental_health_app.mental_health.entity.AppointmentNotes note : therapistNotes) {
+                if (note.getAppointment() != null) {
+                    notesMap.put(note.getAppointment().getId(), note);
+                }
+            }
+            model.addAttribute("notesMap", notesMap);
         }
 
         return "therapist-dashboard";

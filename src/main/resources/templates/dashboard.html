@@ -20,8 +20,9 @@
       <nav class="site-nav">
         <a th:href="@{/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
-        <a href="#">Chat with AI</a>
+        <a th:href="@{/chat}">Chat with AI</a>
         <a th:href="@{/assessments}">Assessments</a>
+        <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
         <span class="user-greeting">
@@ -52,6 +53,29 @@
           <p class="dash-welcome__desc">
             How are you feeling today? You can book appointments with certified therapists or explore self-care tools.
           </p>
+        </div>
+      </section>
+
+      <!-- PRE-APPOINTMENT TASKS ACTION BANNER -->
+      <section th:if="${pendingPreTasks != null and not #lists.isEmpty(pendingPreTasks)}" class="fade-up" style="margin-bottom: 1.5rem;">
+        <div th:each="preTask : ${pendingPreTasks}" style="background: linear-gradient(135deg, rgba(212, 100, 74, 0.08), rgba(197, 232, 224, 0.15)); border: 2px solid var(--coral); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex:1; min-width:200px;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
+              <span style="font-size:1.3rem;">⚡</span>
+              <strong style="color:var(--coral); font-size:1.05rem;">Action Required — Pre-Appointment Check-in</strong>
+              <span class="status-pill status-pill--pending" style="font-size:0.68rem;" th:text="${preTask.status}">PENDING</span>
+            </div>
+            <p style="font-size:0.88rem; color:var(--foreground); margin:0;">
+              <strong th:text="${preTask.title}">Task Title</strong> — Assigned by
+              <strong style="color:var(--teal);">Dr. <span th:text="${preTask.therapist.name}">Therapist</span></strong>
+            </p>
+            <p th:if="${preTask.appointment != null}" style="font-size:0.78rem; color:var(--muted-foreground); margin:0.2rem 0 0 0;">
+              📅 Complete before your appointment on <strong th:text="${preTask.appointment.appointmentDate}">Date</strong> at <strong th:text="${preTask.appointment.appointmentTime}">Time</strong>
+            </p>
+          </div>
+          <a th:href="@{/pre-diagnosis/{id}(id=${preTask.id})}" class="btn btn-coral" style="white-space:nowrap;">
+            Start Check-in 🤖
+          </a>
         </div>
       </section>
 
