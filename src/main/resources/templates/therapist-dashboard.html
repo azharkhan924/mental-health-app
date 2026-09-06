@@ -7,7 +7,7 @@
   <meta name="description" content="Manage appointments, configure availability, generate custom AI tests from documents, and update clinic details." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===== HEADER ===== -->
   <header class="site-header">
@@ -17,13 +17,12 @@
         <span>Heal</span>
         <span>Grow</span>
       </a>
-      <nav class="site-nav">
-        <a th:href="@{/therapist/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
-        <a href="#appointments-section">Appointments</a>
-        <a href="#tests-section">AI Test Studio</a>
-        <a href="#prediagnosis-section">Pre-Diagnosis</a>
-        <a href="#schedule-section">Schedule & Slots</a>
-        <a href="#profile-section">Clinic Profile</a>
+      <nav class="site-nav" aria-label="Therapist navigation">
+        <a th:href="@{/therapist/dashboard}" class="site-nav-btn active" data-tab-switch="appointments">Appointments</a>
+        <a href="#tests" class="site-nav-btn" data-tab-switch="tests">AI Test Studio</a>
+        <a href="#prediagnosis" class="site-nav-btn" data-tab-switch="prediagnosis">Pre-Diagnosis</a>
+        <a href="#schedule" class="site-nav-btn" data-tab-switch="schedule">Schedule &amp; Slots</a>
+        <a href="#profile" class="site-nav-btn" data-tab-switch="profile">Clinic Profile</a>
       </nav>
       <div class="header-actions">
         <span class="user-greeting">
@@ -34,9 +33,69 @@
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
         </form>
+        <button type="button" class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false">
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- ===== MOBILE NAV BACKDROP & DRAWER ===== -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+    <div class="mobile-nav-drawer__header">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="mobile-nav-drawer__user" th:if="${userName != null}">
+      <div class="mobile-user-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="mobile-user-info">
+        <span class="mobile-user-label">Consulting Therapist</span>
+        <strong class="mobile-user-name" th:text="'Dr. ' + ${userName}">Dr. Therapist</strong>
+      </div>
+    </div>
+    <nav class="mobile-nav-drawer__links">
+      <a href="#appointments" class="mobile-nav-link" data-tab-switch="appointments">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Appointments</span>
+      </a>
+      <a href="#tests" class="mobile-nav-link" data-tab-switch="tests">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>AI Test Studio</span>
+      </a>
+      <a href="#prediagnosis" class="mobile-nav-link" data-tab-switch="prediagnosis">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+        <span>Pre-Diagnosis Tasks</span>
+      </a>
+      <a href="#schedule" class="mobile-nav-link" data-tab-switch="schedule">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Schedule &amp; Slots</span>
+      </a>
+      <a href="#profile" class="mobile-nav-link" data-tab-switch="profile">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Clinic Profile</span>
+      </a>
+    </nav>
+    <div class="mobile-nav-drawer__footer">
+      <form th:action="@{/logout}" method="post" style="width:100%;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="btn btn-outline-coral" style="width:100%; justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Logout</span>
+        </button>
+      </form>
+    </div>
+  </aside>
 
   <!-- ===== DASHBOARD CONTENT ===== -->
   <main class="dashboard" style="padding-top:2rem; padding-bottom:4rem;">
@@ -58,538 +117,577 @@
         </div>
       </section>
 
-      <!-- Quick Stats -->
-      <section class="dash-stats fade-up">
-        <div class="dash-stat-card bg-mint">
-          <span class="dash-stat-card__number text-teal" th:text="${activePatientsCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Active Patients</span>
-        </div>
-        <div class="dash-stat-card bg-blush">
-          <span class="dash-stat-card__number text-coral" th:text="${upcomingSessionsCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Confirmed Sessions</span>
-        </div>
-        <div class="dash-stat-card bg-sand">
-          <span class="dash-stat-card__number text-gold" th:text="${pendingRequestsCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Pending Requests</span>
-        </div>
-        <div class="dash-stat-card bg-mint" style="border-top:4px solid var(--teal);">
-          <span class="dash-stat-card__number text-teal" th:text="${#lists.size(customTests)} ?: 0">0</span>
-          <span class="dash-stat-card__label">Custom Tests Created</span>
-        </div>
-      </section>
+      <!-- ===== THERAPIST FEATURE NAVIGATION TABS ===== -->
+      <nav class="dash-tabs-bar fade-up" aria-label="Therapist clinical sections">
+        <button type="button" class="dash-tab-btn active" data-tab="appointments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Appointments</span>
+          <span class="tab-badge" th:if="${pendingRequestsCount != null and pendingRequestsCount > 0}" th:text="${pendingRequestsCount} + ' new'">1 new</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="tests">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>AI Test Studio</span>
+          <span class="tab-badge" th:if="${not #lists.isEmpty(customTests)}" th:text="${#lists.size(customTests)}">0</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="prediagnosis">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+          <span>Pre-Diagnosis</span>
+          <span class="tab-badge" th:if="${preDiagnosisTasks != null and not #lists.isEmpty(preDiagnosisTasks)}" th:text="${#lists.size(preDiagnosisTasks)}">0</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="schedule">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Schedule &amp; Slots</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="profile">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Clinic Profile</span>
+        </button>
+      </nav>
 
-      <!-- ══════════════════════════════════════════════════════════════
-           SECTION 1: APPOINTMENTS MANAGEMENT
-           ══════════════════════════════════════════════════════════════ -->
-      <section id="appointments-section" class="appointments-section fade-up" style="margin-bottom: 3.5rem;">
-        <div class="section-header" style="margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <h2 style="font-size:1.4rem; color:var(--teal);">Appointment Requests & Consultations</h2>
-            <p style="font-size:0.85rem; color:var(--muted-foreground);">Review incoming patient booking requests and manage clinical access</p>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(appointments)}" class="empty-state-card">
-          <p>No appointment requests received yet. Patients will appear here once they book a consultation.</p>
-        </div>
-
-        <!-- Appointments Table -->
-        <div th:if="${not #lists.isEmpty(appointments)}" class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Patient</th>
-                <th>Contact</th>
-                <th>Requested Date & Time</th>
-                <th>Reason / Notes</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="apt : ${appointments}">
-                <td>
-                  <strong th:text="${apt.patient.name}">Patient Name</strong>
-                </td>
-                <td>
-                  <div style="font-size:0.82rem;">
-                    <div th:text="${apt.patient.email}">patient@example.com</div>
-                    <div style="color:var(--muted-foreground);" th:text="${apt.patient.phoneNumber} ?: 'No phone'">+91-XXXXX</div>
-                  </div>
-                </td>
-                <td>
-                  <span th:text="${apt.appointmentDate}" style="font-weight:600;">2026-09-10</span><br/>
-                  <small style="color:var(--teal); font-weight:700;" th:text="${apt.appointmentTime}">10:00 AM</small>
-                </td>
-                <td style="max-width:220px;">
-                  <span th:text="${apt.notes} ?: 'No additional notes'" style="font-size:0.82rem; color:rgba(26,60,60,0.85);">Notes</span>
-                </td>
-                <td>
-                  <span class="status-pill"
-                        th:classappend="'status-pill--' + ${#strings.toLowerCase(apt.status)}"
-                        th:text="${apt.status}">PENDING</span>
-                </td>
-                <td>
-                  <div style="display:flex; gap:0.4rem; align-items:center; flex-wrap:wrap;">
-                    <!-- Accept Button (If PENDING) -->
-                    <form th:if="${apt.status.name() == 'PENDING'}"
-                          th:action="@{/appointments/{id}/status(id=${apt.id})}"
-                          method="post"
-                          style="display:inline;">
-                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                      <input type="hidden" name="status" value="CONFIRMED" />
-                      <input type="hidden" name="returnTo" value="therapist" />
-                      <button type="submit" class="btn btn-teal btn-sm">Accept</button>
-                    </form>
-
-                    <!-- Decline Button (If PENDING) -->
-                    <form th:if="${apt.status.name() == 'PENDING'}"
-                          th:action="@{/appointments/{id}/status(id=${apt.id})}"
-                          method="post"
-                          onsubmit="return confirm('Decline this appointment request?');"
-                          style="display:inline;">
-                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                      <input type="hidden" name="status" value="CANCELLED" />
-                      <input type="hidden" name="returnTo" value="therapist" />
-                      <button type="submit" class="btn btn-cancel btn-sm">Decline</button>
-                    </form>
-
-                    <!-- View Patient Reports -->
-                    <a th:href="@{/therapist/patient/{id}/reports(id=${apt.patient.id})}"
-                       class="btn btn-outline-coral btn-sm"
-                       title="View clinical tests and confidential AI chat behavioral insights">
-                      📋 Reports
-                    </a>
-
-                    <!-- Prescribe / Add Session Notes -->
-                    <button type="button"
-                            class="btn btn-sm"
-                            th:classappend="${notesMap != null and notesMap.containsKey(apt.id)} ? 'btn-teal' : 'btn-outline-coral'"
-                            th:title="${notesMap != null and notesMap.containsKey(apt.id)} ? 'Edit Session Notes & Prescription' : 'Add Session Notes & Prescription for Consultation'"
-                            th:data-apptid="${apt.id}"
-                            th:data-patientname="${apt.patient.name}"
-                            th:data-appttime="${apt.appointmentDate} + ' at ' + ${apt.appointmentTime}"
-                            th:data-complaint="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).chiefComplaint : ''}"
-                            th:data-obs="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).clinicalObservations : ''}"
-                            th:data-rx="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).prescription : ''}"
-                            th:data-plan="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).followUpPlan : ''}"
-                            onclick="openRxModalFromBtn(this)">
-                      <span th:if="${notesMap != null and notesMap.containsKey(apt.id)}">✏️ Rx / Notes</span>
-                      <span th:unless="${notesMap != null and notesMap.containsKey(apt.id)}">✍️ Prescribe</span>
-                    </button>
-
-                    <!-- Cancel Button (If CONFIRMED) -->
-                    <form th:if="${apt.status.name() == 'CONFIRMED'}"
-                          th:action="@{/appointments/{id}/status(id=${apt.id})}"
-                          method="post"
-                          onsubmit="return confirm('Cancel this confirmed appointment?');"
-                          style="display:inline;">
-                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                      <input type="hidden" name="status" value="CANCELLED" />
-                      <input type="hidden" name="returnTo" value="therapist" />
-                      <button type="submit" class="btn btn-cancel btn-sm">Cancel</button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════════
-           SECTION 2: AI CUSTOM TEST STUDIO (UPLOAD DOCUMENT & ASSIGN)
-           ══════════════════════════════════════════════════════════════ -->
-      <section id="tests-section" class="tests-studio-section fade-up" style="margin-bottom: 3.5rem;">
-        <div class="section-header" style="margin-bottom:1.25rem;">
-          <h2 style="font-size:1.4rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            <span>✨ AI Custom Test Studio</span>
-            <span class="badge-shared" style="font-size:0.75rem;">Multi-Patient Assessment Builder</span>
-          </h2>
-          <p style="font-size:0.85rem; color:var(--muted-foreground);">
-            Upload a questionnaire document (PDF, Word DOCX, TXT, CSV) or paste questions. AI will automatically structure questions, Likert options, and scoring rules into a reusable test you can assign to any patient.
-          </p>
-        </div>
-
-        <div class="grid grid--2col" style="gap:2rem; align-items:start;">
-          
-          <!-- Document Upload & Parser Form -->
-          <div class="dash-card" style="padding:1.75rem;">
-            <h3 style="font-size:1.15rem; color:var(--teal); margin-bottom:1rem;">1. Upload Questions or Paste Text</h3>
-            
-            <form id="aiTestGeneratorForm" onsubmit="generateTestWithAI(event)">
-              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-              <label class="field" style="margin-bottom:1rem;">
-                <span class="field-label">Assessment Title (Optional Hint)</span>
-                <input type="text" id="testTitleInput" class="field-input" placeholder="e.g. Workplace Stress & Burnout Screening" />
-              </label>
-
-              <label class="field" style="margin-bottom:1rem;">
-                <span class="field-label">Upload Question Document (PDF, Word DOCX, TXT, CSV, JSON)</span>
-                <input type="file" id="testFileInput" class="field-input" accept=".pdf,.docx,.txt,.csv,.json,.md" />
-                <span style="font-size:0.75rem; color:var(--muted-foreground); margin-top:0.3rem; display:block;">
-                  Supported: .pdf, .docx, .txt, .csv, .json (Max 10MB)
-                </span>
-              </label>
-
-              <label class="field" style="margin-bottom:1.25rem;">
-                <span class="field-label">Or Paste Questions Directly</span>
-                <textarea id="testTextInput" rows="5" class="field-input" style="height:auto; resize:vertical;" placeholder="Paste raw questionnaire items or questions here...
-1. How often do you feel overwhelmed at work?
-2. Trouble concentrating on tasks?
-3. Restless or difficulty relaxing?"></textarea>
-              </label>
-
-              <button type="submit" id="generateTestBtn" class="btn btn-teal" style="width:100%; padding:0.85rem;">
-                ⚡ Generate Structured Test with AI
-              </button>
-            </form>
-          </div>
-
-          <!-- Live Preview & Save Card -->
-          <div class="dash-card" style="padding:1.75rem;">
-            <h3 style="font-size:1.15rem; color:var(--teal); margin-bottom:1rem;">2. Review & Save Test Template</h3>
-
-            <div id="testPreviewEmpty" style="padding:2.5rem 1rem; text-align:center; color:var(--muted-foreground); border:2px dashed var(--border); border-radius:12px;">
-              <span style="font-size:2rem; display:block; margin-bottom:0.5rem;">📋</span>
-              Upload a document or paste questions on the left, then click <strong>Generate Structured Test with AI</strong> to preview the standardized questions and scoring rules.
+      <!-- ============================================================
+           TAB 1: APPOINTMENTS MANAGEMENT
+           ============================================================ -->
+      <div class="dash-tab-content active" id="tab-appointments">
+        <section id="appointments-section" class="appointments-section fade-up" style="margin-bottom: 2.5rem;">
+          <div class="section-header" style="margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-size:1.4rem; color:var(--teal);">Appointment Requests &amp; Consultations</h2>
+              <p style="font-size:0.85rem; color:var(--muted-foreground);">Review incoming patient booking requests, prescribe treatment notes, and access clinical reports.</p>
             </div>
-
-            <!-- Preview Card Content (Hidden until generated) -->
-            <div id="testPreviewContent" style="display:none;">
-              <div class="test-preview-box">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
-                  <h4 id="previewTitle" style="margin:0; font-size:1.1rem; color:var(--teal);">Assessment Title</h4>
-                  <span id="previewCategory" class="report-type-badge report-type-badge--assessment">Category</span>
-                </div>
-                <p id="previewDesc" style="font-size:0.85rem; color:var(--muted-foreground); margin-bottom:1rem;">Description...</p>
-
-                <div id="previewQuestionsList" style="max-height:260px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:0.75rem; background:rgba(250,245,238,0.5); margin-bottom:1rem;">
-                  <!-- Dynamically rendered questions -->
-                </div>
-
-                <div style="font-size:0.8rem; color:var(--teal); font-weight:600; margin-bottom:1rem;" id="previewStats">
-                  Questions: 0 · Max Score: 0
-                </div>
-
-                <!-- Form to save the test -->
-                <form th:action="@{/therapist/tests/save}" method="post">
-                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                  <input type="hidden" name="title" id="saveTitle" />
-                  <input type="hidden" name="description" id="saveDesc" />
-                  <input type="hidden" name="category" id="saveCategory" />
-                  <input type="hidden" name="questionsJson" id="saveQuestionsJson" />
-                  <input type="hidden" name="scoringRulesJson" id="saveScoringRulesJson" />
-
-                  <button type="submit" class="btn btn-coral" style="width:100%; padding:0.85rem;">
-                    💾 Save Test to My Library
-                  </button>
-                </form>
-              </div>
-            </div>
-
           </div>
 
-        </div>
-
-        <!-- My Custom Tests Library Table -->
-        <div style="margin-top:2.5rem;">
-          <h3 style="font-size:1.2rem; color:var(--teal); margin-bottom:1rem;">📚 My Saved Custom Assessments</h3>
-
-          <div th:if="${#lists.isEmpty(customTests)}" class="empty-state-card">
-            <p>You haven't saved any custom assessments yet. Use the AI studio above to upload questions and save your first reusable test.</p>
+          <!-- Empty State -->
+          <div th:if="${#lists.isEmpty(appointments)}" class="empty-state-card">
+            <p>No appointment requests received yet. Patients will appear here once they book a consultation.</p>
           </div>
 
-          <div th:if="${not #lists.isEmpty(customTests)}" class="table-container">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Test Title</th>
-                  <th>Category</th>
-                  <th>Questions</th>
-                  <th>Max Score</th>
-                  <th>Created Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr th:each="t : ${customTests}">
-                  <td>
-                    <strong th:text="${t.title}">Workplace Stress Scale</strong>
-                  </td>
-                  <td>
-                    <span class="meta-tag meta-tag--qual" th:text="${t.category} ?: 'General'">Category</span>
-                  </td>
-                  <td>
-                    <span th:text="${t.questionCount} + ' items'">10 items</span>
-                  </td>
-                  <td>
-                    <span th:text="${t.maxScore} + ' pts'">30 pts</span>
-                  </td>
-                  <td style="font-size:0.82rem; color:var(--muted-foreground);" th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}">
-                    02 Sep 2026
-                  </td>
-                  <td>
-                    <button type="button" class="btn btn-teal btn-sm"
-                            th:onclick="'openAssignModal(' + ${t.id} + ', \'' + ${#strings.escapeJavaScript(t.title)} + '\');'">
-                      👥 Assign to Patient(s)
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Assigned Patient Tests & Completion Results Table -->
-        <div style="margin-top:2.5rem;">
-          <h3 style="font-size:1.2rem; color:var(--teal); margin-bottom:1rem;">📋 Assigned Tests & Patient Responses</h3>
-
-          <div th:if="${#lists.isEmpty(testAssignments)}" class="empty-state-card">
-            <p>No tests have been assigned to patients yet. Click "Assign to Patient(s)" above to assign a custom test.</p>
-          </div>
-
-          <div th:if="${not #lists.isEmpty(testAssignments)}" class="table-container">
-            <table class="custom-table">
+          <!-- Appointments Table (Responsive Cards on Mobile) -->
+          <div th:if="${not #lists.isEmpty(appointments)}" class="table-container">
+            <table class="custom-table custom-table--cards">
               <thead>
                 <tr>
                   <th>Patient</th>
-                  <th>Assessment</th>
-                  <th>Assigned Date</th>
+                  <th>Contact</th>
+                  <th>Requested Date &amp; Time</th>
+                  <th>Reason / Notes</th>
                   <th>Status</th>
-                  <th>Score / Severity</th>
-                  <th>Completed On</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr th:each="assign : ${testAssignments}">
-                  <td>
-                    <strong th:text="${assign.patient.name}">Patient Name</strong>
+                <tr th:each="apt : ${appointments}">
+                  <td class="card-main-title" data-label="Patient">
+                    <strong th:text="${apt.patient.name}">Patient Name</strong>
                   </td>
-                  <td th:text="${assign.customTest.title}">Test Title</td>
-                  <td style="font-size:0.82rem; color:var(--muted-foreground);" th:text="${#temporals.format(assign.assignedAt, 'dd MMM yyyy · hh:mm a')}">
-                    02 Sep 2026
-                  </td>
-                  <td>
-                    <span class="status-pill"
-                          th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}"
-                          th:text="${assign.status}">PENDING</span>
-                  </td>
-                  <td>
-                    <div th:if="${assign.status == 'COMPLETED'}">
-                      <strong th:text="${assign.totalScore} + ' / ' + ${assign.customTest.maxScore}">18 / 30</strong>
-                      <span class="report-severity-badge severity-badge--moderate" style="font-size:0.68rem;" th:text="${assign.severity}">MODERATE</span>
+                  <td data-label="Contact">
+                    <div style="font-size:0.85rem;">
+                      <div th:text="${apt.patient.email}">patient@example.com</div>
+                      <div style="color:var(--muted-foreground);" th:text="${apt.patient.phoneNumber} ?: 'No phone'">+91-XXXXX</div>
                     </div>
-                    <span th:if="${assign.status != 'COMPLETED'}" style="color:var(--muted-foreground); font-size:0.82rem;">Awaiting response</span>
                   </td>
-                  <td style="font-size:0.82rem; color:var(--muted-foreground);" th:text="${assign.completedAt != null ? #temporals.format(assign.completedAt, 'dd MMM yyyy · hh:mm a') : '—'}">
-                    —
+                  <td data-label="Date &amp; Time">
+                    <span th:text="${apt.appointmentDate}" style="font-weight:600;">2026-09-10</span>
+                    <span style="color:var(--teal); font-weight:700; margin-left:0.35rem;" th:text="${apt.appointmentTime}">10:00 AM</span>
                   </td>
-                  <td>
-                    <a th:if="${assign.status == 'COMPLETED'}"
-                       th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
-                       target="_blank"
-                       class="btn btn-outline-coral btn-sm">
-                      View Evaluation 🔍
-                    </a>
+                  <td data-label="Reason / Notes" style="max-width:240px;">
+                    <span th:text="${apt.notes} ?: 'No additional notes'" style="font-size:0.85rem; color:rgba(26,60,60,0.85);">Notes</span>
+                  </td>
+                  <td data-label="Status">
+                    <span class="status-pill"
+                          th:classappend="'status-pill--' + ${#strings.toLowerCase(apt.status)}"
+                          th:text="${apt.status}">PENDING</span>
+                  </td>
+                  <td class="card-action-cell" data-label="Actions">
+                    <div class="card-action-group">
+                      <!-- Accept Button (If PENDING) -->
+                      <form th:if="${apt.status.name() == 'PENDING'}"
+                            th:action="@{/appointments/{id}/status(id=${apt.id})}"
+                            method="post"
+                            style="display:inline;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="status" value="CONFIRMED" />
+                        <input type="hidden" name="returnTo" value="therapist" />
+                        <button type="submit" class="btn btn-teal btn-sm">Accept</button>
+                      </form>
+
+                      <!-- Decline Button (If PENDING) -->
+                      <form th:if="${apt.status.name() == 'PENDING'}"
+                            th:action="@{/appointments/{id}/status(id=${apt.id})}"
+                            method="post"
+                            onsubmit="return confirm('Decline this appointment request?');"
+                            style="display:inline;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="status" value="CANCELLED" />
+                        <input type="hidden" name="returnTo" value="therapist" />
+                        <button type="submit" class="btn btn-cancel btn-sm">Decline</button>
+                      </form>
+
+                      <!-- View Patient Reports -->
+                      <a th:href="@{/therapist/patient/{id}/reports(id=${apt.patient.id})}"
+                         class="btn btn-outline-coral btn-sm"
+                         title="View clinical tests and confidential AI chat behavioral insights">
+                        📋 Reports
+                      </a>
+
+                      <!-- Prescribe / Add Session Notes -->
+                      <button type="button"
+                              class="btn btn-sm"
+                              th:classappend="${notesMap != null and notesMap.containsKey(apt.id)} ? 'btn-teal' : 'btn-outline-coral'"
+                              th:title="${notesMap != null and notesMap.containsKey(apt.id)} ? 'Edit Session Notes & Prescription' : 'Add Session Notes & Prescription for Consultation'"
+                              th:data-apptid="${apt.id}"
+                              th:data-patientname="${apt.patient.name}"
+                              th:data-appttime="${apt.appointmentDate} + ' at ' + ${apt.appointmentTime}"
+                              th:data-complaint="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).chiefComplaint : ''}"
+                              th:data-obs="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).clinicalObservations : ''}"
+                              th:data-rx="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).prescription : ''}"
+                              th:data-plan="${notesMap != null and notesMap.containsKey(apt.id) ? notesMap.get(apt.id).followUpPlan : ''}"
+                              onclick="openRxModalFromBtn(this)">
+                        <span th:if="${notesMap != null and notesMap.containsKey(apt.id)}">✏️ Rx / Notes</span>
+                        <span th:unless="${notesMap != null and notesMap.containsKey(apt.id)}">✍️ Prescribe</span>
+                      </button>
+
+                      <!-- Cancel Button (If CONFIRMED) -->
+                      <form th:if="${apt.status.name() == 'CONFIRMED'}"
+                            th:action="@{/appointments/{id}/status(id=${apt.id})}"
+                            method="post"
+                            onsubmit="return confirm('Cancel this confirmed appointment?');"
+                            style="display:inline;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="status" value="CANCELLED" />
+                        <input type="hidden" name="returnTo" value="therapist" />
+                        <button type="submit" class="btn btn-cancel btn-sm">Cancel</button>
+                      </form>
+                    </div>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
+      </div>
 
-      </section>
+      <!-- ============================================================
+           TAB 2: AI CUSTOM TEST STUDIO (UPLOAD & ASSIGN)
+           ============================================================ -->
+      <div class="dash-tab-content" id="tab-tests">
+        <section id="tests-section" class="tests-studio-section fade-up" style="margin-bottom: 2.5rem;">
+          <div class="section-header" style="margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-size:1.4rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <span>✨ AI Custom Test Studio</span>
+                <span class="badge-shared" style="font-size:0.75rem;">Multi-Patient Assessment Builder</span>
+              </h2>
+              <p style="font-size:0.85rem; color:var(--muted-foreground);">
+                Upload a questionnaire document (PDF, Word DOCX, TXT, CSV) or paste questions. AI will automatically structure questions, Likert options, and scoring rules into a reusable test you can assign to any patient.
+              </p>
+            </div>
+          </div>
 
-      <!-- ══════════════════════════════════════════════════════════════
-           SECTION 3: AVAILABILITY & TIME SLOTS SCHEDULER
-           ══════════════════════════════════════════════════════════════ -->
-      <section id="schedule-section" class="schedule-section fade-up" style="margin-bottom: 3.5rem;">
-        <div class="section-header" style="margin-bottom:1.25rem;">
-          <h2 style="font-size:1.4rem; color:var(--teal);">Weekly Schedule & Appointment Time Slots</h2>
-          <p style="font-size:0.85rem; color:var(--muted-foreground);">
-            Configure your active consultation days and customized consultation time slots. Patients can only book slots that you have opened and that are not already booked.
-          </p>
-        </div>
-
-        <div class="schedule-cards-grid">
-          <div th:each="avail : ${availabilities}" class="schedule-day-card" th:classappend="${avail.active ? 'schedule-day--active' : 'schedule-day--off'}">
+          <div class="grid grid--2col" style="gap:2rem; align-items:start; margin-bottom:2.5rem;">
             
-            <form th:action="@{/therapist/schedule/save}" method="post">
+            <!-- Document Upload & Parser Form -->
+            <div class="dash-card" style="padding:1.75rem;">
+              <h3 style="font-size:1.15rem; color:var(--teal); margin-bottom:1rem;">1. Upload Questions or Paste Text</h3>
+              
+              <form id="aiTestGeneratorForm" onsubmit="generateTestWithAI(event)">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <label class="field" style="margin-bottom:1rem;">
+                  <span class="field-label">Assessment Title (Optional Hint)</span>
+                  <input type="text" id="testTitleInput" class="field-input" placeholder="e.g. Workplace Stress &amp; Burnout Screening" />
+                </label>
+
+                <label class="field" style="margin-bottom:1rem;">
+                  <span class="field-label">Upload Question Document (PDF, Word DOCX, TXT, CSV, JSON)</span>
+                  <input type="file" id="testFileInput" class="field-input" accept=".pdf,.docx,.txt,.csv,.json,.md" />
+                  <span style="font-size:0.75rem; color:var(--muted-foreground); margin-top:0.3rem; display:block;">
+                    Supported: .pdf, .docx, .txt, .csv, .json (Max 10MB)
+                  </span>
+                </label>
+
+                <label class="field" style="margin-bottom:1.25rem;">
+                  <span class="field-label">Or Paste Questions Directly</span>
+                  <textarea id="testTextInput" rows="5" class="field-input" style="height:auto; resize:vertical;" placeholder="Paste raw questionnaire items or questions here...
+1. How often do you feel overwhelmed at work?
+2. Trouble concentrating on tasks?
+3. Restless or difficulty relaxing?"></textarea>
+                </label>
+
+                <button type="submit" id="generateTestBtn" class="btn btn-teal" style="width:100%; padding:0.85rem;">
+                  ⚡ Generate Structured Test with AI
+                </button>
+              </form>
+            </div>
+
+            <!-- Live Preview & Save Card -->
+            <div class="dash-card" style="padding:1.75rem;">
+              <h3 style="font-size:1.15rem; color:var(--teal); margin-bottom:1rem;">2. Review &amp; Save Test Template</h3>
+
+              <div id="testPreviewEmpty" style="padding:2.5rem 1rem; text-align:center; color:var(--muted-foreground); border:2px dashed var(--border); border-radius:12px;">
+                <span style="font-size:2rem; display:block; margin-bottom:0.5rem;">📋</span>
+                Upload a document or paste questions on the left, then click <strong>Generate Structured Test with AI</strong> to preview the standardized questions and scoring rules.
+              </div>
+
+              <!-- Preview Card Content (Hidden until generated) -->
+              <div id="testPreviewContent" style="display:none;">
+                <div class="test-preview-box">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                    <h4 id="previewTitle" style="margin:0; font-size:1.1rem; color:var(--teal);">Assessment Title</h4>
+                    <span id="previewCategory" class="report-type-badge report-type-badge--assessment">Category</span>
+                  </div>
+                  <p id="previewDesc" style="font-size:0.85rem; color:var(--muted-foreground); margin-bottom:1rem;">Description...</p>
+
+                  <div id="previewQuestionsList" style="max-height:260px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:0.75rem; background:rgba(250,245,238,0.5); margin-bottom:1rem;">
+                    <!-- Dynamically rendered questions -->
+                  </div>
+
+                  <div style="font-size:0.8rem; color:var(--teal); font-weight:600; margin-bottom:1rem;" id="previewStats">
+                    Questions: 0 · Max Score: 0
+                  </div>
+
+                  <!-- Form to save the test -->
+                  <form th:action="@{/therapist/tests/save}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="title" id="saveTitle" />
+                    <input type="hidden" name="description" id="saveDesc" />
+                    <input type="hidden" name="category" id="saveCategory" />
+                    <input type="hidden" name="questionsJson" id="saveQuestionsJson" />
+                    <input type="hidden" name="scoringRulesJson" id="saveScoringRulesJson" />
+
+                    <button type="submit" class="btn btn-coral" style="width:100%; padding:0.85rem;">
+                      💾 Save Test to My Library
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- My Custom Tests Library Table -->
+          <div style="margin-top:2rem;">
+            <div class="section-header" style="margin-bottom:1rem;">
+              <div>
+                <h3 style="font-size:1.2rem; color:var(--teal);">📚 My Saved Custom Assessments</h3>
+                <p style="font-size:0.82rem; color:var(--muted-foreground);">Reusable tests in your personal clinical directory</p>
+              </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(customTests)}" class="empty-state-card">
+              <p>You haven't saved any custom assessments yet. Use the AI studio above to upload questions and save your first reusable test.</p>
+            </div>
+
+            <div th:if="${not #lists.isEmpty(customTests)}" class="table-container">
+              <table class="custom-table custom-table--cards">
+                <thead>
+                  <tr>
+                    <th>Test Title</th>
+                    <th>Category</th>
+                    <th>Questions</th>
+                    <th>Max Score</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="t : ${customTests}">
+                    <td class="card-main-title" data-label="Test Title">
+                      <strong th:text="${t.title}">Workplace Stress Scale</strong>
+                    </td>
+                    <td data-label="Category">
+                      <span class="meta-tag meta-tag--qual" th:text="${t.category} ?: 'General'">Category</span>
+                    </td>
+                    <td data-label="Questions">
+                      <span th:text="${t.questionCount} + ' items'">10 items</span>
+                    </td>
+                    <td data-label="Max Score">
+                      <span th:text="${t.maxScore} + ' pts'">30 pts</span>
+                    </td>
+                    <td data-label="Created Date" style="font-size:0.85rem; color:var(--muted-foreground);" th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}">
+                      02 Sep 2026
+                    </td>
+                    <td class="card-action-cell" data-label="Actions">
+                      <button type="button" class="btn btn-teal btn-sm"
+                              th:onclick="'openAssignModal(' + ${t.id} + ', \'' + ${#strings.escapeJavaScript(t.title)} + '\');'">
+                        👥 Assign to Patient(s)
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Assigned Patient Tests & Completion Results Table -->
+          <div style="margin-top:2.5rem;">
+            <div class="section-header" style="margin-bottom:1rem;">
+              <div>
+                <h3 style="font-size:1.2rem; color:var(--teal);">📋 Assigned Tests &amp; Patient Responses</h3>
+                <p style="font-size:0.82rem; color:var(--muted-foreground);">Track progress and score reports for assigned evaluations</p>
+              </div>
+            </div>
+
+            <div th:if="${#lists.isEmpty(testAssignments)}" class="empty-state-card">
+              <p>No tests have been assigned to patients yet. Click "Assign to Patient(s)" above to assign a custom test.</p>
+            </div>
+
+            <div th:if="${not #lists.isEmpty(testAssignments)}" class="table-container">
+              <table class="custom-table custom-table--cards">
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Assessment</th>
+                    <th>Assigned Date</th>
+                    <th>Status</th>
+                    <th>Score / Severity</th>
+                    <th>Completed On</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="assign : ${testAssignments}">
+                    <td class="card-main-title" data-label="Patient">
+                      <strong th:text="${assign.patient.name}">Patient Name</strong>
+                    </td>
+                    <td data-label="Assessment" th:text="${assign.customTest.title}">Test Title</td>
+                    <td data-label="Assigned Date" style="font-size:0.85rem; color:var(--muted-foreground);" th:text="${#temporals.format(assign.assignedAt, 'dd MMM yyyy · hh:mm a')}">
+                      02 Sep 2026
+                    </td>
+                    <td data-label="Status">
+                      <span class="status-pill"
+                            th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}"
+                            th:text="${assign.status}">PENDING</span>
+                    </td>
+                    <td data-label="Score / Severity">
+                      <div th:if="${assign.status == 'COMPLETED'}">
+                        <strong th:text="${assign.totalScore} + ' / ' + ${assign.customTest.maxScore}">18 / 30</strong>
+                        <span class="report-severity-badge severity-badge--moderate" style="font-size:0.68rem;" th:text="${assign.severity}">MODERATE</span>
+                      </div>
+                      <span th:if="${assign.status != 'COMPLETED'}" style="color:var(--muted-foreground); font-size:0.82rem;">Awaiting response</span>
+                    </td>
+                    <td data-label="Completed On" style="font-size:0.85rem; color:var(--muted-foreground);" th:text="${assign.completedAt != null ? #temporals.format(assign.completedAt, 'dd MMM yyyy · hh:mm a') : '—'}">
+                      —
+                    </td>
+                    <td class="card-action-cell" data-label="Actions">
+                      <a th:if="${assign.status == 'COMPLETED'}"
+                         th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
+                         target="_blank"
+                         class="btn btn-outline-coral btn-sm">
+                        View Evaluation 🔍
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <!-- ============================================================
+           TAB 3: AI PRE-APPOINTMENT DIAGNOSTIC TASKS
+           ============================================================ -->
+      <div class="dash-tab-content" id="tab-prediagnosis">
+        <section id="prediagnosis-section" class="fade-up" style="margin-bottom: 2.5rem;">
+          <div class="section-header" style="margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-size:1.4rem; color:var(--teal);">🤖 AI Pre-Appointment Diagnostic Tasks</h2>
+              <p style="font-size:0.85rem; color:var(--muted-foreground);">
+                Assign AI-guided screening conversations to patients before their appointment. The AI follows your custom instructions to collect diagnostic information.
+              </p>
+            </div>
+          </div>
+
+          <!-- Create New Task Form -->
+          <div style="background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:1.75rem; margin-bottom:2rem; box-shadow:var(--shadow-soft);">
+            <h3 style="font-size:1.15rem; color:var(--teal); margin-bottom:1rem;">📋 Create New Pre-Appointment Task</h3>
+            <form th:action="@{/therapist/pre-diagnosis/create}" method="post">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-              <input type="hidden" name="dayOfWeek" th:value="${avail.dayOfWeek}" />
+              <div class="form-grid form-grid--2col">
+                <label class="field">
+                  <span class="field-label">Select Patient *</span>
+                  <select name="patientId" class="field-input" required>
+                    <option value="">Choose a patient...</option>
+                    <option th:each="p : ${allPatients}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.email} + ')'">Patient</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Task Title *</span>
+                  <input type="text" name="title" class="field-input" placeholder="e.g. Pre-Session Symptom Check" required />
+                </label>
+              </div>
+              <label class="field" style="margin-top:1rem;">
+                <span class="field-label">AI Instructions (What should the AI ask/diagnose?) *</span>
+                <textarea name="instructions" class="field-input" rows="3" required
+                          placeholder="e.g. Ask about sleep patterns over the past week, anxiety triggers, mood fluctuations, and appetite changes. Also screen for any social withdrawal or concentration difficulties."></textarea>
+              </label>
+              <button type="submit" class="btn btn-teal" style="margin-top:1.25rem;">🤖 Assign AI Pre-Diagnosis Task</button>
+            </form>
+          </div>
 
-              <div class="schedule-day-header">
-                <div style="font-weight:700; font-size:1.05rem; color:var(--teal);" th:text="${avail.dayOfWeek}">MONDAY</div>
-                <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.82rem; cursor:pointer;">
-                  <input type="checkbox" name="active" value="true" th:checked="${avail.active}" style="accent-color:var(--teal);" />
-                  <span th:text="${avail.active ? 'Active Day' : 'Day Off'}">Active Day</span>
+          <!-- Existing Tasks List -->
+          <div th:if="${preDiagnosisTasks != null and not #lists.isEmpty(preDiagnosisTasks)}">
+            <h3 style="font-size:1.1rem; color:var(--teal); margin-bottom:1rem;">Assigned Tasks</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">
+              <div th:each="pt : ${preDiagnosisTasks}" class="dash-card" style="margin:0; border-top: 4px solid var(--teal);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; gap:0.5rem;">
+                  <strong style="font-size:1rem; color:var(--teal);" th:text="${pt.title}">Task</strong>
+                  <span class="status-pill"
+                        th:classappend="${pt.status == 'COMPLETED'} ? 'status-pill--completed' : (${pt.status == 'IN_PROGRESS'} ? 'status-pill--in-progress' : 'status-pill--pending')"
+                        th:text="${pt.status}">PENDING</span>
+                </div>
+                <p style="font-size:0.82rem; color:var(--muted-foreground); margin-bottom:0.4rem;">
+                  Patient: <strong th:text="${pt.patient.name}">Patient</strong>
+                  · Assigned <span th:text="${#temporals.format(pt.createdAt, 'dd MMM yyyy')}">Date</span>
+                </p>
+                <p style="font-size:0.82rem; color:var(--foreground); background:rgba(250,245,238,0.7); border-radius:6px; padding:0.5rem 0.75rem; margin-bottom:0.75rem; line-height:1.4;">
+                  📝 <em th:text="${#strings.abbreviate(pt.instructions, 120)}">Instructions</em>
+                </p>
+                <div th:if="${pt.status == 'COMPLETED'}">
+                  <details style="font-size:0.85rem;">
+                    <summary style="cursor:pointer; color:var(--teal); font-weight:600;">📊 View AI Diagnostic Summary</summary>
+                    <div style="margin-top:0.5rem; padding:0.75rem; background:rgba(197,232,224,0.15); border-radius:8px; font-size:0.82rem; line-height:1.55;" th:utext="${pt.aiSummary}">Summary</div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${preDiagnosisTasks == null or #lists.isEmpty(preDiagnosisTasks)}" class="empty-state-card" style="margin-top:1.5rem;">
+            <p>No pre-appointment diagnostic tasks assigned yet. Use the form above to assign your first AI screening task to a patient.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================
+           TAB 4: AVAILABILITY & TIME SLOTS SCHEDULER
+           ============================================================ -->
+      <div class="dash-tab-content" id="tab-schedule">
+        <section id="schedule-section" class="schedule-section fade-up" style="margin-bottom: 2.5rem;">
+          <div class="section-header" style="margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-size:1.4rem; color:var(--teal);">Weekly Schedule &amp; Appointment Time Slots</h2>
+              <p style="font-size:0.85rem; color:var(--muted-foreground);">
+                Configure your active consultation days and customized consultation time slots. Patients can only book slots that you have opened and that are not already booked.
+              </p>
+            </div>
+          </div>
+
+          <div class="schedule-cards-grid">
+            <div th:each="avail : ${availabilities}" class="schedule-day-card" th:classappend="${avail.active ? 'schedule-day--active' : 'schedule-day--off'}">
+              
+              <form th:action="@{/therapist/schedule/save}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="dayOfWeek" th:value="${avail.dayOfWeek}" />
+
+                <div class="schedule-day-header">
+                  <div style="font-weight:700; font-size:1.05rem; color:var(--teal);" th:text="${avail.dayOfWeek}">MONDAY</div>
+                  <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.82rem; cursor:pointer;">
+                    <input type="checkbox" name="active" value="true" th:checked="${avail.active}" style="accent-color:var(--teal);" />
+                    <span th:text="${avail.active ? 'Active Day' : 'Day Off'}">Active Day</span>
+                  </label>
+                </div>
+
+                <div style="margin:0.85rem 0;">
+                  <label style="font-size:0.78rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:0.3rem;">
+                    Time Slots (comma-separated):
+                  </label>
+                  <textarea name="timeSlots" rows="2" class="field-input" style="height:auto; font-size:0.82rem; resize:vertical;"
+                            th:text="${avail.timeSlots}">09:00 AM, 10:30 AM, 01:00 PM, 02:30 PM, 04:00 PM, 05:30 PM</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-teal btn-sm" style="width:100%;">
+                  Save Day Schedule
+                </button>
+              </form>
+
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================
+           TAB 5: THERAPIST PROFILE & CLINIC INFORMATION
+           ============================================================ -->
+      <div class="dash-tab-content" id="tab-profile">
+        <section id="profile-section" class="profile-section fade-up" style="margin-bottom: 2.5rem;">
+          <div class="section-header" style="margin-bottom:1.5rem;">
+            <div>
+              <h2 style="font-size:1.4rem; color:var(--teal);">Clinical Practice &amp; Contact Profile</h2>
+              <p style="font-size:0.85rem; color:var(--muted-foreground);">
+                Update your clinic address, qualifications, consultation fees, and contact numbers. These details are visible to patients on the booking directory.
+              </p>
+            </div>
+          </div>
+
+          <div class="booking-form-card" style="padding:2rem;">
+            <form th:action="@{/therapist/profile/update}" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+              <div class="form-grid form-grid--2col">
+                <label class="field">
+                  <span class="field-label">Direct Contact Phone Number</span>
+                  <input type="text" name="phoneNumber" class="field-input" th:value="${user.phoneNumber}" placeholder="+91-9876543210" />
+                </label>
+
+                <label class="field">
+                  <span class="field-label">Clinic City / Location</span>
+                  <input type="text" name="city" class="field-input" th:value="${user.city}" placeholder="e.g. Mumbai, Maharashtra" />
                 </label>
               </div>
 
-              <div style="margin:0.85rem 0;">
-                <label style="font-size:0.78rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:0.3rem;">
-                  Time Slots (comma-separated):
+              <label class="field" style="margin-bottom:1.25rem;">
+                <span class="field-label">Clinic / Consultation Office Address</span>
+                <input type="text" name="clinicAddress" class="field-input" th:value="${user.clinicAddress}" placeholder="e.g. MindCare Wellness Suite, 4th Floor, Linking Road, Bandra West" />
+              </label>
+
+              <div class="form-grid form-grid--2col">
+                <label class="field">
+                  <span class="field-label">Degrees &amp; Board Certifications</span>
+                  <input type="text" name="qualifications" class="field-input" th:value="${user.qualifications}" placeholder="e.g. M.Phil Clinical Psychology, RCI Licensed" />
                 </label>
-                <textarea name="timeSlots" rows="2" class="field-input" style="height:auto; font-size:0.82rem; resize:vertical;"
-                          th:text="${avail.timeSlots}">09:00 AM, 10:30 AM, 01:00 PM, 02:30 PM, 04:00 PM, 05:30 PM</textarea>
+
+                <label class="field">
+                  <span class="field-label">Languages Spoken</span>
+                  <input type="text" name="languages" class="field-input" th:value="${user.languages}" placeholder="e.g. English, Hindi, Marathi" />
+                </label>
               </div>
 
-              <button type="submit" class="btn btn-teal btn-sm" style="width:100%;">
-                Save Day Schedule
+              <div class="form-grid form-grid--2col">
+                <label class="field">
+                  <span class="field-label">Consultation Fee</span>
+                  <input type="text" name="consultationFee" class="field-input" th:value="${user.consultationFee}" placeholder="e.g. ₹1,500 / session (Online / In-Clinic)" />
+                </label>
+
+                <label class="field">
+                  <span class="field-label">Standard Working Days Summary</span>
+                  <input type="text" name="availableDays" class="field-input" th:value="${user.availableDays}" placeholder="e.g. Mon - Fri (Appointments by Slot)" />
+                </label>
+              </div>
+
+              <div class="form-grid form-grid--2col">
+                <label class="field">
+                  <span class="field-label">Standard Operating Hours</span>
+                  <input type="text" name="availableHours" class="field-input" th:value="${user.availableHours}" placeholder="e.g. 09:30 AM - 06:30 PM" />
+                </label>
+              </div>
+
+              <label class="field" style="margin-bottom:1.5rem;">
+                <span class="field-label">Professional Bio (Displayed to Patients)</span>
+                <textarea name="bio" rows="4" class="field-input" style="height:auto; padding-top:1.5rem; resize:vertical;"
+                          placeholder="Describe your clinical expertise, therapeutic modalities (CBT, Mindfulness, Psychodynamic), and patient care approach..."
+                          th:text="${user.bio}"></textarea>
+              </label>
+
+              <button type="submit" class="btn btn-coral" style="padding:0.9rem 2rem;">
+                Save Profile &amp; Clinic Information
               </button>
             </form>
-
           </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════════
-           SECTION: AI PRE-APPOINTMENT DIAGNOSTIC TASKS
-           ══════════════════════════════════════════════════════════════ -->
-      <section id="prediagnosis-section" class="fade-up" style="margin-top:3rem;">
-        <div class="section-header" style="margin-bottom:1.25rem;">
-          <h2 style="font-size:1.4rem; color:var(--teal);">🤖 AI Pre-Appointment Diagnostic Tasks</h2>
-          <p style="font-size:0.85rem; color:var(--muted-foreground);">
-            Assign AI-guided screening conversations to patients before their appointment. The AI follows your custom instructions to collect diagnostic information.
-          </p>
-        </div>
-
-        <!-- Create New Task Form -->
-        <div style="background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:var(--shadow-soft);">
-          <h3 style="font-size:1.1rem; color:var(--teal); margin-bottom:1rem;">📋 Create New Pre-Appointment Task</h3>
-          <form th:action="@{/therapist/pre-diagnosis/create}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <div class="form-grid form-grid--2col">
-              <label class="field">
-                <span class="field-label">Select Patient *</span>
-                <select name="patientId" class="field-input" required>
-                  <option value="">Choose a patient...</option>
-                  <option th:each="p : ${allPatients}" th:value="${p.id}" th:text="${p.name} + ' (' + ${p.email} + ')'">Patient</option>
-                </select>
-              </label>
-              <label class="field">
-                <span class="field-label">Task Title *</span>
-                <input type="text" name="title" class="field-input" placeholder="e.g. Pre-Session Symptom Check" required />
-              </label>
-            </div>
-            <label class="field" style="margin-top:1rem;">
-              <span class="field-label">AI Instructions (What should the AI ask/diagnose?) *</span>
-              <textarea name="instructions" class="field-input" rows="3" required
-                        placeholder="e.g. Ask about sleep patterns over the past week, anxiety triggers, mood fluctuations, and appetite changes. Also screen for any social withdrawal or concentration difficulties."></textarea>
-            </label>
-            <button type="submit" class="btn btn-teal" style="margin-top:1rem;">🤖 Assign AI Pre-Diagnosis Task</button>
-          </form>
-        </div>
-
-        <!-- Existing Tasks List -->
-        <div th:if="${preDiagnosisTasks != null and not #lists.isEmpty(preDiagnosisTasks)}">
-          <h3 style="font-size:1rem; color:var(--foreground); margin-bottom:0.75rem;">Assigned Tasks</h3>
-          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:1rem;">
-            <div th:each="pt : ${preDiagnosisTasks}" class="dash-card" style="margin:0; border-top: 4px solid var(--teal);">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
-                <strong style="font-size:1rem; color:var(--teal);" th:text="${pt.title}">Task</strong>
-                <span class="status-pill"
-                      th:classappend="${pt.status == 'COMPLETED'} ? 'status-pill--completed' : (${pt.status == 'IN_PROGRESS'} ? 'status-pill--in-progress' : 'status-pill--pending')"
-                      th:text="${pt.status}">PENDING</span>
-              </div>
-              <p style="font-size:0.82rem; color:var(--muted-foreground); margin-bottom:0.4rem;">
-                Patient: <strong th:text="${pt.patient.name}">Patient</strong>
-                · Assigned <span th:text="${#temporals.format(pt.createdAt, 'dd MMM yyyy')}">Date</span>
-              </p>
-              <p style="font-size:0.78rem; color:var(--foreground); background:rgba(250,245,238,0.6); border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.75rem;">
-                📝 <em th:text="${#strings.abbreviate(pt.instructions, 120)}">Instructions</em>
-              </p>
-              <div th:if="${pt.status == 'COMPLETED'}">
-                <details style="font-size:0.82rem;">
-                  <summary style="cursor:pointer; color:var(--teal); font-weight:600;">📊 View AI Diagnostic Summary</summary>
-                  <div style="margin-top:0.5rem; padding:0.75rem; background:rgba(197,232,224,0.15); border-radius:8px; font-size:0.82rem; line-height:1.55;" th:utext="${pt.aiSummary}">Summary</div>
-                </details>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════════════════════════════
-           SECTION 4: THERAPIST PROFILE & CLINIC INFORMATION
-           ══════════════════════════════════════════════════════════════ -->
-      <section id="profile-section" class="profile-section fade-up">
-        <div class="section-header" style="margin-bottom:1.25rem;">
-          <h2 style="font-size:1.4rem; color:var(--teal);">Clinical Practice & Contact Profile</h2>
-          <p style="font-size:0.85rem; color:var(--muted-foreground);">
-            Update your clinic address, qualifications, consultation fees, and contact numbers. These details are visible to patients on the booking directory.
-          </p>
-        </div>
-
-        <div class="booking-form-card" style="padding:2rem;">
-          <form th:action="@{/therapist/profile/update}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-            <div class="form-grid form-grid--2col">
-              <label class="field">
-                <span class="field-label">Direct Contact Phone Number</span>
-                <input type="text" name="phoneNumber" class="field-input" th:value="${user.phoneNumber}" placeholder="+91-9876543210" />
-              </label>
-
-              <label class="field">
-                <span class="field-label">Clinic City / Location</span>
-                <input type="text" name="city" class="field-input" th:value="${user.city}" placeholder="e.g. Mumbai, Maharashtra" />
-              </label>
-            </div>
-
-            <label class="field" style="margin-bottom:1.25rem;">
-              <span class="field-label">Clinic / Consultation Office Address</span>
-              <input type="text" name="clinicAddress" class="field-input" th:value="${user.clinicAddress}" placeholder="e.g. MindCare Wellness Suite, 4th Floor, Linking Road, Bandra West" />
-            </label>
-
-            <div class="form-grid form-grid--2col">
-              <label class="field">
-                <span class="field-label">Degrees & Board Certifications</span>
-                <input type="text" name="qualifications" class="field-input" th:value="${user.qualifications}" placeholder="e.g. M.Phil Clinical Psychology, RCI Licensed" />
-              </label>
-
-              <label class="field">
-                <span class="field-label">Languages Spoken</span>
-                <input type="text" name="languages" class="field-input" th:value="${user.languages}" placeholder="e.g. English, Hindi, Marathi" />
-              </label>
-            </div>
-
-            <div class="form-grid form-grid--2col">
-              <label class="field">
-                <span class="field-label">Consultation Fee</span>
-                <input type="text" name="consultationFee" class="field-input" th:value="${user.consultationFee}" placeholder="e.g. ₹1,500 / session (Online / In-Clinic)" />
-              </label>
-
-              <label class="field">
-                <span class="field-label">Standard Working Days Summary</span>
-                <input type="text" name="availableDays" class="field-input" th:value="${user.availableDays}" placeholder="e.g. Mon - Fri (Appointments by Slot)" />
-              </label>
-            </div>
-
-            <div class="form-grid form-grid--2col">
-              <label class="field">
-                <span class="field-label">Standard Operating Hours</span>
-                <input type="text" name="availableHours" class="field-input" th:value="${user.availableHours}" placeholder="e.g. 09:30 AM - 06:30 PM" />
-              </label>
-            </div>
-
-            <label class="field" style="margin-bottom:1.5rem;">
-              <span class="field-label">Professional Bio (Displayed to Patients)</span>
-              <textarea name="bio" rows="4" class="field-input" style="height:auto; padding-top:1.5rem; resize:vertical;"
-                        placeholder="Describe your clinical expertise, therapeutic modalities (CBT, Mindfulness, Psychodynamic), and patient care approach..."
-                        th:text="${user.bio}"></textarea>
-            </label>
-
-            <button type="submit" class="btn btn-coral" style="padding:0.9rem 2rem;">
-              Save Profile & Clinic Information
-            </button>
-          </form>
-        </div>
-      </section>
+        </section>
+      </div>
 
     </div>
   </main>
@@ -632,7 +730,7 @@
 
         <div class="custom-modal-footer">
           <button type="button" class="btn btn-outline-coral btn-sm" onclick="closeAssignModal()">Cancel</button>
-          <button type="submit" class="btn btn-teal btn-sm">Confirm & Send Assignment</button>
+          <button type="submit" class="btn btn-teal btn-sm">Confirm &amp; Send Assignment</button>
         </div>
       </form>
     </div>
@@ -642,7 +740,7 @@
   <div id="rxModal" class="custom-modal-overlay" style="display:none;">
     <div class="custom-modal-card" style="max-width:650px;">
       <div class="custom-modal-header">
-        <h3 style="margin:0; font-size:1.2rem; color:var(--teal);">✍️ Clinical Notes & Prescription</h3>
+        <h3 style="margin:0; font-size:1.2rem; color:var(--teal);">✍️ Clinical Notes &amp; Prescription</h3>
         <button type="button" class="btn-close-modal" onclick="closeRxModal()">✕</button>
       </div>
 
@@ -662,17 +760,17 @@
           </label>
 
           <label class="field" style="margin-bottom:0.75rem;">
-            <span class="field-label">Clinical Observations & Mental State Exam</span>
+            <span class="field-label">Clinical Observations &amp; Mental State Exam</span>
             <textarea name="clinicalObservations" id="modalRxObs" class="field-input" rows="3" placeholder="e.g. Patient appeared visibly distressed, restless psychomotor activity, rational thought process with catastrophic cognitive distortions."></textarea>
           </label>
 
           <label class="field" style="margin-bottom:0.75rem;">
-            <span class="field-label">💊 Prescription & Therapeutic Interventions *</span>
+            <span class="field-label">💊 Prescription &amp; Therapeutic Interventions *</span>
             <textarea name="prescription" id="modalRxPrescription" class="field-input" rows="3" required placeholder="e.g. 1. Practice 4-7-8 diaphragmatic breathing 2x daily.&#10;2. Cognitive Restructuring Journaling template.&#10;3. Tab Escitalopram 10mg once daily after breakfast (if psychiatrist).&#10;4. Sleep hygiene protocol."></textarea>
           </label>
 
           <label class="field" style="margin-bottom:0.75rem;">
-            <span class="field-label">📅 Follow-Up Plan & Goals</span>
+            <span class="field-label">📅 Follow-Up Plan &amp; Goals</span>
             <textarea name="followUpPlan" id="modalRxPlan" class="field-input" rows="2" placeholder="e.g. Next review in 2 weeks; track daily mood on app; assess medication tolerance."></textarea>
           </label>
 
@@ -683,11 +781,35 @@
 
         <div class="custom-modal-footer">
           <button type="button" class="btn btn-outline-coral btn-sm" onclick="closeRxModal()">Cancel</button>
-          <button type="submit" class="btn btn-teal btn-sm">💾 Save & Generate AI Report</button>
+          <button type="submit" class="btn btn-teal btn-sm">💾 Save &amp; Generate AI Report</button>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- ===== MOBILE BOTTOM NAVIGATION BAR ===== -->
+  <nav class="mobile-bottom-nav" aria-label="Therapist quick mobile navigation">
+    <button type="button" class="mobile-bottom-nav__item active" data-tab="appointments">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Appts</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__item" data-tab="tests">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>AI Tests</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__item" data-tab="prediagnosis">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+      <span>Pre-Diag</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__item" data-tab="schedule">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Schedule</span>
+    </button>
+    <button type="button" class="mobile-bottom-nav__item" data-tab="profile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
 
   <!-- ===== FOOTER ===== -->
   <footer>
@@ -701,7 +823,8 @@
     <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
   </footer>
 
-  <!-- ===== JAVASCRIPT: AI TEST GENERATOR & MODAL CONTROLS ===== -->
+  <!-- ===== JAVASCRIPT: NAVIGATION, AI TEST GENERATOR & MODAL CONTROLS ===== -->
+  <script th:src="@{/js/navigation.js}"></script>
   <script>
     async function generateTestWithAI(event) {
       event.preventDefault();

@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                 // PUBLIC — anyone can access these (no login needed)
                 .requestMatchers("/", "/auth", "/auth/**").permitAll()
-                .requestMatchers("/css/**", "/images/**").permitAll()
+                .requestMatchers("/css/**", "/images/**", "/js/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
 

@@ -7,7 +7,7 @@
   <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===== HEADER ===== -->
   <header class="site-header">
@@ -17,6 +17,8 @@
         <span>Heal</span>
         <span>Grow</span>
       </a>
+
+      <!-- Desktop Nav (Visible >= 1024px) -->
       <nav class="site-nav">
         <a th:href="@{/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
@@ -24,6 +26,8 @@
         <a th:href="@{/assessments}">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
+
+      <!-- Header Actions -->
       <div class="header-actions">
         <span class="user-greeting">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -33,9 +37,77 @@
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
           <button type="submit" class="btn btn-outline-coral btn-sm">Logout</button>
         </form>
+
+        <!-- Hamburger Button for Mobile / Tablet (< 1024px) -->
+        <button type="button" class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-expanded="false">
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+          <span class="nav-toggle__bar"></span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- ===== MOBILE NAV BACKDROP & DRAWER ===== -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+    <div class="mobile-nav-drawer__header">
+      <a th:href="@{/}" class="wordmark" aria-label="Breathe Heal Grow home">
+        <span>Breathe</span>
+        <span>Heal</span>
+        <span>Grow</span>
+      </a>
+      <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <!-- User Profile Badge -->
+    <div class="mobile-nav-drawer__user" th:if="${userName != null}">
+      <div class="mobile-user-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div class="mobile-user-info">
+        <span class="mobile-user-label">Welcome</span>
+        <strong class="mobile-user-name" th:text="${userName}">Patient</strong>
+      </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <nav class="mobile-nav-drawer__links">
+      <a th:href="@{/dashboard}" class="mobile-nav-link active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a th:href="@{/appointments/book}" class="mobile-nav-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Book Session</span>
+      </a>
+      <a th:href="@{/chat}" class="mobile-nav-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+        <span>Chat with AI</span>
+      </a>
+      <a th:href="@{/assessments}" class="mobile-nav-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Assessments</span>
+      </a>
+      <a th:href="@{/reports}" class="mobile-nav-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>My Reports</span>
+      </a>
+    </nav>
+
+    <!-- Logout Action -->
+    <div class="mobile-nav-drawer__footer">
+      <form th:action="@{/logout}" method="post" style="width:100%;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="btn btn-outline-coral" style="width:100%; justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>Logout</span>
+        </button>
+      </form>
+    </div>
+  </aside>
 
   <!-- ===== TOAST NOTIFICATIONS ===== -->
   <div th:if="${success}" class="toast toast--success show" th:text="${success}"></div>
@@ -51,286 +123,339 @@
             Welcome back, <span th:text="${userName}" class="text-coral">User</span> 👋
           </h1>
           <p class="dash-welcome__desc">
-            How are you feeling today? You can book appointments with certified therapists or explore self-care tools.
+            How are you feeling today? Easily navigate your consultations, self-assessments, and confidential care tools.
           </p>
         </div>
       </section>
 
-      <!-- PRE-APPOINTMENT TASKS ACTION BANNER -->
-      <section th:if="${pendingPreTasks != null and not #lists.isEmpty(pendingPreTasks)}" class="fade-up" style="margin-bottom: 1.5rem;">
-        <div th:each="preTask : ${pendingPreTasks}" style="background: linear-gradient(135deg, rgba(212, 100, 74, 0.08), rgba(197, 232, 224, 0.15)); border: 2px solid var(--coral); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-          <div style="flex:1; min-width:200px;">
-            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
-              <span style="font-size:1.3rem;">⚡</span>
-              <strong style="color:var(--coral); font-size:1.05rem;">Action Required — Pre-Appointment Check-in</strong>
-              <span class="status-pill status-pill--pending" style="font-size:0.68rem;" th:text="${preTask.status}">PENDING</span>
+      <!-- ===== DASHBOARD FEATURE NAVIGATION TABS ===== -->
+      <nav class="dash-tabs-bar fade-up" aria-label="Dashboard sections">
+        <button type="button" class="dash-tab-btn active" data-tab="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span>Overview</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="consultations">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>My Consultations</span>
+          <span class="tab-badge" th:if="${not #lists.isEmpty(appointments)}" th:text="${#lists.size(appointments)}">0</span>
+        </button>
+        <button type="button" class="dash-tab-btn" data-tab="assessments">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <span>My Self-Assessments</span>
+          <span class="tab-badge" th:if="${not #lists.isEmpty(assignedTests) or not #lists.isEmpty(assessments)}" th:text="${(#lists.size(assignedTests) ?: 0) + (#lists.size(assessments) ?: 0)}">0</span>
+        </button>
+      </nav>
+
+      <!-- ========================================
+           TAB 1: OVERVIEW
+           ======================================== -->
+      <div class="dash-tab-content active" id="tab-overview">
+
+        <!-- PRE-APPOINTMENT TASKS ACTION BANNER (if any) -->
+        <section th:if="${pendingPreTasks != null and not #lists.isEmpty(pendingPreTasks)}" class="fade-up" style="margin-bottom: 2rem;">
+          <div th:each="preTask : ${pendingPreTasks}" class="pre-task-card">
+            <div class="pre-task-card__content">
+              <div class="pre-task-card__badge-row">
+                <span style="font-size:1.2rem;">⚡</span>
+                <strong style="color:var(--coral); font-size:0.95rem;">Action Required — Pre-Appointment Check-in</strong>
+                <span class="status-pill status-pill--pending" th:text="${preTask.status}">PENDING</span>
+              </div>
+              <h3 class="pre-task-card__title" th:text="${preTask.title}">Task Title</h3>
+              <p class="pre-task-card__sub">
+                Assigned by <strong style="color:var(--teal);">Dr. <span th:text="${preTask.therapist.name}">Therapist</span></strong>
+              </p>
+              <p th:if="${preTask.appointment != null}" class="pre-task-card__date">
+                📅 Complete before your appointment on <strong th:text="${preTask.appointment.appointmentDate}">Date</strong> at <strong th:text="${preTask.appointment.appointmentTime}">Time</strong>
+              </p>
             </div>
-            <p style="font-size:0.88rem; color:var(--foreground); margin:0;">
-              <strong th:text="${preTask.title}">Task Title</strong> — Assigned by
-              <strong style="color:var(--teal);">Dr. <span th:text="${preTask.therapist.name}">Therapist</span></strong>
-            </p>
-            <p th:if="${preTask.appointment != null}" style="font-size:0.78rem; color:var(--muted-foreground); margin:0.2rem 0 0 0;">
-              📅 Complete before your appointment on <strong th:text="${preTask.appointment.appointmentDate}">Date</strong> at <strong th:text="${preTask.appointment.appointmentTime}">Time</strong>
-            </p>
+            <a th:href="@{/pre-diagnosis/{id}(id=${preTask.id})}" class="btn btn-coral pre-task-card__btn">
+              Start Check-in 🤖
+            </a>
           </div>
-          <a th:href="@{/pre-diagnosis/{id}(id=${preTask.id})}" class="btn btn-coral" style="white-space:nowrap;">
-            Start Check-in 🤖
-          </a>
-        </div>
-      </section>
+        </section>
 
-      <!-- Quick Stats Row -->
-      <section class="dash-stats fade-up">
-        <div class="dash-stat-card bg-mint">
-          <span class="dash-stat-card__number text-teal" th:text="${confirmedCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Confirmed Sessions</span>
-        </div>
-        <div class="dash-stat-card bg-blush">
-          <span class="dash-stat-card__number text-coral" th:text="${pendingCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Pending Requests</span>
-        </div>
-        <div class="dash-stat-card bg-sand">
-          <span class="dash-stat-card__number text-gold" th:text="${assessmentsCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Assessments Taken</span>
-        </div>
-        <div class="dash-stat-card bg-blush" style="border-top:4px solid var(--coral);">
-          <span class="dash-stat-card__number text-coral" th:text="${pendingAssignedTestsCount} ?: 0">0</span>
-          <span class="dash-stat-card__label">Assigned Tests Pending</span>
-        </div>
-      </section>
+        <!-- Quick Actions Grid -->
+        <section class="dash-grid">
 
-      <!-- Quick Actions Grid -->
-      <section class="dash-grid">
+          <!-- Appointments Card -->
+          <article class="dash-card dash-card--appointments fade-up fade-up-d1">
+            <span class="dash-card__icon bg-blush text-coral">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </span>
+            <h2 class="dash-card__title">Appointments</h2>
+            <p class="dash-card__body">Schedule confidential one-on-one sessions with our certified therapists.</p>
+            <a th:href="@{/appointments/book}" class="btn btn-coral dash-card__cta">Book New Session</a>
+          </article>
 
-        <!-- Appointments Card -->
-        <article class="dash-card dash-card--appointments fade-up fade-up-d1">
-          <span class="dash-card__icon bg-blush text-coral">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-          </span>
-          <h2 class="dash-card__title">Appointments</h2>
-          <p class="dash-card__body">Schedule confidential one-on-one sessions with our certified therapists.</p>
-          <a th:href="@{/appointments/book}" class="btn btn-coral dash-card__cta">Book New Session</a>
-        </article>
+          <!-- Assessment Card -->
+          <article class="dash-card dash-card--assessment fade-up fade-up-d2">
+            <span class="dash-card__icon bg-sand text-gold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            <h2 class="dash-card__title">Self-Assessments</h2>
+            <p class="dash-card__body">Take clinically validated tests (PHQ-9, GAD-7) to monitor your mental wellbeing.</p>
+            <a th:href="@{/assessments}" class="btn btn-gold dash-card__cta">Take Assessment</a>
+          </article>
 
-        <!-- Assessment Card -->
-        <article class="dash-card dash-card--assessment fade-up fade-up-d2">
-          <span class="dash-card__icon bg-sand text-gold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          </span>
-          <h2 class="dash-card__title">Self-Assessments</h2>
-          <p class="dash-card__body">Take clinically validated tests (PHQ-9, GAD-7) to monitor your mental wellbeing.</p>
-          <a th:href="@{/assessments}" class="btn btn-gold dash-card__cta">Take Assessment</a>
-        </article>
+          <!-- AI Chat Card -->
+          <article class="dash-card dash-card--chat fade-up fade-up-d3">
+            <span class="dash-card__icon bg-mint text-teal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+            </span>
+            <h2 class="dash-card__title">Chat with AI</h2>
+            <p class="dash-card__body">Talk to our AI mental health assistant anytime. It's private, supportive, and non-judgemental.</p>
+            <a th:href="@{/chat}" class="btn btn-teal dash-card__cta">Start AI Chat</a>
+          </article>
 
-        <!-- AI Chat Card -->
-        <article class="dash-card dash-card--chat fade-up fade-up-d3">
-          <span class="dash-card__icon bg-mint text-teal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
-          </span>
-          <h2 class="dash-card__title">Chat with AI</h2>
-          <p class="dash-card__body">Talk to our AI mental health assistant anytime. It's private, supportive, and non-judgemental.</p>
-          <a th:href="@{/chat}" class="btn btn-teal dash-card__cta">Start AI Chat</a>
-        </article>
+        </section>
 
-      </section>
-
-      <!-- ===== APPOINTMENTS SECTION ===== -->
-      <section class="appointments-section fade-up" style="margin-bottom: 2.5rem;">
-        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-          <div>
-            <h2 style="font-size:1.4rem; color:var(--teal);">My Consultations</h2>
-            <p style="font-size:0.85rem; color:var(--muted-foreground);">Track your appointment schedule and status</p>
+        <!-- Info Section -->
+        <section class="dash-info fade-up" style="margin-top:2rem;">
+          <div class="dash-info__card bg-mint">
+            <h3 class="text-teal">💡 Quick Tip</h3>
+            <p>Taking just 5 minutes a day for mindfulness can significantly reduce stress and anxiety. Try a breathing exercise today!</p>
           </div>
-          <a th:href="@{/appointments/book}" class="btn btn-outline-coral btn-sm">+ Book Session</a>
-        </div>
-
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(appointments)}" class="empty-state-card">
-          <p>You haven't booked any appointments yet.</p>
-          <a th:href="@{/appointments/book}" class="btn btn-coral" style="margin-top:1rem;">Book Your First Appointment</a>
-        </div>
-
-        <!-- Appointments List / Table -->
-        <div th:if="${not #lists.isEmpty(appointments)}" class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Therapist</th>
-                <th>Specialization</th>
-                <th>Date & Time</th>
-                <th>Notes</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="apt : ${appointments}">
-                <td>
-                  <strong th:text="${apt.therapist.name}">Dr. Specialist</strong>
-                </td>
-                <td th:text="${apt.therapist.specialization} ?: 'Therapy'">Clinical Psychology</td>
-                <td>
-                  <span th:text="${apt.appointmentDate}">2026-09-10</span><br/>
-                  <small style="color:var(--muted-foreground);" th:text="${apt.appointmentTime}">10:00 AM</small>
-                </td>
-                <td style="max-width:200px;">
-                  <span th:text="${apt.notes} ?: 'No specific notes'" style="font-size:0.82rem; color:rgba(26,60,60,0.8);">Notes</span>
-                </td>
-                <td>
-                  <span class="status-pill"
-                        th:classappend="'status-pill--' + ${#strings.toLowerCase(apt.status)}"
-                        th:text="${apt.status}">PENDING</span>
-                </td>
-                <td>
-                  <form th:if="${apt.status.name() != 'CANCELLED'}"
-                        th:action="@{/appointments/{id}/status(id=${apt.id})}"
-                        method="post"
-                        onsubmit="return confirm('Are you sure you want to cancel this appointment?');"
-                        style="display:inline;">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <input type="hidden" name="status" value="CANCELLED" />
-                    <input type="hidden" name="returnTo" value="dashboard" />
-                    <button type="submit" class="btn btn-cancel btn-sm">Cancel</button>
-                  </form>
-                  <span th:if="${apt.status.name() == 'CANCELLED'}" style="font-size:0.78rem; color:var(--muted-foreground);">Closed</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ===== ASSIGNED ASSESSMENTS FROM THERAPIST ===== -->
-      <section th:if="${not #lists.isEmpty(assignedTests)}" class="appointments-section fade-up" style="margin-bottom: 2.5rem;">
-        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-          <div>
-            <h2 style="font-size:1.4rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-              <span>🔔 Clinical Tests Assigned by Your Therapist</span>
-              <span class="badge-confidential" style="font-size:0.75rem;">Action Required</span>
-            </h2>
-            <p style="font-size:0.85rem; color:var(--muted-foreground);">Personalized questionnaires requested by your consulting doctor</p>
+          <div class="dash-info__card bg-blush">
+            <h3 class="text-coral">📞 Need Immediate Help?</h3>
+            <p>If you're in crisis, please call a mental health helpline immediately. You are not alone.</p>
+            <a href="tel:988" class="btn btn-coral" style="margin-top:1rem;">Call 988 Lifeline</a>
           </div>
-        </div>
+        </section>
 
-        <div class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Test Title</th>
-                <th>Assigned By</th>
-                <th>Assigned On</th>
-                <th>Status</th>
-                <th>Score</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="assign : ${assignedTests}">
-                <td>
-                  <strong th:text="${assign.customTest.title}">Custom Test Title</strong>
-                  <div style="font-size:0.75rem; color:var(--muted-foreground);" th:text="${assign.customTest.category}">Category</div>
-                </td>
-                <td>
-                  <span th:text="'Dr. ' + ${assign.assignedBy.name}">Dr. Therapist</span>
-                </td>
-                <td>
-                  <span th:text="${#temporals.format(assign.assignedAt, 'dd MMM yyyy')}">02 Sep 2026</span>
-                </td>
-                <td>
-                  <span class="status-pill"
-                        th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}"
-                        th:text="${assign.status}">PENDING</span>
-                </td>
-                <td>
-                  <span th:if="${assign.status == 'COMPLETED'}" th:text="${assign.totalScore} + ' / ' + ${assign.customTest.maxScore}" style="font-weight:700;">14 / 30</span>
-                  <span th:if="${assign.status != 'COMPLETED'}" style="color:var(--muted-foreground); font-size:0.82rem;">Not taken</span>
-                </td>
-                <td>
-                  <a th:if="${assign.status == 'PENDING'}"
-                     th:href="@{/assessments/custom/{id}(id=${assign.id})}"
-                     class="btn btn-coral btn-sm">
-                    ✍️ Take Test
-                  </a>
-                  <a th:if="${assign.status == 'COMPLETED'}"
-                     th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
-                     class="btn btn-outline-coral btn-sm">
-                    📊 View Results
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      </div>
 
-      <!-- ===== RECENT ASSESSMENTS SECTION ===== -->
-      <section class="appointments-section fade-up">
-        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-          <div>
-            <h2 style="font-size:1.4rem; color:var(--teal);">My Self-Assessments</h2>
-            <p style="font-size:0.85rem; color:var(--muted-foreground);">Past screening records (PHQ-9 & GAD-7)</p>
+      <!-- ========================================
+           TAB 2: CONSULTATIONS
+           ======================================== -->
+      <div class="dash-tab-content" id="tab-consultations">
+
+        <section class="appointments-section fade-up">
+          <div class="section-header">
+            <div class="section-header__text">
+              <h2 class="section-header__title">My Consultations</h2>
+              <p class="section-header__desc">Track your appointment schedule, doctor details, and status</p>
+            </div>
+            <div class="section-header__actions">
+              <a th:href="@{/appointments/book}" class="btn btn-coral btn-sm">+ Book New Session</a>
+            </div>
           </div>
-          <a th:href="@{/assessments}" class="btn btn-outline-coral btn-sm">+ Take New Test</a>
-        </div>
 
-        <!-- Empty State -->
-        <div th:if="${#lists.isEmpty(assessments)}" class="empty-state-card">
-          <p>No assessment records yet. Take a 2-minute test to understand your mental health score.</p>
-          <a th:href="@{/assessments}" class="btn btn-gold" style="margin-top:1rem;">Take Self-Assessment</a>
-        </div>
+          <!-- Empty State -->
+          <div th:if="${#lists.isEmpty(appointments)}" class="empty-state-card">
+            <p style="font-size:1.05rem; margin-bottom:0.5rem; color:var(--foreground); font-weight:600;">No Consultations Booked Yet</p>
+            <p>Connect with our certified therapists for confidential 1-on-1 counseling.</p>
+            <a th:href="@{/appointments/book}" class="btn btn-coral" style="margin-top:1.25rem;">Book Your First Appointment</a>
+          </div>
 
-        <!-- Assessments Table -->
-        <div th:if="${not #lists.isEmpty(assessments)}" class="table-container">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Assessment</th>
-                <th>Score</th>
-                <th>Severity Level</th>
-                <th>Date Taken</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="a : ${assessments}">
-                <td>
-                  <strong th:text="${a.type.displayName}">PHQ-9 Depression Screening</strong>
-                </td>
-                <td>
-                  <span th:text="${a.totalScore} + ' / ' + ${a.type.maxScore}" style="font-weight:700;">12 / 27</span>
-                </td>
-                <td>
-                  <span class="status-pill status-pill--pending" th:text="${a.severity}">Moderate</span>
-                </td>
-                <td>
-                  <span th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, hh:mm a')}">02 Sep 2026</span>
-                </td>
-                <td>
-                  <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">
-                    📊 View AI Report & Result
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+          <!-- Consultations Table / Cards for Mobile -->
+          <div th:if="${not #lists.isEmpty(appointments)}" class="table-container">
+            <table class="custom-table custom-table--cards">
+              <thead>
+                <tr>
+                  <th>Therapist</th>
+                  <th>Specialization</th>
+                  <th>Date & Time</th>
+                  <th>Notes</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="apt : ${appointments}">
+                  <td class="card-main-title" data-label="Therapist">
+                    <div>
+                      <strong th:text="${apt.therapist.name}">Dr. Specialist</strong>
+                      <div style="font-size:0.8rem; color:var(--muted-foreground); font-weight:500;" th:text="${apt.therapist.specialization} ?: 'Clinical Therapy'">Clinical Psychology</div>
+                    </div>
+                  </td>
+                  <td data-label="Specialization" th:text="${apt.therapist.specialization} ?: 'Clinical Therapy'">Clinical Psychology</td>
+                  <td data-label="Date & Time">
+                    <span th:text="${apt.appointmentDate}" style="font-weight:600;">2026-09-10</span><br/>
+                    <small style="color:var(--muted-foreground);" th:text="${apt.appointmentTime}">10:00 AM</small>
+                  </td>
+                  <td data-label="Notes">
+                    <span th:text="${apt.notes} ?: 'No specific notes'" style="font-size:0.85rem; color:rgba(26,60,60,0.85);">Notes</span>
+                  </td>
+                  <td data-label="Status">
+                    <span class="status-pill"
+                          th:classappend="'status-pill--' + ${#strings.toLowerCase(apt.status)}"
+                          th:text="${apt.status}">PENDING</span>
+                  </td>
+                  <td class="card-action-cell" data-label="Action">
+                    <form th:if="${apt.status.name() != 'CANCELLED'}"
+                          th:action="@{/appointments/{id}/status(id=${apt.id})}"
+                          method="post"
+                          onsubmit="return confirm('Are you sure you want to cancel this appointment?');"
+                          style="display:inline;">
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                      <input type="hidden" name="status" value="CANCELLED" />
+                      <input type="hidden" name="returnTo" value="dashboard" />
+                      <button type="submit" class="btn btn-cancel btn-sm">Cancel Appointment</button>
+                    </form>
+                    <span th:if="${apt.status.name() == 'CANCELLED'}" style="font-size:0.82rem; color:var(--muted-foreground); font-weight:600;">Closed</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <!-- Info Section -->
-      <section class="dash-info fade-up" style="margin-top:2.5rem;">
-        <div class="dash-info__card bg-mint">
-          <h3 class="text-teal">💡 Quick Tip</h3>
-          <p>Taking just 5 minutes a day for mindfulness can significantly reduce stress and anxiety. Try a breathing exercise today!</p>
-        </div>
-        <div class="dash-info__card bg-blush">
-          <h3 class="text-coral">📞 Need Immediate Help?</h3>
-          <p>If you're in crisis, please call a mental health helpline immediately. You are not alone.</p>
-          <a href="tel:988" class="btn btn-coral" style="margin-top:1rem;">Call 988 Lifeline</a>
-        </div>
-      </section>
+      </div>
+
+      <!-- ========================================
+           TAB 3: ASSESSMENTS
+           ======================================== -->
+      <div class="dash-tab-content" id="tab-assessments">
+
+        <!-- ASSIGNED ASSESSMENTS FROM THERAPIST (IF ANY) -->
+        <section th:if="${not #lists.isEmpty(assignedTests)}" class="appointments-section fade-up" style="margin-bottom: 2rem;">
+          <div class="section-header">
+            <div class="section-header__text">
+              <h2 class="section-header__title">
+                <span>🔔 Assigned Clinical Tests</span>
+                <span class="badge-confidential" style="font-size:0.75rem;">Action Required</span>
+              </h2>
+              <p class="section-header__desc">Questionnaires requested by your consulting doctor</p>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="custom-table custom-table--cards">
+              <thead>
+                <tr>
+                  <th>Test Title</th>
+                  <th>Assigned By</th>
+                  <th>Assigned On</th>
+                  <th>Status</th>
+                  <th>Score</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="assign : ${assignedTests}">
+                  <td class="card-main-title" data-label="Test Title">
+                    <div>
+                      <strong th:text="${assign.customTest.title}">Custom Test Title</strong>
+                      <div style="font-size:0.78rem; color:var(--muted-foreground); font-weight:500;" th:text="${assign.customTest.category}">Category</div>
+                    </div>
+                  </td>
+                  <td data-label="Assigned By">
+                    <span th:text="'Dr. ' + ${assign.assignedBy.name}">Dr. Therapist</span>
+                  </td>
+                  <td data-label="Assigned On">
+                    <span th:text="${#temporals.format(assign.assignedAt, 'dd MMM yyyy')}">02 Sep 2026</span>
+                  </td>
+                  <td data-label="Status">
+                    <span class="status-pill"
+                          th:classappend="'status-pill--' + ${#strings.toLowerCase(assign.status)}"
+                          th:text="${assign.status}">PENDING</span>
+                  </td>
+                  <td data-label="Score">
+                    <span th:if="${assign.status == 'COMPLETED'}" th:text="${assign.totalScore} + ' / ' + ${assign.customTest.maxScore}" style="font-weight:700; color:var(--teal);">14 / 30</span>
+                    <span th:if="${assign.status != 'COMPLETED'}" style="color:var(--muted-foreground); font-size:0.85rem;">Not taken yet</span>
+                  </td>
+                  <td class="card-action-cell" data-label="Action">
+                    <a th:if="${assign.status == 'PENDING'}"
+                       th:href="@{/assessments/custom/{id}(id=${assign.id})}"
+                       class="btn btn-coral btn-sm">
+                      ✍️ Take Test Now
+                    </a>
+                    <a th:if="${assign.status == 'COMPLETED'}"
+                       th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
+                       class="btn btn-outline-coral btn-sm">
+                      📊 View Results
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SELF-ASSESSMENTS HISTORY -->
+        <section class="appointments-section fade-up">
+          <div class="section-header">
+            <div class="section-header__text">
+              <h2 class="section-header__title">My Self-Assessments</h2>
+              <p class="section-header__desc">Clinical screenings taken for Depression (PHQ-9), Anxiety (GAD-7), and Stress</p>
+            </div>
+            <div class="section-header__actions">
+              <a th:href="@{/assessments}" class="btn btn-coral btn-sm">+ Take New Test</a>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div th:if="${#lists.isEmpty(assessments)}" class="empty-state-card">
+            <p style="font-size:1.05rem; margin-bottom:0.5rem; color:var(--foreground); font-weight:600;">No Self-Assessments Recorded Yet</p>
+            <p>Take a 2-minute clinically validated assessment to understand your wellbeing score.</p>
+            <a th:href="@{/assessments}" class="btn btn-gold" style="margin-top:1.25rem;">Take Self-Assessment</a>
+          </div>
+
+          <!-- Assessments Table / Cards for Mobile -->
+          <div th:if="${not #lists.isEmpty(assessments)}" class="table-container">
+            <table class="custom-table custom-table--cards">
+              <thead>
+                <tr>
+                  <th>Assessment</th>
+                  <th>Score</th>
+                  <th>Severity Level</th>
+                  <th>Date Taken</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="a : ${assessments}">
+                  <td class="card-main-title" data-label="Assessment">
+                    <strong th:text="${a.type.displayName}">PHQ-9 Depression Screening</strong>
+                  </td>
+                  <td data-label="Score">
+                    <span th:text="${a.totalScore} + ' / ' + ${a.type.maxScore}" style="font-weight:700; color:var(--teal);">12 / 27</span>
+                  </td>
+                  <td data-label="Severity Level">
+                    <span class="status-pill status-pill--pending" th:text="${a.severity}">Moderate</span>
+                  </td>
+                  <td data-label="Date Taken">
+                    <span th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, hh:mm a')}">02 Sep 2026</span>
+                  </td>
+                  <td class="card-action-cell" data-label="Action">
+                    <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">
+                      📊 View AI Report & Result
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
 
     </div>
   </main>
+
+  <!-- ===== MOBILE BOTTOM NAVIGATION BAR ===== -->
+  <nav class="mobile-bottom-nav" aria-label="Quick mobile navigation">
+    <a th:href="@{/dashboard}" class="mobile-bottom-nav__item active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>Home</span>
+    </a>
+    <a th:href="@{/appointments/book}" class="mobile-bottom-nav__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Book</span>
+    </a>
+    <a th:href="@{/chat}" class="mobile-bottom-nav__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
+      <span>Chat</span>
+    </a>
+    <a th:href="@{/assessments}" class="mobile-bottom-nav__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Tests</span>
+    </a>
+    <a th:href="@{/reports}" class="mobile-bottom-nav__item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Reports</span>
+    </a>
+  </nav>
 
   <!-- ===== FOOTER ===== -->
   <footer>
@@ -343,6 +468,9 @@
     </div>
     <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
   </footer>
+
+  <!-- Navigation & Drawer Script -->
+  <script th:src="@{/js/navigation.js}"></script>
 
   <!-- Auto-hide toast -->
   <script th:if="${success}">
