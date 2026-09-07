@@ -7,7 +7,7 @@
   <meta name="description" content="Complete the assessment assigned by your therapist." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===== HEADER ===== -->
   <header class="site-header">
@@ -165,18 +165,6 @@
     </div>
   </main>
 
-  <!-- ===== FOOTER ===== -->
-  <footer>
-    <div class="footer-links">
-      <div class="footer-links__inner">
-        <a href="#">Terms and Conditions</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Contact</a>
-      </div>
-    </div>
-    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
-  </footer>
-
   <!-- ===== MOBILE BOTTOM NAVIGATION BAR ===== -->
   <nav class="mobile-bottom-nav" aria-label="Quick mobile navigation">
     <a th:href="@{/dashboard}" class="mobile-bottom-nav__item">
@@ -200,6 +188,18 @@
       <span>Reports</span>
     </a>
   </nav>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-links">
+      <div class="footer-links__inner">
+        <a href="#">Terms and Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bar">© 2026 All rights reserved. Breathe Heal Grow Foundation.</div>
+  </footer>
 
   <!-- Navigation & Mobile Drawer Script -->
   <script th:src="@{/js/navigation.js}"></script>
