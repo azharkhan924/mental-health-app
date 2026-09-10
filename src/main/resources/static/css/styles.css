@@ -31,6 +31,8 @@
   --sand:           #f0e4c8;
   --gold:           #c4a24e;
   --sky:            #a8cce8;
+  --violet:         #8e44ad;
+  --ocean:          #2980b9;
 
   /* Shadows */
   --shadow-soft:  0 1px 2px rgba(26,92,92,0.05), 0 8px 24px rgba(26,92,92,0.06);
@@ -132,6 +134,16 @@ ul { list-style: none; }
 .btn-gold {
   background-color: var(--gold);
   color: #3d3218;
+}
+
+.btn-violet {
+  background-color: var(--violet);
+  color: #ffffff;
+}
+
+.btn-ocean {
+  background-color: var(--ocean);
+  color: #ffffff;
 }
 
 .btn-outline-coral {
@@ -294,6 +306,7 @@ textarea.field-input {
 }
 
 .site-nav a:hover { color: var(--coral); }
+.site-nav a.active { color: var(--coral); font-weight: 700; }
 
 /* Header right */
 .header-actions {
@@ -2974,6 +2987,10 @@ textarea.field-input {
   .mobile-bottom-nav {
     display: flex;
   }
+  /* Hide the horizontal tab bar on mobile — bottom nav handles tab switching */
+  .dash-tabs-bar {
+    display: none;
+  }
   body.has-bottom-nav,
   body:has(.mobile-bottom-nav),
   .dashboard {
@@ -3041,9 +3058,6 @@ textarea.field-input {
   .dash-welcome__desc {
     font-size: 0.84rem;
     margin-top: 0.5rem;
-  }
-  .dash-tabs-bar {
-    margin-bottom: 1.35rem;
   }
   .dash-tab-btn {
     padding: 0.6rem 0.95rem;
@@ -4458,10 +4472,177 @@ textarea.field-input {
   color: var(--teal);
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   PATIENT REPORTS PAGE — Tabs, Cards, Print
+   ═══════════════════════════════════════════════════════════════════ */
 
+.report-tabs-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.5rem;
+  margin: 1.75rem 0 1.5rem 0;
+  flex-wrap: wrap;
+}
 
+.report-tab-btn {
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
 
+.report-tab-btn:hover {
+  color: var(--teal);
+  background: rgba(197, 232, 224, 0.15);
+}
 
+.report-tab-btn.active {
+  color: var(--teal);
+  border-color: var(--teal);
+  background: rgba(197, 232, 224, 0.18);
+}
 
+.report-tab-btn .badge-count {
+  background: var(--teal);
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 50px;
+}
 
+.report-tab-btn.active .badge-count {
+  background: var(--coral);
+}
 
+.report-tab-panel {
+  display: none;
+  animation: tabFadeIn 0.3s ease-out;
+}
+
+.report-tab-panel.active {
+  display: block;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.patient-report-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.patient-report-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.patient-report-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.patient-report-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.patient-report-meta {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  margin-bottom: 0.75rem;
+}
+
+.clean-bullet-list {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.clean-bullet-list li {
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+
+.rx-box {
+  background: linear-gradient(135deg, rgba(245, 213, 200, 0.2), rgba(197, 232, 224, 0.15));
+  border-left: 4px solid var(--coral);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 0.75rem;
+}
+
+@media print {
+  .no-print, .site-header, .report-tabs-nav { display: none !important; }
+  .print-header { display: flex !important; }
+  .report-tab-panel { display: block !important; margin-bottom: 2rem; }
+  .patient-report-card { break-inside: avoid; page-break-inside: avoid; border-color: #ccc; box-shadow: none; }
+}
+
+/* ==========================================================================
+   LUCIDE ICONS & MODERN ICON UTILITIES
+   ========================================================================== */
+
+.lucide,
+i[data-lucide] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.16em;
+  stroke-width: 2px;
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.16em;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.icon-inline svg,
+.icon-inline.lucide {
+  width: 100%;
+  height: 100%;
+}
+
+.icon-spin {
+  animation: icon-spin-kf 1s linear infinite;
+}
+
+@keyframes icon-spin-kf {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.icon-circle-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(197, 232, 224, 0.35);
+  color: var(--teal);
+  flex-shrink: 0;
+}

@@ -6,6 +6,7 @@
   <title th:text="${title} + ' — Breathe Heal Grow'">Assessment Quiz</title>
   <meta name="description" content="Complete your mental health questionnaire." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -21,7 +22,7 @@
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
-        <a th:href="@{/assessments}" style="color:var(--coral);font-weight:700;">Assessments</a>
+        <a th:href="@{/assessments}" class="active">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
@@ -152,7 +153,7 @@
         <!-- Disclaimer & Submit -->
         <div class="quiz-submit-card">
           <p class="quiz-disclaimer">
-            ℹ️ <strong>Note:</strong> This self-assessment is an educational screening aid, not a definitive clinical diagnosis. If you are experiencing severe distress, please consult a medical professional.
+            <i data-lucide="info" class="icon-inline"></i> <strong>Note:</strong> This self-assessment is an educational screening aid, not a definitive clinical diagnosis. If you are experiencing severe distress, please consult a medical professional.
           </p>
           <button type="submit" class="btn btn-coral" style="width: 100%; padding: 1rem; font-size: 0.9rem;">
             Submit Assessment & Calculate Score →

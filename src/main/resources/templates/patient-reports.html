@@ -6,6 +6,7 @@
   <title th:text="'Comprehensive Report Hub — ' + ${patient.name} + ' — Breathe Heal Grow'">Patient Reports</title>
   <meta name="description" content="Comprehensive patient report hub with AI chat analysis, clinical assessments, pre-diagnosis screening, and appointment notes." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
   <style>
     /* ══ REPORT HUB SPECIFIC STYLES ══ */
     .report-hub-tabs { display:flex; gap:0.35rem; flex-wrap:wrap; border-bottom:2px solid var(--border); padding-bottom:0.5rem; margin:1.75rem 0 1.25rem 0; }
@@ -174,7 +175,7 @@
       <!-- Breadcrumbs -->
       <div class="no-print" style="margin-bottom:1.25rem;">
         <a th:href="@{/therapist/dashboard}" style="color:var(--teal); font-size:0.85rem; font-weight:600; display:inline-flex; align-items:center; gap:0.4rem;">
-          ← Back to Therapist Dashboard
+          <i data-lucide="arrow-left" class="icon-inline"></i> Back to Therapist Dashboard
         </a>
       </div>
 
@@ -192,10 +193,10 @@
           <div class="patient-profile-details">
             <h1 class="patient-profile-name" th:text="${patient.name}">Patient Name</h1>
             <div class="patient-profile-meta">
-              <span>📧 <span th:text="${patient.email}">patient@example.com</span></span>
-              <span>📞 <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
-              <span th:if="${patient.age != null}">🎂 <span th:text="${patient.age}">22</span> yrs</span>
-              <span th:if="${patient.gender != null and patient.gender != ''}">⚤ <span th:text="${patient.gender}">Gender</span></span>
+              <span style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="mail" class="icon-inline"></i> <span th:text="${patient.email}">patient@example.com</span></span>
+              <span style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="phone" class="icon-inline"></i> <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
+              <span th:if="${patient.age != null}" style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="user" class="icon-inline"></i> <span th:text="${patient.age}">22</span> yrs</span>
+              <span th:if="${patient.gender != null and patient.gender != ''}" style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="users" class="icon-inline"></i> <span th:text="${patient.gender}">Gender</span></span>
             </div>
           </div>
           <div class="patient-profile-actions no-print">
@@ -209,7 +210,7 @@
             <form th:action="@{/therapist/patient/{id}/generate-chat-report(id=${patient.id})}" method="post" style="margin-top:0.5rem;">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
               <button type="submit" class="btn btn-teal btn-sm" title="Analyze latest chat messages with AI companions">
-                ⚡ Refresh AI Behavioral Insights
+                <i data-lucide="zap" class="icon-inline"></i> Refresh AI Behavioral Insights
               </button>
             </form>
           </div>
@@ -218,50 +219,50 @@
 
       <!-- ═══ PDF SECTION SELECTOR ═══ -->
       <div class="pdf-selector fade-up no-print">
-        <h3>📄 Export to PDF — Select Sections to Include</h3>
+        <h3 style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="file-text" class="icon-inline"></i> Export to PDF — Select Sections to Include</h3>
         <div class="pdf-section-grid">
           <label class="pdf-section-check">
             <input type="checkbox" data-section="behavioral" checked onchange="togglePrintSection(this)" />
-            <span>🔒 AI Chat Behavioral Insights</span>
+            <span><i data-lucide="lock" class="icon-inline"></i> AI Chat Behavioral Insights</span>
           </label>
           <label class="pdf-section-check">
             <input type="checkbox" data-section="assessment" checked onchange="togglePrintSection(this)" />
-            <span>📝 Clinical Assessment Tests</span>
+            <span><i data-lucide="file-text" class="icon-inline"></i> Clinical Assessment Tests</span>
           </label>
           <label class="pdf-section-check">
             <input type="checkbox" data-section="customtest" checked onchange="togglePrintSection(this)" />
-            <span>🧪 Custom Test Evaluations</span>
+            <span><i data-lucide="flask-conical" class="icon-inline"></i> Custom Test Evaluations</span>
           </label>
           <label class="pdf-section-check">
             <input type="checkbox" data-section="prediag" checked onchange="togglePrintSection(this)" />
-            <span>🤖 Pre-Diagnosis AI Screening</span>
+            <span><i data-lucide="bot" class="icon-inline"></i> Pre-Diagnosis AI Screening</span>
           </label>
           <label class="pdf-section-check">
             <input type="checkbox" data-section="notes" checked onchange="togglePrintSection(this)" />
-            <span>📋 Appointment Notes & Rx</span>
+            <span><i data-lucide="clipboard-list" class="icon-inline"></i> Appointment Notes &amp; Rx</span>
           </label>
         </div>
         <button class="btn-export-pdf-lg" onclick="exportCombinedPDF()">
-          📄 Generate Combined PDF Report
+          <i data-lucide="file-down" class="icon-inline"></i> Generate Combined PDF Report
         </button>
       </div>
 
       <!-- ═══ TAB NAVIGATION ═══ -->
       <div class="report-hub-tabs fade-up no-print">
         <button class="report-hub-tab active" onclick="switchTab('behavioral', this)">
-          🔒 AI Chat Analysis <span class="tab-count" th:text="${#lists.size(behavioralReports)}">0</span>
+          <i data-lucide="lock" class="icon-inline"></i> AI Chat Analysis <span class="tab-count" th:text="${#lists.size(behavioralReports)}">0</span>
         </button>
         <button class="report-hub-tab" onclick="switchTab('assessment', this)">
-          📝 Clinical Tests <span class="tab-count" th:text="${#lists.size(assessmentReports)}">0</span>
+          <i data-lucide="file-text" class="icon-inline"></i> Clinical Tests <span class="tab-count" th:text="${#lists.size(assessmentReports)}">0</span>
         </button>
         <button class="report-hub-tab" onclick="switchTab('customtest', this)">
-          🧪 Custom Tests <span class="tab-count" th:text="${#lists.size(customTestResults)}">0</span>
+          <i data-lucide="flask-conical" class="icon-inline"></i> Custom Tests <span class="tab-count" th:text="${#lists.size(customTestResults)}">0</span>
         </button>
         <button class="report-hub-tab" onclick="switchTab('prediag', this)">
-          🤖 Pre-Diagnosis AI <span class="tab-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>
+          <i data-lucide="bot" class="icon-inline"></i> Pre-Diagnosis AI <span class="tab-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>
         </button>
         <button class="report-hub-tab" onclick="switchTab('notes', this)">
-          📋 Session Notes <span class="tab-count" th:text="${#lists.size(appointmentNotes)}">0</span>
+          <i data-lucide="clipboard-list" class="icon-inline"></i> Session Notes <span class="tab-count" th:text="${#lists.size(appointmentNotes)}">0</span>
         </button>
       </div>
 
@@ -269,7 +270,7 @@
       <section id="tab-behavioral" class="report-section active print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            🔒 AI Chat Behavioral Analysis
+            <i data-lucide="lock" class="icon-inline"></i> AI Chat Behavioral Analysis
             <span class="badge-confidential">Confidential • Therapist Only</span>
           </h2>
           <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
@@ -299,7 +300,7 @@
       <section id="tab-assessment" class="report-section print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            📝 Clinical Assessment Reports
+            <i data-lucide="file-text" class="icon-inline"></i> Clinical Assessment Reports
             <span class="badge-shared">Shared with Patient</span>
           </h2>
           <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
@@ -331,7 +332,7 @@
       <section id="tab-customtest" class="report-section print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            🧪 Custom Test Evaluations
+            <i data-lucide="flask-conical" class="icon-inline"></i> Custom Test Evaluations
           </h2>
           <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
             Results from therapist-designed assessments with AI clinical interpretation.
@@ -365,7 +366,7 @@
       <section id="tab-prediag" class="report-section print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            🤖 Pre-Diagnosis AI Screening Results
+            <i data-lucide="bot" class="icon-inline"></i> Pre-Diagnosis AI Screening Results
             <span class="badge-confidential">Confidential • Therapist Only</span>
           </h2>
           <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
@@ -397,7 +398,7 @@
       <section id="tab-notes" class="report-section print-include fade-up">
         <div class="section-header" style="margin-bottom:1rem;">
           <h2 style="font-size:1.2rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem;">
-            📋 Appointment Notes & Prescriptions
+            <i data-lucide="clipboard-list" class="icon-inline"></i> Appointment Notes &amp; Prescriptions
           </h2>
           <p style="font-size:0.82rem; color:var(--muted-foreground); margin-top:0.25rem;">
             Session notes, clinical observations, and prescriptions recorded during appointments.
@@ -430,17 +431,17 @@
                 <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.clinicalObservations}">Observations</p>
               </div>
               <div th:if="${note.prescription != null and note.prescription != ''}" style="margin-bottom:0.75rem; background:rgba(245,213,200,0.15); border-radius:8px; padding:0.6rem 0.8rem;">
-                <strong style="color:var(--coral);">💊 Prescription:</strong>
+                <strong style="color:var(--coral); display:flex; align-items:center; gap:0.35rem;"><i data-lucide="pill" class="icon-inline"></i> Prescription:</strong>
                 <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.prescription}">Rx</p>
               </div>
               <div th:if="${note.followUpPlan != null and note.followUpPlan != ''}" style="margin-bottom:0.75rem;">
-                <strong style="color:var(--teal);">📅 Follow-Up Plan:</strong>
+                <strong style="color:var(--teal); display:flex; align-items:center; gap:0.35rem;"><i data-lucide="calendar" class="icon-inline"></i> Follow-Up Plan:</strong>
                 <p style="margin:0.25rem 0 0 0; white-space:pre-line;" th:text="${note.followUpPlan}">Plan</p>
               </div>
 
               <!-- AI Clinical Summary -->
               <div th:if="${note.aiClinicalSummary != null and note.aiClinicalSummary != ''}" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.75rem;">
-                <strong style="color:var(--teal); font-size:0.92rem;">🤖 AI Clinical Summary:</strong>
+                <strong style="color:var(--teal); font-size:0.92rem; display:flex; align-items:center; gap:0.35rem;"><i data-lucide="bot" class="icon-inline"></i> AI Clinical Summary:</strong>
                 <div style="margin-top:0.5rem; line-height:1.65;" th:utext="${note.aiClinicalSummary}">Summary</div>
               </div>
             </div>

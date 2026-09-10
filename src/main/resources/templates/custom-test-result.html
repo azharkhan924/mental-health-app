@@ -6,6 +6,7 @@
   <title th:text="'Results — ' + ${test.title} + ' — Breathe Heal Grow'">Custom Assessment Result</title>
   <meta name="description" content="Your custom mental health evaluation result and AI diagnostic insights." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -21,7 +22,7 @@
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
-        <a th:href="@{/assessments}" style="color:var(--coral);font-weight:700;">Assessments</a>
+        <a th:href="@{/assessments}" class="active">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
@@ -147,7 +148,7 @@
         <div class="result-ai-report-box" style="margin-top:1.5rem;">
           <div class="report-visual-header">
             <div style="display:flex; align-items:center; gap:0.6rem;">
-              <span class="report-visual-icon">🤖</span>
+              <span class="report-visual-icon" style="display:flex; align-items:center; justify-content:center;"><i data-lucide="bot" style="width:24px; height:24px; color:var(--teal);"></i></span>
               <div>
                 <h3 style="font-size:1.1rem; color:var(--teal); margin:0;">AI Clinical Diagnostic Evaluation</h3>
                 <span style="font-size:0.75rem; color:var(--muted-foreground);">Personalized clinical evaluation for your consulting therapist</span>
@@ -161,14 +162,14 @@
           </div>
 
           <div class="report-visual-footer">
-            <span>ℹ️</span> This completed evaluation has been automatically updated in Dr. <strong th:text="${assignment.assignedBy.name}">Therapist</strong>'s clinical dashboard.
+            <span><i data-lucide="info" class="icon-inline"></i></span> This completed evaluation has been automatically updated in Dr. <strong th:text="${assignment.assignedBy.name}">Therapist</strong>'s clinical dashboard.
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="result-actions" style="margin-top:2rem;">
           <a th:href="@{/appointments/book(therapistId=${assignment.assignedBy.id})}" class="btn btn-coral" style="flex:1;">
-            📅 Schedule Follow-up with Dr. <span th:text="${assignment.assignedBy.name}">Therapist</span>
+            <i data-lucide="calendar" class="icon-inline"></i> Schedule Follow-up with Dr. <span th:text="${assignment.assignedBy.name}">Therapist</span>
           </a>
           <a th:href="@{/assessments}" class="btn btn-outline-coral">
             All Assessments

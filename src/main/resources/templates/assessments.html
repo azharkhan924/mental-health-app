@@ -6,6 +6,7 @@
   <title>Mental Health Self-Assessments — Breathe Heal Grow</title>
   <meta name="description" content="Take clinically validated self-assessments (PHQ-9, GAD-7, PSS-10, ISI, Burnout) to check in with your mental wellbeing." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -21,7 +22,7 @@
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
-        <a th:href="@{/assessments}" style="color:var(--coral);font-weight:700;">Assessments</a>
+        <a th:href="@{/assessments}" class="active">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
@@ -111,17 +112,19 @@
 
       <!-- Welcome Banner -->
       <section class="dash-welcome fade-up">
-        <h1 class="dash-welcome__title">Mental Health Self-Assessments 📋</h1>
-        <p class="dash-welcome__desc">
-          Clinically standard check-in questionnaires for depression, anxiety, daily stress, sleep quality, and academic burnout, plus custom evaluations assigned by your doctor.
-        </p>
+        <div class="dash-welcome__text">
+          <h1 class="dash-welcome__title">Mental Health Self-Assessments</h1>
+          <p class="dash-welcome__desc">
+            Clinically standard check-in questionnaires for depression, anxiety, daily stress, sleep quality, and academic burnout, plus custom evaluations assigned by your doctor.
+          </p>
+        </div>
       </section>
 
       <!-- Assigned Tests from Therapist -->
       <section th:if="${not #lists.isEmpty(assignedTests)}" class="fade-up" style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(245, 213, 200, 0.25), rgba(197, 232, 224, 0.25)); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
           <h2 style="font-size:1.25rem; color:var(--teal); margin:0; display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem;">
-            <span>🔔 Assigned by Your Consulting Therapist</span>
+            <span style="display:inline-flex; align-items:center; gap:0.4rem;"><i data-lucide="bell" style="width:1.1rem; height:1.1rem;"></i> Assigned by Your Consulting Therapist</span>
             <span class="badge-confidential" style="font-size:0.72rem;">Doctor Requested</span>
           </h2>
         </div>
@@ -138,12 +141,12 @@
             </p>
             <div th:if="${assign.status == 'PENDING'}">
               <a th:href="@{/assessments/custom/{id}(id=${assign.id})}" class="btn btn-coral" style="width:100%;">
-                Take Assigned Test ✍️
+                Take Assigned Test <i data-lucide="arrow-right" class="icon-inline"></i>
               </a>
             </div>
             <div th:if="${assign.status == 'COMPLETED'}">
               <a th:href="@{/assessments/custom/{id}/result(id=${assign.id})}" class="btn btn-outline-coral" style="width:100%;">
-                View Completed Score 📊
+                <i data-lucide="bar-chart-2" class="icon-inline"></i> View Completed Score
               </a>
             </div>
           </div>
@@ -163,7 +166,7 @@
             Evaluates mood, energy levels, and common depressive patterns experienced over the last two weeks.
           </p>
           <div style="font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
-            ⏱️ 3 mins · 9 Questions · Max 27 pts
+            <i data-lucide="clock" class="icon-inline"></i> 3 mins · 9 Questions · Max 27 pts
           </div>
           <a th:href="@{/assessments/take/PHQ9}" class="btn btn-teal dash-card__cta">Take PHQ-9 Test</a>
         </article>
@@ -178,14 +181,14 @@
             Measures generalized anxiety, panic tendencies, excessive worry, and restlessness over the past 2 weeks.
           </p>
           <div style="font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
-            ⏱️ 2 mins · 7 Questions · Max 21 pts
+            <i data-lucide="clock" class="icon-inline"></i> 2 mins · 7 Questions · Max 21 pts
           </div>
           <a th:href="@{/assessments/take/GAD7}" class="btn btn-coral dash-card__cta">Take GAD-7 Test</a>
         </article>
 
         <!-- 3. PSS-10 Stress Scale -->
-        <article class="dash-card" style="border-top: 4px solid #8e44ad;">
-          <span class="dash-card__icon text-teal" style="background-color: #f4ecf7; color: #8e44ad;">
+        <article class="dash-card" style="border-top: 4px solid var(--violet);">
+          <span class="dash-card__icon" style="background-color: rgba(142,68,173,0.12); color: var(--violet);">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           </span>
           <h2 class="dash-card__title">PSS-10 Stress Scale</h2>
@@ -193,14 +196,14 @@
             The most widely used clinical tool for measuring perceived unpredictability and daily stress levels in life.
           </p>
           <div style="font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
-            ⏱️ 3 mins · 10 Questions · Max 40 pts
+            <i data-lucide="clock" class="icon-inline"></i> 3 mins · 10 Questions · Max 40 pts
           </div>
-          <a th:href="@{/assessments/take/PSS10}" class="btn dash-card__cta" style="background-color:#8e44ad; color:#fff;">Take Stress Test</a>
+          <a th:href="@{/assessments/take/PSS10}" class="btn btn-violet dash-card__cta">Take Stress Test</a>
         </article>
 
         <!-- 4. ISI Sleep & Insomnia -->
-        <article class="dash-card" style="border-top: 4px solid #2980b9;">
-          <span class="dash-card__icon text-teal" style="background-color: #ebf5fb; color: #2980b9;">
+        <article class="dash-card" style="border-top: 4px solid var(--ocean);">
+          <span class="dash-card__icon" style="background-color: rgba(41,128,185,0.12); color: var(--ocean);">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
           </span>
           <h2 class="dash-card__title">ISI Insomnia & Sleep Test</h2>
@@ -208,9 +211,9 @@
             Screens for difficulties falling asleep, night waking, and overall impact of sleep disruption on daily energy.
           </p>
           <div style="font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
-            ⏱️ 2 mins · 7 Questions · Max 28 pts
+            <i data-lucide="clock" class="icon-inline"></i> 2 mins · 7 Questions · Max 28 pts
           </div>
-          <a th:href="@{/assessments/take/ISI}" class="btn dash-card__cta" style="background-color:#2980b9; color:#fff;">Take Sleep Test</a>
+          <a th:href="@{/assessments/take/ISI}" class="btn btn-ocean dash-card__cta">Take Sleep Test</a>
         </article>
 
         <!-- 5. Burnout Index -->
@@ -223,7 +226,7 @@
             Measures mental exhaustion, cynicism, and motivation drain specifically tailored for students and working professionals.
           </p>
           <div style="font-size:0.78rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
-            ⏱️ 2 mins · 8 Questions · Max 24 pts
+            <i data-lucide="clock" class="icon-inline"></i> 2 mins · 8 Questions · Max 24 pts
           </div>
           <a th:href="@{/assessments/take/BURNOUT}" class="btn btn-gold dash-card__cta">Take Burnout Test</a>
         </article>
@@ -233,8 +236,10 @@
       <!-- Past Assessments History Section -->
       <section class="appointments-section fade-up">
         <div class="section-header" style="margin-bottom: 1.5rem;">
-          <h2 style="font-size: 1.4rem; color: var(--teal);">My Assessment History</h2>
-          <p style="font-size: 0.85rem; color: var(--muted-foreground);">Review your past test results and monitor your wellness progress</p>
+          <div class="section-header__text">
+            <h2 class="section-header__title">My Assessment History</h2>
+            <p class="section-header__desc">Review your past test results and monitor your wellness progress</p>
+          </div>
         </div>
 
         <!-- Empty State -->

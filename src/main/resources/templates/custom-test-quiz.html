@@ -6,6 +6,7 @@
   <title th:text="${test.title} + ' — Breathe Heal Grow'">Custom Assessment</title>
   <meta name="description" content="Complete the assessment assigned by your therapist." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -21,7 +22,7 @@
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
-        <a th:href="@{/assessments}" style="color:var(--coral);font-weight:700;">Assessments</a>
+        <a th:href="@{/assessments}" class="active">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
@@ -151,7 +152,7 @@
           <!-- Submit Button -->
           <div style="margin-top:2rem; display:flex; justify-content:space-between; align-items:center;">
             <span style="font-size:0.82rem; color:var(--muted-foreground);">
-              🔒 Your responses are confidential and shared with Dr. <span th:text="${assignment.assignedBy.name}">Therapist</span>.
+              <i data-lucide="lock" class="icon-inline"></i> Your responses are confidential and shared with Dr. <span th:text="${assignment.assignedBy.name}">Therapist</span>.
             </span>
             <button type="submit" class="btn btn-coral" style="padding:0.85rem 2rem;">
               Submit & View AI Evaluation

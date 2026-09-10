@@ -6,6 +6,7 @@
   <title>Assessment Result — Breathe Heal Grow</title>
   <meta name="description" content="Your mental health self-assessment evaluation and recommendations." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -21,7 +22,7 @@
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
-        <a th:href="@{/assessments}" style="color:var(--coral);font-weight:700;">Assessments</a>
+        <a th:href="@{/assessments}" class="active">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
       <div class="header-actions">
@@ -144,7 +145,7 @@
 
         <!-- Clinical Recommendation -->
         <div class="result-recommendation-box bg-mint">
-          <h3 class="text-teal" style="font-size:1.1rem; margin-bottom:0.75rem;">💡 Guidance & Next Steps</h3>
+          <h3 class="text-teal" style="font-size:1.1rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.4rem;"><i data-lucide="lightbulb" class="icon-inline"></i> Guidance &amp; Next Steps</h3>
           <p style="font-size:0.92rem; line-height:1.7; color:rgba(26,60,60,0.9);" th:text="${assessment.recommendation}">
             Recommendation text goes here...
           </p>
@@ -156,7 +157,7 @@
           <!-- Report Header -->
           <div class="report-visual-header">
             <div style="display:flex; align-items:center; gap:0.6rem;">
-              <span class="report-visual-icon">🤖</span>
+              <span class="report-visual-icon" style="display:flex; align-items:center; justify-content:center;"><i data-lucide="bot" style="width:24px; height:24px; color:var(--teal);"></i></span>
               <div>
                 <h3 style="font-size:1.1rem; color:var(--teal); margin:0;">AI Clinical Insights</h3>
                 <span style="font-size:0.75rem; color:var(--muted-foreground);">Personalized for you based on your responses</span>
@@ -171,14 +172,14 @@
           </div>
 
           <div class="report-visual-footer">
-            <span>ℹ️</span> This report is automatically generated for your records and shared with your consulting therapist upon booking.
+            <span><i data-lucide="info" class="icon-inline"></i></span> This report is automatically generated for your records and shared with your consulting therapist upon booking.
           </div>
         </div>
 
         <!-- Next Actions -->
         <div class="result-actions" style="margin-top:2rem;">
           <a th:href="@{/appointments/book}" class="btn btn-coral" style="flex:1;">
-            📅 Schedule a Consultation with a Therapist
+            <i data-lucide="calendar" class="icon-inline"></i> Schedule a Consultation with a Therapist
           </a>
           <a th:href="@{/assessments}" class="btn btn-outline-coral">
             Take Another Test
@@ -193,7 +194,7 @@
       <!-- Immediate Crisis Helpline Box -->
       <section class="dash-info fade-up" style="margin-top:2rem;">
         <div class="dash-info__card bg-blush" style="grid-column: 1 / -1;">
-          <h3 class="text-coral">📞 Need Immediate Crisis Support?</h3>
+          <h3 class="text-coral" style="display:flex; align-items:center; gap:0.4rem;"><i data-lucide="phone-call" class="icon-inline"></i> Need Immediate Crisis Support?</h3>
           <p>
             If you or someone you know is going through a difficult time or having thoughts of self-harm, please reach out immediately. The 988 Suicide & Crisis Lifeline is free, confidential, and available 24/7.
           </p>

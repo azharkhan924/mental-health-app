@@ -6,6 +6,7 @@
   <title>Patient Dashboard — Breathe Heal Grow</title>
   <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -20,7 +21,7 @@
 
       <!-- Desktop Nav (Visible >= 1024px) -->
       <nav class="site-nav">
-        <a th:href="@{/dashboard}" style="color:var(--coral);font-weight:700;">Dashboard</a>
+        <a th:href="@{/dashboard}" class="active">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
         <a th:href="@{/assessments}">Assessments</a>
@@ -109,18 +110,18 @@
     </div>
   </aside>
 
-  <!-- ===== TOAST NOTIFICATIONS ===== -->
-  <div th:if="${success}" class="toast toast--success show" th:text="${success}"></div>
-
   <!-- ===== DASHBOARD CONTENT ===== -->
   <main class="dashboard">
     <div class="container">
+
+      <!-- Toast Notifications -->
+      <div th:if="${success}" class="toast toast--success show" th:text="${success}" style="margin-bottom:1.5rem;"></div>
 
       <!-- Welcome Banner -->
       <section class="dash-welcome fade-up">
         <div class="dash-welcome__text">
           <h1 class="dash-welcome__title">
-            Welcome back, <span th:text="${userName}" class="text-coral">User</span> 👋
+            Welcome back, <span th:text="${userName}" class="text-coral">User</span>
           </h1>
           <p class="dash-welcome__desc">
             How are you feeling today? Easily navigate your consultations, self-assessments, and confidential care tools.
@@ -156,7 +157,7 @@
           <div th:each="preTask : ${pendingPreTasks}" class="pre-task-card">
             <div class="pre-task-card__content">
               <div class="pre-task-card__badge-row">
-                <span style="font-size:1.2rem;">⚡</span>
+                <i data-lucide="zap" style="width:1.2rem; height:1.2rem; color:var(--coral);"></i>
                 <strong style="color:var(--coral); font-size:0.95rem;">Action Required — Pre-Appointment Check-in</strong>
                 <span class="status-pill status-pill--pending" th:text="${preTask.status}">PENDING</span>
               </div>
@@ -165,11 +166,11 @@
                 Assigned by <strong style="color:var(--teal);">Dr. <span th:text="${preTask.therapist.name}">Therapist</span></strong>
               </p>
               <p th:if="${preTask.appointment != null}" class="pre-task-card__date">
-                📅 Complete before your appointment on <strong th:text="${preTask.appointment.appointmentDate}">Date</strong> at <strong th:text="${preTask.appointment.appointmentTime}">Time</strong>
+                <i data-lucide="calendar" class="icon-inline"></i> Complete before your appointment on <strong th:text="${preTask.appointment.appointmentDate}">Date</strong> at <strong th:text="${preTask.appointment.appointmentTime}">Time</strong>
               </p>
             </div>
             <a th:href="@{/pre-diagnosis/{id}(id=${preTask.id})}" class="btn btn-coral pre-task-card__btn">
-              Start Check-in 🤖
+              Start Check-in <i data-lucide="arrow-right" class="icon-inline"></i>
             </a>
           </div>
         </section>
@@ -212,11 +213,11 @@
         <!-- Info Section -->
         <section class="dash-info fade-up" style="margin-top:2rem;">
           <div class="dash-info__card bg-mint">
-            <h3 class="text-teal">💡 Quick Tip</h3>
+            <h3 class="text-teal" style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="lightbulb" style="width:1.2rem; height:1.2rem;"></i> Quick Tip</h3>
             <p>Taking just 5 minutes a day for mindfulness can significantly reduce stress and anxiety. Try a breathing exercise today!</p>
           </div>
           <div class="dash-info__card bg-blush">
-            <h3 class="text-coral">📞 Need Immediate Help?</h3>
+            <h3 class="text-coral" style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="phone-call" style="width:1.2rem; height:1.2rem;"></i> Need Immediate Help?</h3>
             <p>If you're in crisis, please call a mental health helpline immediately. You are not alone.</p>
             <a href="tel:988" class="btn btn-coral" style="margin-top:1rem;">Call 988 Lifeline</a>
           </div>
@@ -312,7 +313,7 @@
           <div class="section-header">
             <div class="section-header__text">
               <h2 class="section-header__title">
-                <span>🔔 Assigned Clinical Tests</span>
+                <span style="display:inline-flex; align-items:center; gap:0.4rem;"><i data-lucide="bell" style="width:1.1rem; height:1.1rem;"></i> Assigned Clinical Tests</span>
                 <span class="badge-confidential" style="font-size:0.75rem;">Action Required</span>
               </h2>
               <p class="section-header__desc">Questionnaires requested by your consulting doctor</p>
@@ -358,12 +359,12 @@
                     <a th:if="${assign.status == 'PENDING'}"
                        th:href="@{/assessments/custom/{id}(id=${assign.id})}"
                        class="btn btn-coral btn-sm">
-                      ✍️ Take Test Now
+                      <i data-lucide="edit-3" class="icon-inline"></i> Take Test Now
                     </a>
                     <a th:if="${assign.status == 'COMPLETED'}"
                        th:href="@{/assessments/custom/{id}/result(id=${assign.id})}"
                        class="btn btn-outline-coral btn-sm">
-                      📊 View Results
+                      <i data-lucide="bar-chart-2" class="icon-inline"></i> View Results
                     </a>
                   </td>
                 </tr>
@@ -419,7 +420,7 @@
                   </td>
                   <td class="card-action-cell" data-label="Action">
                     <a th:href="@{/assessments/result/{id}(id=${a.id})}" class="btn btn-outline-coral btn-sm">
-                      📊 View AI Report & Result
+                      <i data-lucide="file-text" class="icon-inline"></i> View AI Report &amp; Result
                     </a>
                   </td>
                 </tr>

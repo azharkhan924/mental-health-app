@@ -187,5 +187,17 @@
         switchDashboardTab(tabKey, false);
       }
     });
+
+    // 3. Initialize Modern Lucide Icons
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
   });
+
+  // Global helper to refresh icons after dynamic DOM changes
+  window.refreshIcons = function () {
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  };
 })();

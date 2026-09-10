@@ -6,6 +6,7 @@
   <title th:text="'Chat with ' + ${currentPersona.displayName} + ' — Breathe Heal Grow'">Messages</title>
   <meta name="description" content="Direct confidential 1-on-1 support chat with your companions: Kabir, Aanya, Dr. Priya Sharma, Rohan Sir, and Meera." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="wa-body">
 
@@ -20,7 +21,7 @@
       <nav class="site-nav">
         <a th:href="@{/dashboard}">Dashboard</a>
         <a th:href="@{/appointments/book}">Book Session</a>
-        <a th:href="@{/chat}" style="color:var(--coral);font-weight:700;">Messages</a>
+        <a th:href="@{/chat}" class="active">Messages</a>
         <a th:href="@{/assessments}">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
       </nav>
@@ -218,7 +219,7 @@
         <!-- Crisis Helpline Banner if trigger detected -->
         <div id="crisisAlertBanner" class="wa-crisis-alert" th:style="${showCrisisAlert} ? 'display:flex;' : 'display:none;'">
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            <span>⚠️</span>
+            <span><i data-lucide="alert-triangle" class="icon-inline"></i></span>
             <span><strong>We're with you:</strong> If you're going through a crisis or having thoughts of self-harm, please reach out to the <strong>988 Lifeline</strong> (free, 24/7).</span>
           </div>
           <a href="tel:988" class="btn btn-coral btn-sm">Call 988</a>
@@ -229,7 +230,7 @@
 
           <!-- Encryption & Security Pill -->
           <div class="wa-encryption-pill">
-            🔒 Messages are end-to-end confidential between you and <span th:text="${currentPersona.displayName}">Kabir</span>.
+            <i data-lucide="lock" class="icon-inline"></i> Messages are end-to-end confidential between you and <span th:text="${currentPersona.displayName}">Kabir</span>.
           </div>
 
           <!-- Empty Conversation Intro Card -->
@@ -302,11 +303,6 @@
             <!-- Attachment Icon -->
             <button type="button" class="wa-tool-btn" title="Attach file / voice note" onclick="alert('Attachment: You can share notes with ' + document.querySelector('.wa-chat-header-name').textContent);">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            </button>
-
-            <!-- Emoji Icon -->
-            <button type="button" class="wa-tool-btn" title="Emoji" onclick="insertEmoji('😊')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
             </button>
 
             <!-- Main Input Field -->
@@ -516,7 +512,7 @@
           headerStatusText.style.color = '';
           headerStatusText.style.fontStyle = 'normal';
         }
-        appendAssistantBubble('System', '⚠️ Could not reach AI service. Please check your network or try again shortly.', formatTimeNow());
+        appendAssistantBubble('System', 'Could not reach AI service. Please check your network or try again shortly.', formatTimeNow());
       } finally {
         if (sendBtn) sendBtn.disabled = false;
         messageInput.focus();

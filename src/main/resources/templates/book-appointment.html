@@ -6,6 +6,7 @@
   <title>Book a Consultation — Breathe Heal Grow</title>
   <meta name="description" content="Book a confidential mental health consultation with a licensed therapist. View clinic location, fees, and real-time available slots." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -19,7 +20,7 @@
       </a>
       <nav class="site-nav">
         <a th:href="@{/dashboard}">Dashboard</a>
-        <a th:href="@{/appointments/book}" style="color:var(--coral);font-weight:700;">Book Session</a>
+        <a th:href="@{/appointments/book}" class="active">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
         <a th:href="@{/assessments}">Assessments</a>
         <a th:href="@{/reports}">My Reports</a>
@@ -111,7 +112,7 @@
 
       <!-- Page Title -->
       <section class="dash-welcome fade-up">
-        <h1 class="dash-welcome__title">Book a Consultation 🗓️</h1>
+        <h1 class="dash-welcome__title">Book a Consultation</h1>
         <p class="dash-welcome__desc">
           Choose a certified mental health professional, review clinic credentials, and select from real-time available time slots.
         </p>
@@ -163,7 +164,7 @@
               <!-- Real-time dynamic slots container -->
               <div id="slotsContainer" class="slots-pill-grid">
                 <div class="slots-hint">
-                  📅 Select a specialist and consultation date above to view live available slots.
+                  <i data-lucide="calendar" class="icon-inline"></i> Select a specialist and consultation date above to view live available slots.
                 </div>
               </div>
 
@@ -206,21 +207,21 @@
 
               <!-- Qualifications & Languages -->
               <div class="therapist-meta-tags">
-                <span class="meta-tag meta-tag--qual" th:if="${t.qualifications != null and !t.qualifications.isBlank()}" th:text="'🎓 ' + ${t.qualifications}">
-                  🎓 M.Phil Clinical Psychology
+                <span class="meta-tag meta-tag--qual" th:if="${t.qualifications != null and !t.qualifications.isBlank()}">
+                  <i data-lucide="graduation-cap" class="icon-inline"></i> <span th:text="${t.qualifications}">M.Phil Clinical Psychology</span>
                 </span>
-                <span class="meta-tag meta-tag--lang" th:if="${t.languages != null and !t.languages.isBlank()}" th:text="'🗣️ ' + ${t.languages}">
-                  🗣️ English, Hindi
+                <span class="meta-tag meta-tag--lang" th:if="${t.languages != null and !t.languages.isBlank()}">
+                  <i data-lucide="languages" class="icon-inline"></i> <span th:text="${t.languages}">English, Hindi</span>
                 </span>
-                <span class="meta-tag meta-tag--fee" th:if="${t.consultationFee != null and !t.consultationFee.isBlank()}" th:text="'💰 ' + ${t.consultationFee}">
-                  💰 ₹1,500 / session
+                <span class="meta-tag meta-tag--fee" th:if="${t.consultationFee != null and !t.consultationFee.isBlank()}">
+                  <i data-lucide="circle-dollar-sign" class="icon-inline"></i> <span th:text="${t.consultationFee}">₹1,500 / session</span>
                 </span>
               </div>
 
               <!-- Clinic Location & Contact Details -->
               <div class="therapist-contact-box">
                 <div class="therapist-contact-row" th:if="${t.clinicAddress != null and !t.clinicAddress.isBlank()}">
-                  <span class="contact-icon">📍</span>
+                  <span class="contact-icon"><i data-lucide="map-pin" style="width:16px; height:16px;"></i></span>
                   <div>
                     <strong>Clinic / Office:</strong>
                     <span th:text="${t.clinicAddress}">Suite 402, MindWell Clinic, Bandra</span>
@@ -229,21 +230,21 @@
                 </div>
 
                 <div class="therapist-contact-row" th:if="${t.phoneNumber != null and !t.phoneNumber.isBlank()}">
-                  <span class="contact-icon">📞</span>
+                  <span class="contact-icon"><i data-lucide="phone" style="width:16px; height:16px;"></i></span>
                   <div>
                     <strong>Direct Desk:</strong> <a th:href="'tel:' + ${t.phoneNumber}" th:text="${t.phoneNumber}" style="color:var(--teal); font-weight:600;">+91-9876543210</a>
                   </div>
                 </div>
 
                 <div class="therapist-contact-row" th:if="${t.email != null}">
-                  <span class="contact-icon">📧</span>
+                  <span class="contact-icon"><i data-lucide="mail" style="width:16px; height:16px;"></i></span>
                   <div>
                     <strong>Consultation Email:</strong> <span th:text="${t.email}">doctor@example.com</span>
                   </div>
                 </div>
 
                 <div class="therapist-contact-row" th:if="${t.availableDays != null or t.availableHours != null}">
-                  <span class="contact-icon">🕒</span>
+                  <span class="contact-icon"><i data-lucide="clock" style="width:16px; height:16px;"></i></span>
                   <div>
                     <strong>Consultation Hours:</strong> 
                     <span th:text="${t.availableDays ?: 'Mon - Sat'}">Mon - Fri</span> · 
@@ -313,11 +314,13 @@
       submitBtn.textContent = 'Select a Slot to Book';
 
       if (!therapistId || !date) {
-        container.innerHTML = '<div class="slots-hint">📅 Please select both a specialist and consultation date to view available slots.</div>';
+        container.innerHTML = '<div class="slots-hint"><i data-lucide="calendar" class="icon-inline"></i> Please select both a specialist and consultation date to view available slots.</div>';
+        if (window.refreshIcons) refreshIcons();
         return;
       }
 
-      container.innerHTML = '<div class="slots-loading">⏳ Checking specialist availability and booked slots...</div>';
+      container.innerHTML = '<div class="slots-loading"><i data-lucide="loader-2" class="icon-inline icon-spin"></i> Checking specialist availability and booked slots...</div>';
+      if (window.refreshIcons) refreshIcons();
 
       try {
         const response = await fetch('/appointments/available-slots?therapistId=' + encodeURIComponent(therapistId) + '&date=' + encodeURIComponent(date));
@@ -328,7 +331,8 @@
         const slots = await response.json();
 
         if (!slots || slots.length === 0) {
-          container.innerHTML = '<div class="slots-alert slots-alert--off">❌ The specialist is not taking appointments on this day (day off). Please select an alternative date.</div>';
+          container.innerHTML = '<div class="slots-alert slots-alert--off"><i data-lucide="calendar-x" class="icon-inline"></i> The specialist is not taking appointments on this day (day off). Please select an alternative date.</div>';
+          if (window.refreshIcons) refreshIcons();
           return;
         }
 
@@ -348,20 +352,22 @@
             html += `
               <button type="button" class="slot-pill slot-pill--booked" disabled title="Slot already taken by another patient">
                 <span class="slot-time">${slot.slotTime}</span>
-                <span class="slot-status-text">🔒 Booked</span>
+                <span class="slot-status-text"><i data-lucide="lock" class="icon-inline"></i> Booked</span>
               </button>
             `;
           }
         });
 
         if (availableCount === 0) {
-          html = '<div class="slots-alert slots-alert--full">⚠️ All consultation slots are booked for this day. Please select another date.</div>' + html;
+          html = '<div class="slots-alert slots-alert--full"><i data-lucide="alert-triangle" class="icon-inline"></i> All consultation slots are booked for this day. Please select another date.</div>' + html;
         }
 
         container.innerHTML = html;
+        if (window.refreshIcons) refreshIcons();
 
       } catch (err) {
-        container.innerHTML = '<div class="slots-alert slots-alert--error">⚠️ Could not load schedule slots. Please try again or refresh.</div>';
+        container.innerHTML = '<div class="slots-alert slots-alert--error"><i data-lucide="alert-triangle" class="icon-inline"></i> Could not load schedule slots. Please try again or refresh.</div>';
+        if (window.refreshIcons) refreshIcons();
       }
     }
 

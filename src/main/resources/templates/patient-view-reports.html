@@ -6,117 +6,7 @@
   <title th:text="'My Health Reports & Prescriptions — ' + ${userName} + ' — Breathe Heal Grow'">My Reports</title>
   <meta name="description" content="View your comprehensive mental health reports, assessment outcomes, prescriptions, and pre-appointment check-ins." />
   <link rel="stylesheet" th:href="@{/css/styles.css}" />
-  <style>
-    .report-tabs-nav {
-      display: flex;
-      gap: 0.5rem;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 0.5rem;
-      margin: 1.75rem 0 1.5rem 0;
-      flex-wrap: wrap;
-    }
-    .report-tab-btn {
-      background: none;
-      border: 2px solid transparent;
-      border-radius: 8px;
-      padding: 0.6rem 1.1rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-    .report-tab-btn:hover {
-      color: var(--teal);
-      background: rgba(197, 232, 224, 0.15);
-    }
-    .report-tab-btn.active {
-      color: var(--teal);
-      border-color: var(--teal);
-      background: rgba(197, 232, 224, 0.18);
-    }
-    .report-tab-btn .badge-count {
-      background: var(--teal);
-      color: #fff;
-      font-size: 0.68rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 50px;
-    }
-    .report-tab-btn.active .badge-count {
-      background: var(--coral);
-    }
-
-    .report-tab-panel {
-      display: none;
-      animation: tabFadeIn 0.3s ease-out;
-    }
-    .report-tab-panel.active {
-      display: block;
-    }
-    @keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .patient-report-card {
-      background: #fff;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: var(--shadow-soft);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .patient-report-card:hover {
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    }
-    .patient-report-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.75rem;
-    }
-    .patient-report-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--foreground);
-      margin-bottom: 0.25rem;
-    }
-    .patient-report-meta {
-      font-size: 0.8rem;
-      color: var(--muted-foreground);
-      margin-bottom: 0.75rem;
-    }
-
-    .clean-bullet-list {
-      padding-left: 1.25rem;
-      margin: 0.5rem 0;
-    }
-    .clean-bullet-list li {
-      margin-bottom: 0.4rem;
-      line-height: 1.6;
-    }
-
-    .rx-box {
-      background: linear-gradient(135deg, rgba(245, 213, 200, 0.2), rgba(197, 232, 224, 0.15));
-      border-left: 4px solid var(--coral);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      margin-top: 0.75rem;
-    }
-
-    @media print {
-      .no-print, .site-header, .report-tabs-nav { display: none !important; }
-      .print-header { display: flex !important; }
-      .report-tab-panel { display: block !important; margin-bottom: 2rem; }
-      .patient-report-card { break-inside: avoid; page-break-inside: avoid; border-color: #ccc; box-shadow: none; }
-    }
-  </style>
+  <script th:src="@{/js/lucide.min.js}"></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -133,7 +23,7 @@
         <a th:href="@{/appointments/book}">Book Session</a>
         <a th:href="@{/chat}">Chat with AI</a>
         <a th:href="@{/assessments}">Assessments</a>
-        <a th:href="@{/reports}" style="color:var(--coral); font-weight:700;">My Reports</a>
+        <a th:href="@{/reports}" class="active">My Reports</a>
       </nav>
       <div class="header-actions">
         <span class="user-greeting">
@@ -244,18 +134,18 @@
           </div>
           <div class="patient-profile-details">
             <h1 class="patient-profile-name">
-              <span th:text="${patient.name}">Patient</span>'s Health Reports 📑
+              <span th:text="${patient.name}">Patient</span>'s Health Reports
             </h1>
             <div class="patient-profile-meta">
-              <span>📧 <span th:text="${patient.email}">patient@example.com</span></span>
-              <span>📞 <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
-              <span th:if="${patient.age != null}">🎂 <span th:text="${patient.age}">22</span> yrs old</span>
-              <span th:if="${patient.gender != null and patient.gender != ''}">⚤ <span th:text="${patient.gender}">Gender</span></span>
+              <span style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="mail" class="icon-inline"></i> <span th:text="${patient.email}">patient@example.com</span></span>
+              <span style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="phone" class="icon-inline"></i> <span th:text="${patient.phoneNumber} ?: 'Not provided'">+91-XXXXX</span></span>
+              <span th:if="${patient.age != null}" style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="user" class="icon-inline"></i> <span th:text="${patient.age}">22</span> yrs old</span>
+              <span th:if="${patient.gender != null and patient.gender != ''}" style="display:inline-flex; align-items:center; gap:0.35rem;"><i data-lucide="users" class="icon-inline"></i> <span th:text="${patient.gender}">Gender</span></span>
             </div>
           </div>
           <div class="patient-profile-actions no-print">
             <button type="button" class="btn btn-outline-coral btn-sm" onclick="window.print()">
-              🖨️ Export PDF / Print
+              <i data-lucide="printer" class="icon-inline"></i> Export PDF / Print
             </button>
           </div>
         </div>
@@ -284,16 +174,16 @@
       <!-- Navigation Tabs -->
       <div class="report-tabs-nav fade-up no-print">
         <button class="report-tab-btn active" onclick="switchPatientTab('rx', this)">
-          💊 Prescriptions & Plans (<span class="badge-count" th:text="${#lists.size(appointmentNotes)}">0</span>)
+          <i data-lucide="pill" class="icon-inline"></i> Prescriptions &amp; Plans (<span class="badge-count" th:text="${#lists.size(appointmentNotes)}">0</span>)
         </button>
         <button class="report-tab-btn" onclick="switchPatientTab('assessments', this)">
-          📝 Clinical Assessments (<span class="badge-count" th:text="${#lists.size(assessmentReports)}">0</span>)
+          <i data-lucide="file-text" class="icon-inline"></i> Clinical Assessments (<span class="badge-count" th:text="${#lists.size(assessmentReports)}">0</span>)
         </button>
         <button class="report-tab-btn" onclick="switchPatientTab('custom', this)">
-          🧪 Doctor Assigned Tests (<span class="badge-count" th:text="${#lists.size(customTestResults)}">0</span>)
+          <i data-lucide="flask-conical" class="icon-inline"></i> Doctor Assigned Tests (<span class="badge-count" th:text="${#lists.size(customTestResults)}">0</span>)
         </button>
         <button class="report-tab-btn" onclick="switchPatientTab('prediag', this)">
-          🤖 Pre-Appointment Screenings (<span class="badge-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>)
+          <i data-lucide="bot" class="icon-inline"></i> Pre-Appointment Screenings (<span class="badge-count" th:text="${#lists.size(preDiagnosisTasks)}">0</span>)
         </button>
       </div>
 
@@ -302,7 +192,7 @@
            ════════════════════════════════════════════════════════════════ -->
       <section id="panel-rx" class="report-tab-panel active fade-up">
         <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-          💊 Prescriptions & Session Plans
+          <i data-lucide="pill" class="icon-inline"></i> Prescriptions &amp; Session Plans
         </h2>
 
         <div th:if="${#lists.isEmpty(appointmentNotes)}" class="empty-state-card">
@@ -329,7 +219,7 @@
 
             <!-- Prescription Box -->
             <div th:if="${note.prescription != null and note.prescription != ''}" class="rx-box">
-              <strong style="color:var(--coral); font-size:0.95rem;">💊 Doctor's Prescription & Advice:</strong>
+              <strong style="color:var(--coral); font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;"><i data-lucide="pill" class="icon-inline"></i> Doctor's Prescription &amp; Advice:</strong>
               <div style="margin-top:0.4rem; white-space:pre-line; font-size:0.9rem; line-height:1.6;" th:text="${note.prescription}">
                 Prescription details...
               </div>
@@ -337,7 +227,7 @@
 
             <!-- Follow-up Plan -->
             <div th:if="${note.followUpPlan != null and note.followUpPlan != ''}" style="margin-top:1rem; background:rgba(197,232,224,0.15); border-radius:8px; padding:0.75rem 1rem;">
-              <strong style="color:var(--teal); font-size:0.9rem;">📅 Next Steps & Follow-up Plan:</strong>
+              <strong style="color:var(--teal); font-size:0.9rem; display:flex; align-items:center; gap:0.4rem;"><i data-lucide="calendar" class="icon-inline"></i> Next Steps &amp; Follow-up Plan:</strong>
               <div style="margin-top:0.3rem; white-space:pre-line; font-size:0.88rem; line-height:1.55;" th:text="${note.followUpPlan}">
                 Plan...
               </div>
@@ -346,7 +236,7 @@
             <!-- AI Summary for Patient -->
             <div th:if="${note.aiClinicalSummary != null and note.aiClinicalSummary != ''}" style="margin-top:1rem; border-top:1px solid var(--border); padding-top:0.75rem;">
               <details style="font-size:0.85rem;">
-                <summary style="cursor:pointer; color:var(--teal); font-weight:600;">📋 View AI Clinical Session Summary</summary>
+                <summary style="cursor:pointer; color:var(--teal); font-weight:600;"><i data-lucide="clipboard-list" class="icon-inline"></i> View AI Clinical Session Summary</summary>
                 <div style="margin-top:0.5rem; line-height:1.65;" th:utext="${note.aiClinicalSummary}">Summary</div>
               </details>
             </div>
@@ -358,8 +248,8 @@
            TAB 2: CLINICAL ASSESSMENT TESTS (PHQ-9, GAD-7, etc.)
            ════════════════════════════════════════════════════════════════ -->
       <section id="panel-assessments" class="report-tab-panel fade-up">
-        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
-          📝 Clinically Validated Assessments
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="file-text" class="icon-inline"></i> Clinically Validated Assessments
         </h2>
 
         <div th:if="${#lists.isEmpty(assessmentReports)}" class="empty-state-card">
@@ -390,8 +280,8 @@
            TAB 3: DOCTOR ASSIGNED CUSTOM TESTS
            ════════════════════════════════════════════════════════════════ -->
       <section id="panel-custom" class="report-tab-panel fade-up">
-        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
-          🧪 Doctor-Assigned Custom Assessments
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="flask-conical" class="icon-inline"></i> Doctor-Assigned Custom Assessments
         </h2>
 
         <div th:if="${#lists.isEmpty(customTestResults)}" class="empty-state-card">
@@ -426,8 +316,8 @@
            TAB 4: PRE-APPOINTMENT AI SCREENINGS
            ════════════════════════════════════════════════════════════════ -->
       <section id="panel-prediag" class="report-tab-panel fade-up">
-        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem;">
-          🤖 Pre-Appointment Check-in Screenings
+        <h2 style="font-size:1.25rem; color:var(--teal); margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+          <i data-lucide="bot" class="icon-inline"></i> Pre-Appointment Check-in Screenings
         </h2>
 
         <div th:if="${#lists.isEmpty(preDiagnosisTasks)}" class="empty-state-card">
