@@ -5,8 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Dashboard — Breathe Heal Grow</title>
   <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
-  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.3')}" />
-  <script th:src="@{/js/lucide.min.js(v='2.3')}" defer></script>
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.5')}" />
+  <script>
+    /* =========================================================
+       GLOBAL CORE NAVIGATION & TAB CONTROLLER (IN <HEAD>)
+       Available BEFORE body starts rendering — prevents any ReferenceError.
+       ========================================================= */
+    function switchDashboardTab(tabId, updateHash) {
+      if (!tabId) return;
+
+      var targetPanel = document.getElementById('tab-' + tabId);
+      if (!targetPanel) return;
+
+      // 1. Show target panel, hide all other panels directly with important
+      var panels = document.querySelectorAll('.dash-tab-content');
+      for (var i = 0; i < panels.length; i++) {
+        if (panels[i].id === 'tab-' + tabId) {
+          panels[i].classList.add('active');
+          panels[i].style.setProperty('display', 'block', 'important');
+        } else {
+          panels[i].classList.remove('active');
+          panels[i].style.setProperty('display', 'none', 'important');
+        }
+      }
+
+      // 2. Desktop Tab Buttons (.dash-tab-btn)
+      var btns = document.querySelectorAll('.dash-tab-btn');
+      for (var j = 0; j < btns.length; j++) {
+        btns[j].classList.toggle('active', btns[j].getAttribute('data-tab') === tabId);
+      }
+
+      // 3. Mobile Bottom Nav Items (.mobile-bottom-nav__item)
+      var bottomItems = document.querySelectorAll('.mobile-bottom-nav__item');
+      for (var k = 0; k < bottomItems.length; k++) {
+        bottomItems[k].classList.toggle('active', bottomItems[k].getAttribute('data-tab') === tabId);
+      }
+
+      // 4. Drawer Links ([data-tab-switch])
+      var links = document.querySelectorAll('[data-tab-switch]');
+      for (var l = 0; l < links.length; l++) {
+        links[l].classList.toggle('active', links[l].getAttribute('data-tab-switch') === tabId);
+      }
+
+      // 5. Update URL hash
+      if (updateHash !== false && window.history && window.history.replaceState) {
+        try {
+          window.history.replaceState(null, null, '#' + tabId);
+        } catch (e) {}
+      }
+    }
+
+    function openDrawer() {
+      var drawer = document.getElementById('mobileNavDrawer');
+      var backdrop = document.getElementById('mobileNavBackdrop');
+      var toggle = document.getElementById('navToggle');
+      if (drawer) {
+        drawer.classList.add('open');
+        drawer.style.setProperty('visibility', 'visible', 'important');
+        drawer.style.setProperty('pointer-events', 'auto', 'important');
+        drawer.style.setProperty('transform', 'translateX(0)', 'important');
+      }
+      if (backdrop) {
+        backdrop.classList.add('open');
+        backdrop.style.setProperty('display', 'block', 'important');
+        backdrop.style.setProperty('visibility', 'visible', 'important');
+        backdrop.style.setProperty('pointer-events', 'auto', 'important');
+        backdrop.style.setProperty('opacity', '1', 'important');
+      }
+      if (toggle) {
+        toggle.classList.add('active');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      var drawer = document.getElementById('mobileNavDrawer');
+      var backdrop = document.getElementById('mobileNavBackdrop');
+      var toggle = document.getElementById('navToggle');
+      if (drawer) {
+        drawer.classList.remove('open');
+        drawer.style.setProperty('visibility', 'hidden', 'important');
+        drawer.style.setProperty('pointer-events', 'none', 'important');
+        drawer.style.setProperty('transform', 'translateX(100%)', 'important');
+      }
+      if (backdrop) {
+        backdrop.classList.remove('open');
+        backdrop.style.setProperty('display', 'none', 'important');
+        backdrop.style.setProperty('visibility', 'hidden', 'important');
+        backdrop.style.setProperty('pointer-events', 'none', 'important');
+        backdrop.style.setProperty('opacity', '0', 'important');
+      }
+      if (toggle) {
+        toggle.classList.remove('active');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+      document.body.style.overflow = '';
+    }
+
+    function toggleDrawer() {
+      var drawer = document.getElementById('mobileNavDrawer');
+      if (drawer && (drawer.classList.contains('open') || drawer.style.visibility === 'visible')) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    }
+
+    // Expose explicitly to window
+    window.switchDashboardTab = switchDashboardTab;
+    window.openDrawer = openDrawer;
+    window.closeDrawer = closeDrawer;
+    window.toggleDrawer = toggleDrawer;
+
+    // Restore active tab on initial load
+    function initActiveTab() {
+      var hash = window.location.hash ? window.location.hash.substring(1) : '';
+      var cleanHash = hash.replace(/-section$/, '');
+      var urlParams = new URLSearchParams(window.location.search);
+      var tabParam = urlParams.get('tab');
+
+      var tabToOpen = 'overview';
+      if (cleanHash && document.getElementById('tab-' + cleanHash)) {
+        tabToOpen = cleanHash;
+      } else if (tabParam && document.getElementById('tab-' + tabParam)) {
+        tabToOpen = tabParam;
+      }
+      switchDashboardTab(tabToOpen, false);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initActiveTab);
+    } else {
+      initActiveTab();
+    }
+    window.addEventListener('hashchange', initActiveTab);
+  </script>
+  <script th:src="@{/js/lucide.min.js(v='2.5')}" defer></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -471,91 +606,7 @@
   </footer>
 
   <!-- Navigation & Drawer Script -->
-  <script th:src="@{/js/navigation.js(v='2.3')}"></script>
-  <script>
-    function openDrawer() {
-      var drawer = document.getElementById('mobileNavDrawer');
-      var backdrop = document.getElementById('mobileNavBackdrop');
-      var toggle = document.getElementById('navToggle');
-      if (drawer) {
-        drawer.classList.add('open');
-        drawer.style.visibility = 'visible';
-        drawer.style.pointerEvents = 'auto';
-      }
-      if (backdrop) {
-        backdrop.classList.add('open');
-        backdrop.style.display = 'block';
-        backdrop.style.pointerEvents = 'auto';
-      }
-      if (toggle) {
-        toggle.classList.add('active');
-        toggle.setAttribute('aria-expanded', 'true');
-      }
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeDrawer() {
-      var drawer = document.getElementById('mobileNavDrawer');
-      var backdrop = document.getElementById('mobileNavBackdrop');
-      var toggle = document.getElementById('navToggle');
-      if (drawer) {
-        drawer.classList.remove('open');
-        drawer.style.visibility = '';
-        drawer.style.pointerEvents = '';
-      }
-      if (backdrop) {
-        backdrop.classList.remove('open');
-        backdrop.style.display = 'none';
-        backdrop.style.pointerEvents = '';
-      }
-      if (toggle) {
-        toggle.classList.remove('active');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-      document.body.style.overflow = '';
-    }
-
-    function toggleDrawer() {
-      var drawer = document.getElementById('mobileNavDrawer');
-      if (drawer && drawer.classList.contains('open')) {
-        closeDrawer();
-      } else {
-        openDrawer();
-      }
-    }
-
-    function switchDashboardTab(tabId, updateHash) {
-      if (!tabId) return;
-      var targetPanel = document.getElementById('tab-' + tabId);
-      if (!targetPanel) return;
-
-      var panels = document.querySelectorAll('.dash-tab-content');
-      panels.forEach(function (panel) {
-        if (panel.id === 'tab-' + tabId) {
-          panel.classList.add('active');
-          panel.style.display = 'block';
-        } else {
-          panel.classList.remove('active');
-          panel.style.display = 'none';
-        }
-      });
-
-      document.querySelectorAll('.dash-tab-btn').forEach(function (btn) {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-      });
-
-      if (updateHash !== false && window.history && window.history.replaceState) {
-        try {
-          window.history.replaceState(null, null, '#' + tabId);
-        } catch (e) {}
-      }
-    }
-
-    window.openDrawer = openDrawer;
-    window.closeDrawer = closeDrawer;
-    window.toggleDrawer = toggleDrawer;
-    window.switchDashboardTab = switchDashboardTab;
-  </script>
+  <script th:src="@{/js/navigation.js(v='2.5')}"></script>
 
   <!-- Auto-hide toast -->
   <script th:if="${success}">

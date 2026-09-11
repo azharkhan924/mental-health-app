@@ -63,39 +63,44 @@
      HELPER: Switch dashboard tabs
      ========================================================= */
   function switchDashboardTab(tabId, updateHash) {
+    if (!tabId) return;
     var targetPanel = document.getElementById('tab-' + tabId);
     if (!targetPanel) return;
 
-    // Update Tab Panels with direct display property
+    // 1. Show target panel, hide all other panels directly with important
     var panels = document.querySelectorAll('.dash-tab-content');
-    panels.forEach(function (panel) {
-      if (panel.id === 'tab-' + tabId) {
-        panel.classList.add('active');
-        panel.style.display = 'block';
+    for (var i = 0; i < panels.length; i++) {
+      if (panels[i].id === 'tab-' + tabId) {
+        panels[i].classList.add('active');
+        panels[i].style.setProperty('display', 'block', 'important');
       } else {
-        panel.classList.remove('active');
-        panel.style.display = 'none';
+        panels[i].classList.remove('active');
+        panels[i].style.setProperty('display', 'none', 'important');
       }
-    });
+    }
 
-    // Update Tab Buttons (.dash-tab-btn)
-    document.querySelectorAll('.dash-tab-btn').forEach(function (btn) {
-      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-    });
+    // 2. Desktop Tab Buttons (.dash-tab-btn)
+    var btns = document.querySelectorAll('.dash-tab-btn');
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.toggle('active', btns[j].getAttribute('data-tab') === tabId);
+    }
 
-    // Update Bottom Nav Items
-    document.querySelectorAll('.mobile-bottom-nav__item[data-tab]').forEach(function (item) {
-      item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
-    });
+    // 3. Mobile Bottom Nav Items (.mobile-bottom-nav__item)
+    var bottomItems = document.querySelectorAll('.mobile-bottom-nav__item');
+    for (var k = 0; k < bottomItems.length; k++) {
+      bottomItems[k].classList.toggle('active', bottomItems[k].getAttribute('data-tab') === tabId);
+    }
 
-    // Update nav switchers (drawer links)
-    document.querySelectorAll('[data-tab-switch]').forEach(function (item) {
-      item.classList.toggle('active', item.getAttribute('data-tab-switch') === tabId);
-    });
+    // 4. Drawer Links ([data-tab-switch])
+    var links = document.querySelectorAll('[data-tab-switch]');
+    for (var l = 0; l < links.length; l++) {
+      links[l].classList.toggle('active', links[l].getAttribute('data-tab-switch') === tabId);
+    }
 
-    if (updateHash && history.replaceState) {
+    // 5. Update URL hash
+    if (updateHash !== false && window.history && window.history.replaceState) {
       try {
-        history.replaceState(null, null, '#' + tabId);
+        window.history.replaceState(null, null, '#' + tabId);
       } catch (e) {}
     }
   }
