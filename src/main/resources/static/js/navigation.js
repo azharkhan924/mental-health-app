@@ -6,15 +6,22 @@
   'use strict';
 
   /* =========================================================
-     HELPER: Open / Close mobile drawer
+     HELPER: Open / Close / Toggle mobile drawer
      ========================================================= */
   function openDrawer() {
     var drawer = document.getElementById('mobileNavDrawer');
     var backdrop = document.getElementById('mobileNavBackdrop');
     var toggle = document.getElementById('navToggle');
-    if (!drawer) return;
-    drawer.classList.add('open');
-    if (backdrop) backdrop.classList.add('open');
+    if (drawer) {
+      drawer.classList.add('open');
+      drawer.style.visibility = 'visible';
+      drawer.style.pointerEvents = 'auto';
+    }
+    if (backdrop) {
+      backdrop.classList.add('open');
+      backdrop.style.display = 'block';
+      backdrop.style.pointerEvents = 'auto';
+    }
     if (toggle) {
       toggle.classList.add('active');
       toggle.setAttribute('aria-expanded', 'true');
@@ -26,14 +33,30 @@
     var drawer = document.getElementById('mobileNavDrawer');
     var backdrop = document.getElementById('mobileNavBackdrop');
     var toggle = document.getElementById('navToggle');
-    if (!drawer) return;
-    drawer.classList.remove('open');
-    if (backdrop) backdrop.classList.remove('open');
+    if (drawer) {
+      drawer.classList.remove('open');
+      drawer.style.visibility = '';
+      drawer.style.pointerEvents = '';
+    }
+    if (backdrop) {
+      backdrop.classList.remove('open');
+      backdrop.style.display = 'none';
+      backdrop.style.pointerEvents = '';
+    }
     if (toggle) {
       toggle.classList.remove('active');
       toggle.setAttribute('aria-expanded', 'false');
     }
     document.body.style.overflow = '';
+  }
+
+  function toggleDrawer() {
+    var drawer = document.getElementById('mobileNavDrawer');
+    if (drawer && drawer.classList.contains('open')) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
   }
 
   /* =========================================================
@@ -43,14 +66,21 @@
     var targetPanel = document.getElementById('tab-' + tabId);
     if (!targetPanel) return;
 
+    // Update Tab Panels with direct display property
+    var panels = document.querySelectorAll('.dash-tab-content');
+    panels.forEach(function (panel) {
+      if (panel.id === 'tab-' + tabId) {
+        panel.classList.add('active');
+        panel.style.display = 'block';
+      } else {
+        panel.classList.remove('active');
+        panel.style.display = 'none';
+      }
+    });
+
     // Update Tab Buttons (.dash-tab-btn)
     document.querySelectorAll('.dash-tab-btn').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
-    });
-
-    // Update Tab Panels
-    document.querySelectorAll('.dash-tab-content').forEach(function (panel) {
-      panel.classList.toggle('active', panel.id === 'tab-' + tabId);
     });
 
     // Update Bottom Nav Items
@@ -64,9 +94,17 @@
     });
 
     if (updateHash && history.replaceState) {
-      history.replaceState(null, null, '#' + tabId);
+      try {
+        history.replaceState(null, null, '#' + tabId);
+      } catch (e) {}
     }
   }
+
+  // Expose to window object
+  window.openDrawer = openDrawer;
+  window.closeDrawer = closeDrawer;
+  window.toggleDrawer = toggleDrawer;
+  window.switchDashboardTab = switchDashboardTab;
 
   /* =========================================================
      SINGLE EVENT DELEGATION on document (click)

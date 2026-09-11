@@ -324,6 +324,8 @@ textarea.field-input {
 
 /* ===== HAMBURGER & MOBILE DRAWER ===== */
 .nav-toggle {
+  position: relative;
+  z-index: 60;
   display: none;
   background: #ffffff;
   border: 1px solid var(--border);
@@ -342,6 +344,10 @@ textarea.field-input {
   box-shadow: var(--shadow-soft);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.nav-toggle * {
+  pointer-events: none;
 }
 
 .nav-toggle:hover {
@@ -379,12 +385,16 @@ textarea.field-input {
   z-index: 998;
   opacity: 0;
   visibility: hidden;
+  display: none;
+  pointer-events: none;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .mobile-nav-backdrop.open {
   opacity: 1;
   visibility: visible;
+  display: block;
+  pointer-events: auto;
 }
 
 /* Mobile Nav Drawer */
@@ -401,12 +411,16 @@ textarea.field-input {
   padding: 1.5rem 1.25rem;
   box-shadow: -10px 0 35px rgba(26, 60, 60, 0.15);
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
   overflow-y: auto;
 }
 
 .mobile-nav-drawer.open {
   transform: translateX(0);
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .mobile-nav-drawer__header {
@@ -572,6 +586,10 @@ textarea.field-input {
   transition: color 0.2s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bottom-nav__item * {
+  pointer-events: none;
 }
 
 .mobile-bottom-nav__item svg {
@@ -1244,11 +1262,13 @@ textarea.field-input {
   font-weight: 500;
   box-shadow: var(--shadow-lift);
   transform: translateX(120%);
+  pointer-events: none;
   transition: transform 0.35s cubic-bezier(.4,0,.2,1);
 }
 
 .toast.show {
   transform: translateX(0);
+  pointer-events: auto;
 }
 
 .toast--success {
@@ -1627,6 +1647,10 @@ textarea.field-input {
   transition: all 0.2s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.dash-tab-btn * {
+  pointer-events: none;
 }
 
 .dash-tab-btn svg {
@@ -2997,9 +3021,14 @@ textarea.field-input {
   .mobile-bottom-nav {
     display: flex;
   }
-  /* Hide the horizontal tab bar on mobile — bottom nav handles tab switching */
+  /* Horizontal tab bar on mobile is scrollable with thumb gestures */
   .dash-tabs-bar {
-    display: none;
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1.5rem;
+    padding: 0.35rem;
   }
   body.has-bottom-nav,
   body:has(.mobile-bottom-nav),
@@ -4392,11 +4421,18 @@ textarea.field-input {
   inset: 0;
   background: rgba(26, 60, 60, 0.45);
   backdrop-filter: blur(4px);
-  display: flex;
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  pointer-events: none;
+}
+
+.custom-modal-overlay.open {
+  display: flex !important;
+  pointer-events: auto !important;
 }
 
 .custom-modal-card {
