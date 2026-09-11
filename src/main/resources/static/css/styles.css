@@ -340,6 +340,8 @@ textarea.field-input {
   color: var(--teal);
   flex-shrink: 0;
   box-shadow: var(--shadow-soft);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-toggle:hover {
@@ -559,11 +561,17 @@ textarea.field-input {
   gap: 3px;
   flex: 1;
   height: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   color: var(--muted-foreground);
   text-decoration: none;
   font-size: 0.68rem;
   font-weight: 600;
   transition: color 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-bottom-nav__item svg {
@@ -1617,6 +1625,8 @@ textarea.field-input {
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dash-tab-btn svg {
