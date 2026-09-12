@@ -103,6 +103,15 @@
         window.history.replaceState(null, null, '#' + tabId);
       } catch (e) {}
     }
+
+    // 6. Smooth scroll to content top so shorter tabs don't show empty bottom viewport
+    if (updateHash !== false) {
+      var anchor = targetPanel || document.querySelector('.dash-tabs-bar');
+      if (anchor) {
+        var topPos = anchor.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) - 85;
+        window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+      }
+    }
   }
 
   // Expose to window object

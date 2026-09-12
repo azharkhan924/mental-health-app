@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Dashboard — Breathe Heal Grow</title>
   <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
-  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.5')}" />
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.6')}" />
   <script>
     /* =========================================================
        GLOBAL CORE NAVIGATION & TAB CONTROLLER (IN <HEAD>)
@@ -52,6 +52,15 @@
         try {
           window.history.replaceState(null, null, '#' + tabId);
         } catch (e) {}
+      }
+
+      // 6. Smooth scroll to content top so shorter tabs don't show empty bottom viewport
+      if (updateHash !== false) {
+        var anchor = targetPanel || document.querySelector('.dash-tabs-bar');
+        if (anchor) {
+          var topPos = anchor.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) - 85;
+          window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+        }
       }
     }
 
@@ -141,7 +150,7 @@
     }
     window.addEventListener('hashchange', initActiveTab);
   </script>
-  <script th:src="@{/js/lucide.min.js(v='2.5')}" defer></script>
+  <script th:src="@{/js/lucide.min.js(v='2.6')}" defer></script>
 </head>
 <body class="has-bottom-nav">
 
@@ -606,7 +615,7 @@
   </footer>
 
   <!-- Navigation & Drawer Script -->
-  <script th:src="@{/js/navigation.js(v='2.5')}"></script>
+  <script th:src="@{/js/navigation.js(v='2.6')}"></script>
 
   <!-- Auto-hide toast -->
   <script th:if="${success}">
