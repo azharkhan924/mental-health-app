@@ -104,12 +104,15 @@
       } catch (e) {}
     }
 
-    // 6. Smooth scroll to content top so shorter tabs don't show empty bottom viewport
+    // 6. If the user was scrolled far down the page (e.g. from bottom nav), gently bring tabs bar into view
     if (updateHash !== false) {
-      var anchor = targetPanel || document.querySelector('.dash-tabs-bar');
-      if (anchor) {
-        var topPos = anchor.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) - 85;
-        window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+      var tabsBar = document.querySelector('.dash-tabs-bar');
+      if (tabsBar) {
+        var barRect = tabsBar.getBoundingClientRect();
+        if (barRect.top < 60) {
+          var topPos = barRect.top + (window.pageYOffset || document.documentElement.scrollTop) - 75;
+          window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+        }
       }
     }
   }

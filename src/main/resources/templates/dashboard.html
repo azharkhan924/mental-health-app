@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Dashboard — Breathe Heal Grow</title>
   <meta name="description" content="Your personal mental health dashboard. Chat with AI, book appointments, and take assessments." />
-  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.6')}" />
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.7')}" />
   <script>
     /* =========================================================
        GLOBAL CORE NAVIGATION & TAB CONTROLLER (IN <HEAD>)
@@ -54,12 +54,15 @@
         } catch (e) {}
       }
 
-      // 6. Smooth scroll to content top so shorter tabs don't show empty bottom viewport
+      // 6. If the user was scrolled far down the page (e.g. from bottom nav), gently bring tabs bar into view
       if (updateHash !== false) {
-        var anchor = targetPanel || document.querySelector('.dash-tabs-bar');
-        if (anchor) {
-          var topPos = anchor.getBoundingClientRect().top + (window.pageYOffset || document.documentElement.scrollTop) - 85;
-          window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+        var tabsBar = document.querySelector('.dash-tabs-bar');
+        if (tabsBar) {
+          var barRect = tabsBar.getBoundingClientRect();
+          if (barRect.top < 60) {
+            var topPos = barRect.top + (window.pageYOffset || document.documentElement.scrollTop) - 75;
+            window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+          }
         }
       }
     }
@@ -615,7 +618,7 @@
   </footer>
 
   <!-- Navigation & Drawer Script -->
-  <script th:src="@{/js/navigation.js(v='2.6')}"></script>
+  <script th:src="@{/js/navigation.js(v='2.7')}"></script>
 
   <!-- Auto-hide toast -->
   <script th:if="${success}">

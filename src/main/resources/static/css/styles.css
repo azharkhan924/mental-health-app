@@ -1614,20 +1614,16 @@ textarea.field-input {
 .dash-tabs-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
   background: #ffffff;
-  padding: 0.4rem;
+  padding: 0.45rem;
   border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
   margin-bottom: 2rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.dash-tabs-bar::-webkit-scrollbar {
-  display: none;
+  position: relative;
+  z-index: 10;
 }
 
 .dash-tab-btn {
@@ -3021,14 +3017,21 @@ textarea.field-input {
   .mobile-bottom-nav {
     display: flex;
   }
-  /* Horizontal tab bar on mobile is scrollable with thumb gestures */
+  /* Tabs bar on mobile: wrap into balanced clickable cards so all buttons are 100% visible */
   .dash-tabs-bar {
     display: flex;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    gap: 0.45rem;
     margin-bottom: 1.5rem;
-    padding: 0.35rem;
+    padding: 0.45rem;
+    overflow-x: visible;
+  }
+  .dash-tab-btn {
+    flex: 1 1 calc(50% - 0.45rem);
+    min-width: 135px;
+    justify-content: center;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.82rem;
   }
   body.has-bottom-nav,
   body:has(.mobile-bottom-nav),
