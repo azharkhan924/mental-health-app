@@ -50,7 +50,7 @@ public class ChatService {
      * so that AI responses are personalized, age-appropriate, and gender-sensitive.
      */
     public String sendMessage(String userMessage, List<ChatMessage> history, ChatPersona persona, com.mental_health_app.mental_health.entity.Patient patient) {
-        String basePrompt = (persona != null) ? persona.getSystemPrompt() : ChatPersona.KABIR.getSystemPrompt();
+        String basePrompt = (persona != null) ? persona.getSystemPrompt() : ChatPersona.SAGE.getSystemPrompt();
         StringBuilder systemPrompt = new StringBuilder(basePrompt);
 
         if (patient != null) {

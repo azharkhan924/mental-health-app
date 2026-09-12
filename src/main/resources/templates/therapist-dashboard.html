@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Therapist Clinical Hub — Breathe Heal Grow</title>
   <meta name="description" content="Manage appointments, configure availability, generate custom AI tests from documents, and update clinic details." />
-  <link rel="stylesheet" th:href="@{/css/styles.css(v='3.0')}" />
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='3.2')}" />
   <script>
     /* =========================================================
        GLOBAL CORE NAVIGATION & TAB CONTROLLER (IN <HEAD>)
@@ -177,6 +177,15 @@
         <span>Heal</span>
         <span>Grow</span>
       </a>
+
+      <!-- Desktop Nav for Therapist Hub -->
+      <nav class="site-nav">
+        <a href="#appointments" class="site-nav-btn active" data-tab-switch="appointments" onclick="switchDashboardTab('appointments', true); return false;">Appointments</a>
+        <a href="#tests" class="site-nav-btn" data-tab-switch="tests" onclick="switchDashboardTab('tests', true); return false;">Tests Studio</a>
+        <a href="#prediagnosis" class="site-nav-btn" data-tab-switch="prediagnosis" onclick="switchDashboardTab('prediagnosis', true); return false;">Pre-Diagnosis</a>
+        <a href="#schedule" class="site-nav-btn" data-tab-switch="schedule" onclick="switchDashboardTab('schedule', true); return false;">Schedule</a>
+        <a href="#profile" class="site-nav-btn" data-tab-switch="profile" onclick="switchDashboardTab('profile', true); return false;">Profile</a>
+      </nav>
 
       <div class="header-actions">
         <span class="user-greeting">

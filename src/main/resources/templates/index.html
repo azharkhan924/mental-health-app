@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Breathe Heal Grow — Making Mental Health a Priority for All</title>
   <meta name="description" content="Awareness, accessible help and affordable care. Find a therapist, access helplines and take mental health assessments." />
-  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='3.1')}" />
   <script th:src="@{/js/lucide.min.js}"></script>
 </head>
-<body>
+<body class="has-bottom-nav">
 
   <!-- ===== HEADER ===== -->
   <header class="site-header">
@@ -276,7 +276,36 @@
     }, 3500);
   </script>
 
+  <!-- ===== MOBILE BOTTOM NAVIGATION ===== -->
+  <nav class="mobile-bottom-nav" aria-label="Quick mobile navigation">
+    <a th:href="@{/}" class="mobile-bottom-nav__item active">
+      <i data-lucide="home"></i>
+      <span>Home</span>
+    </a>
+    <a th:href="@{/chat}" class="mobile-bottom-nav__item">
+      <i data-lucide="message-circle"></i>
+      <span>Chat</span>
+    </a>
+    <a th:href="@{/assessments}" class="mobile-bottom-nav__item">
+      <i data-lucide="check-square"></i>
+      <span>Tests</span>
+    </a>
+    <a th:href="@{/appointments/book}" class="mobile-bottom-nav__item">
+      <i data-lucide="calendar"></i>
+      <span>Book</span>
+    </a>
+    <a th:href="@{/auth}" class="mobile-bottom-nav__item">
+      <i data-lucide="user"></i>
+      <span>Sign In</span>
+    </a>
+  </nav>
+
   <!-- Navigation & Mobile Drawer Script -->
-  <script th:src="@{/js/navigation.js}"></script>
+  <script th:src="@{/js/navigation.js(v='3.1')}"></script>
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
 </body>
 </html>

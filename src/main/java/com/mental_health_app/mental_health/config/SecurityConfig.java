@@ -64,13 +64,14 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()
 
                 // PATIENTS ONLY — must be logged in as a patient
-                .requestMatchers("/dashboard/**").hasRole("PATIENT")
+                .requestMatchers("/dashboard", "/dashboard/**").hasRole("PATIENT")
                 .requestMatchers("/appointments/book").hasRole("PATIENT")
-                .requestMatchers("/assessments/**").hasRole("PATIENT")
-                .requestMatchers("/chat/**").hasRole("PATIENT")
+                .requestMatchers("/assessments", "/assessments/**").hasRole("PATIENT")
+                .requestMatchers("/chat", "/chat/**").hasRole("PATIENT")
+                .requestMatchers("/reports", "/reports/**").hasRole("PATIENT")
 
                 // THERAPISTS ONLY — must be logged in as a therapist
-                .requestMatchers("/therapist/**").hasRole("THERAPIST")
+                .requestMatchers("/therapist", "/therapist/**").hasRole("THERAPIST")
 
                 // APPOINTMENTS (common status updates) — must be logged in
                 .requestMatchers("/appointments/**").authenticated()
