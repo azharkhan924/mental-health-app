@@ -8,19 +8,26 @@
   /* =========================================================
      HELPER: Open / Close / Toggle mobile drawer
      ========================================================= */
-  function openDrawer() {
+  function openDrawer(e) {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     var drawer = document.getElementById('mobileNavDrawer');
     var backdrop = document.getElementById('mobileNavBackdrop');
     var toggle = document.getElementById('navToggle');
     if (drawer) {
       drawer.classList.add('open');
-      drawer.style.visibility = 'visible';
-      drawer.style.pointerEvents = 'auto';
+      drawer.style.setProperty('visibility', 'visible', 'important');
+      drawer.style.setProperty('pointer-events', 'auto', 'important');
+      drawer.style.setProperty('transform', 'translateX(0)', 'important');
     }
     if (backdrop) {
       backdrop.classList.add('open');
-      backdrop.style.display = 'block';
-      backdrop.style.pointerEvents = 'auto';
+      backdrop.style.setProperty('display', 'block', 'important');
+      backdrop.style.setProperty('visibility', 'visible', 'important');
+      backdrop.style.setProperty('pointer-events', 'auto', 'important');
+      backdrop.style.setProperty('opacity', '1', 'important');
     }
     if (toggle) {
       toggle.classList.add('active');
@@ -29,19 +36,26 @@
     document.body.style.overflow = 'hidden';
   }
 
-  function closeDrawer() {
+  function closeDrawer(e) {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     var drawer = document.getElementById('mobileNavDrawer');
     var backdrop = document.getElementById('mobileNavBackdrop');
     var toggle = document.getElementById('navToggle');
     if (drawer) {
       drawer.classList.remove('open');
-      drawer.style.visibility = '';
-      drawer.style.pointerEvents = '';
+      drawer.style.setProperty('visibility', 'hidden', 'important');
+      drawer.style.setProperty('pointer-events', 'none', 'important');
+      drawer.style.setProperty('transform', 'translateX(100%)', 'important');
     }
     if (backdrop) {
       backdrop.classList.remove('open');
-      backdrop.style.display = 'none';
-      backdrop.style.pointerEvents = '';
+      backdrop.style.setProperty('display', 'none', 'important');
+      backdrop.style.setProperty('visibility', 'hidden', 'important');
+      backdrop.style.setProperty('pointer-events', 'none', 'important');
+      backdrop.style.setProperty('opacity', '0', 'important');
     }
     if (toggle) {
       toggle.classList.remove('active');
@@ -50,12 +64,16 @@
     document.body.style.overflow = '';
   }
 
-  function toggleDrawer() {
+  function toggleDrawer(e) {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
     var drawer = document.getElementById('mobileNavDrawer');
-    if (drawer && drawer.classList.contains('open')) {
-      closeDrawer();
+    if (drawer && (drawer.classList.contains('open') || drawer.style.visibility === 'visible')) {
+      closeDrawer(e);
     } else {
-      openDrawer();
+      openDrawer(e);
     }
   }
 
@@ -127,41 +145,35 @@
      SINGLE EVENT DELEGATION on document (click)
      ========================================================= */
   document.addEventListener('click', function (e) {
+    if (e.defaultPrevented) return;
+
     var target = e.target;
 
     // --- Hamburger Toggle Button ---
     var navToggle = target.closest('#navToggle');
     if (navToggle) {
-      e.preventDefault();
-      e.stopPropagation();
-      var drawer = document.getElementById('mobileNavDrawer');
-      if (drawer && drawer.classList.contains('open')) {
-        closeDrawer();
-      } else {
-        openDrawer();
-      }
+      toggleDrawer(e);
       return;
     }
 
     // --- Mobile Nav Close Button ---
     if (target.closest('#mobileNavClose')) {
-      e.preventDefault();
-      closeDrawer();
+      closeDrawer(e);
       return;
     }
 
     // --- Mobile Nav Backdrop ---
     if (target.id === 'mobileNavBackdrop') {
-      closeDrawer();
+      closeDrawer(e);
       return;
     }
 
     // --- Dashboard Tab Buttons (.dash-tab-btn) ---
     var tabBtn = target.closest('.dash-tab-btn');
     if (tabBtn) {
-      e.preventDefault();
       var tabId = tabBtn.getAttribute('data-tab');
       if (tabId) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
         switchDashboardTab(tabId, true);
       }
       return;
@@ -170,11 +182,10 @@
     // --- Mobile Bottom Nav Items ---
     var bottomItem = target.closest('.mobile-bottom-nav__item[data-tab]');
     if (bottomItem) {
-      e.preventDefault();
       var tabId = bottomItem.getAttribute('data-tab');
       if (tabId && document.getElementById('tab-' + tabId)) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
         switchDashboardTab(tabId, true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return;
     }
@@ -184,10 +195,9 @@
     if (navSwitch) {
       var tabId = navSwitch.getAttribute('data-tab-switch');
       if (tabId && document.getElementById('tab-' + tabId)) {
-        e.preventDefault();
-        closeDrawer();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        closeDrawer(e);
         switchDashboardTab(tabId, true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return;
     }
@@ -198,10 +208,9 @@
       var hash = hashLink.getAttribute('href').substring(1);
       var tabKey = hash.replace(/-section$/, '');
       if (tabKey && document.getElementById('tab-' + tabKey)) {
-        e.preventDefault();
-        closeDrawer();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        closeDrawer(e);
         switchDashboardTab(tabKey, true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   });
