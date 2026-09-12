@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Therapist Clinical Hub — Breathe Heal Grow</title>
   <meta name="description" content="Manage appointments, configure availability, generate custom AI tests from documents, and update clinic details." />
-  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.7')}" />
+  <link rel="stylesheet" th:href="@{/css/styles.css(v='2.8')}" />
   <script>
     /* =========================================================
        GLOBAL CORE NAVIGATION & TAB CONTROLLER (IN <HEAD>)
@@ -421,7 +421,7 @@
           <div class="section-header" style="margin-bottom:1.5rem;">
             <div>
               <h2 style="font-size:1.4rem; color:var(--teal); display:inline-flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                <span><i data-lucide="sparkles" class="icon-inline"></i> AI Custom Test Studio</span>
+                <span style="display:inline-flex; align-items:center; gap:0.45rem;"><i data-lucide="sparkles" class="icon-inline"></i> AI Custom Test Studio</span>
                 <span class="badge-shared" style="font-size:0.75rem;">Multi-Patient Assessment Builder</span>
               </h2>
               <p style="font-size:0.85rem; color:var(--muted-foreground);">
@@ -460,7 +460,7 @@
 3. Restless or difficulty relaxing?"></textarea>
                 </label>
 
-                <button type="submit" id="generateTestBtn" class="btn btn-teal" style="width:100%; padding:0.85rem;">
+                <button type="submit" id="generateTestBtn" class="btn btn-teal" style="width:100%; padding:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;">
                   <i data-lucide="zap" class="icon-inline"></i> Generate Structured Test with AI
                 </button>
               </form>
@@ -501,7 +501,7 @@
                     <input type="hidden" name="questionsJson" id="saveQuestionsJson" />
                     <input type="hidden" name="scoringRulesJson" id="saveScoringRulesJson" />
 
-                    <button type="submit" class="btn btn-coral" style="width:100%; padding:0.85rem;">
+                    <button type="submit" class="btn btn-coral" style="width:100%; padding:0.85rem; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;">
                       <i data-lucide="save" class="icon-inline"></i> Save Test to My Library
                     </button>
                   </form>
